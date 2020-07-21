@@ -136,7 +136,8 @@ class shop(Cafe24) :
 			# 품절여부 확인
 			self.set_product_soldout_first(product_data, product_ctx ) 
 
-			
+			crw_post_url = self.set_product_name_url_first( product_data, product_ctx , 'div', 'description')
+
 			name_div_list = product_ctx.find_all('div', class_='description')
 
 			for name_div_ctx in name_div_list :

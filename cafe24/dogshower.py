@@ -98,7 +98,7 @@ class shop(Cafe24) :
 		
 		# 물품 이미지 CSS selector 정의
 		self.C_PRODUCT_IMG_SELECTOR = 'div'
-		self.C_PRODUCT_IMG_SELECTOR_CLASSNAME = 'thumbnail'
+		self.C_PRODUCT_IMG_SELECTOR_CLASSNAME = 'prdImg'
 		
 		
 		# 물품 SOLDOUT CSS selector 정의
@@ -129,44 +129,16 @@ class shop(Cafe24) :
 			self.set_product_category_first(product_data, soup)
 
 			# 상품 이미지 확인
-			self.set_product_image_first(product_data, product_ctx )
+			self.set_product_image_fourth(product_data, product_ctx )
 				
 		
 			# 품절여부 확인
 			self.set_product_soldout_first(product_data, product_ctx ) 
 			
+			crw_post_url = self.set_product_name_url_second( product_data, product_ctx , 'div', 'description')
 			
-			name_div_list = product_ctx.find_all('div')
-
-			for name_div_ctx in name_div_list :
-				self.set_product_price_brand_first(product_data, name_div_ctx )
-				class_name_list = name_div_ctx.attrs['class']
-				if(class_name_list[0] == 'description' ) :
-					#
-					# 상품 링크 정보 및 상품명 / 상품코드
-					#
-					name_strong_list = name_div_ctx.find_all('strong', class_='name')
-					for name_strong_ctx in name_strong_list :
-						product_link_list = name_strong_ctx.find_all('a')
-						for product_link_ctx in product_link_list :
-		
-							if('href' in product_link_ctx.attrs ) : 
-								span_list = product_link_ctx.find_all('span')
-								for span_ctx in span_list :
-									name_value = span_ctx.get_text().strip()
-									
-									if(0 != name_value.find('상품명') ) and (0 != name_value.find(':') ) : product_data.crw_name = name_value
-									
-								tmp_product_link = product_link_ctx.attrs['href'].strip()
-								if(0 != tmp_product_link.find('http')) : tmp_product_link = '%s%s' % ( self.BASIC_PRODUCT_URL, product_link_ctx.attrs['href'].strip() )
-								crw_post_url = tmp_product_link
-
-								if(self.C_PRODUCT_STRIP_STR != '') : crw_post_url = tmp_product_link.replace( self.C_PRODUCT_STRIP_STR,'')
-								
-								split_list = crw_post_url.split('/')
-								if( product_data.crw_name == '') : product_data.crw_name = split_list[4].strip()
-								product_data.crw_goods_code = split_list[5].strip()
-
+			self.set_product_price_brand_first(product_data, product_ctx )
+			
 
 			if( crw_post_url != '' ) :
 				self.set_product_url_hash( product_data, crw_post_url) 

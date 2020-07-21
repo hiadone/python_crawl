@@ -328,9 +328,10 @@ def insert_itemdetail(product_data):
 		URL = 'http://adm.denguru.kr/crawl/insert_itemdetail/%d/%d' % ( product_data.brd_id, product_data.crw_id )
 		
 		#보내고자하는 파일을 'rb'(바이너리 리드)방식 열고
-		img_files = open( product_data.d_crw_file_1 , 'rb')
-
-		upload = {'cdt_file_1' : img_files }
+		upload = {'cdt_file_1' : None }
+		if( product_data.d_crw_file_1 != '' ) : 
+			img_files = open( product_data.d_crw_file_1 , 'rb')
+			upload = {'cdt_file_1' : img_files }
 			
 		
 		params = {'cdt_content' : product_data.cdt_content ,
@@ -340,8 +341,9 @@ def insert_itemdetail(product_data):
 					'cdt_brand4' : product_data.d_crw_brand4 ,
 					'cdt_brand5' : product_data.d_crw_brand5  }
 		
-		
-		res = requests.post(URL , files=upload, data=params)
+		res = None
+		if( product_data.d_crw_file_1 != '' ) : res = requests.post(URL , files=upload, data=params)
+		else : res = requests.post(URL , data=params)
 		
 		if(config.__DEBUG__) :
 			__LOG__.Trace( URL )

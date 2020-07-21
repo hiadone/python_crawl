@@ -152,7 +152,7 @@ class shop(Cafe24) :
 							img_src = img_ctx.attrs['src'].strip()
 							if( img_src != '' ) :
 								img_link = self.set_img_url( self.BASIC_IMAGE_URL, img_src )
-								product_data.product_img = self.get_hangul_url_convert( img_link )
+								if(product_data.product_img == '') : product_data.product_img = self.get_hangul_url_convert( img_link )
 
 			# 품절여부 확인
 			self.set_product_soldout_first(product_data, product_ctx ) 
@@ -238,7 +238,7 @@ class shop(Cafe24) :
 				
 			
 			detail_page_txt, detail_page_img = self.get_text_img_in_detail_content_part( soup, '#prdDetailContentLazy', 'p', 'src' )
-			#detail_page_txt, detail_page_img = self.get_text_img_in_detail_content_part( soup, '#prdDetailContentLazy', 'p', 'ec-data-src' )
+			if( len(detail_page_img) == 0 ) : detail_page_txt, detail_page_img = self.get_text_img_in_detail_content_part( soup, '#prdDetailContentLazy', 'p', 'ec-data-src' )
 			
 			self.set_detail_page( product_data, detail_page_txt, detail_page_img)
 			

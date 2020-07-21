@@ -98,8 +98,8 @@ class shop(Cafe24) :
 		'''
 		
 		# 물품 이미지 CSS selector 정의
-		self.C_PRODUCT_IMG_SELECTOR = ''
-		self.C_PRODUCT_IMG_SELECTOR_CLASSNAME = ''
+		self.C_PRODUCT_IMG_SELECTOR = 'div'
+		self.C_PRODUCT_IMG_SELECTOR_CLASSNAME = 'thumbnail'
 		
 		
 		# 물품 SOLDOUT CSS selector 정의
@@ -139,23 +139,10 @@ class shop(Cafe24) :
 			#
 			self.set_product_category_first(product_data, soup)
 
-
-			# 상품 이미지 확인
-			img_div_list = product_ctx.find_all('div', class_='thumbnail')
 			
-			for img_div_ctx in img_div_list :
-				a_link_ctx = img_div_ctx.find('a')
-				if(a_link_ctx != None ) :
-					img_ctx = a_link_ctx.find('img')
-					if(img_ctx != None ) :
-						if('src' in img_ctx.attrs ) :
-							img_src = img_ctx.attrs['src'].strip()
-							if( img_src != '' ) :
-								img_link = self.set_img_url( self.BASIC_IMAGE_URL, img_src )
-								product_data.product_img = self.get_hangul_url_convert( img_link )
-								
-
-							
+			# 상품 이미지 확인
+			self.set_product_image_fourth( product_data, product_ctx )
+			
 		
 			# 품절여부 확인
 			self.set_product_soldout_first(product_data, product_ctx ) 

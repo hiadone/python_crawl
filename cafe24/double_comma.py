@@ -40,8 +40,8 @@ class shop(Cafe24) :
 		Cafe24.__init__(self)
 		
 		
-		#self.SITE_HOME = 'http://double-comma.com/product/list.html?cate_no=70'
-		self.SITE_HOME = 'http://double-comma.com'
+		self.SITE_HOME = 'http://double-comma.com/product/list.html?cate_no=70'
+		self.ORG_SITE_HOME = 'http://double-comma.com'
 		
 		self.SEARCH_MODE = __DEFINE__.__CATEGORY_ALL__
 
@@ -51,7 +51,7 @@ class shop(Cafe24) :
 		self.C_CATEGORY_TYPE = ''
 		
 		
-		#self.C_CATEGORY_VALUE = '#category > div > ul > li > a'
+		self.C_CATEGORY_VALUE = '#category > div > ul > li > a'
 		self.C_CATEGORY_IGNORE_STR = ['샘플 공동구매','샘플 기획전','개인결제창','MAIN']
 		self.C_CATEGORY_STRIP_STR = ''
 
@@ -88,10 +88,10 @@ class shop(Cafe24) :
 
 		
 		
-		self.BASIC_CATEGORY_URL = self.SITE_HOME
-		self.BASIC_PAGE_URL = self.SITE_HOME + '/product/list.html'
-		self.BASIC_PRODUCT_URL = self.SITE_HOME
-		self.BASIC_IMAGE_URL = self.SITE_HOME
+		self.BASIC_CATEGORY_URL = self.ORG_SITE_HOME
+		self.BASIC_PAGE_URL = self.ORG_SITE_HOME + '/product/list.html'
+		self.BASIC_PRODUCT_URL = self.ORG_SITE_HOME
+		self.BASIC_IMAGE_URL = self.ORG_SITE_HOME
 		
 		'''
 		# Cafe24 전용 
@@ -116,8 +116,8 @@ class shop(Cafe24) :
 	######################################################################
 	'''
 	
-	def process_category_list(self):
-		self.process_sub_category_list()
+	#def process_category_list(self):
+	#	self.process_sub_category_list()
 		
 	'''
 	######################################################################
@@ -140,7 +140,7 @@ class shop(Cafe24) :
 
 
 			# 상품 이미지 확인
-			self.set_product_image_first(product_data, product_ctx )
+			self.set_product_image_fourth(product_data, product_ctx )
 
 
 			

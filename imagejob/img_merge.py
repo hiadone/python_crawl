@@ -171,7 +171,7 @@ def get_single_img( img_url ) :
 		filename, fileExtension = os.path.splitext(img_name)
 		img_name = '%s%s%s' % ( config.IMAGE_PATH, uuid.uuid4(), fileExtension )
 
-		if(img_name.count('http') == 0 ) and ( (0 == fileExtension.lower().find('.jpg')) or (0 == fileExtension.lower().find('.jpeg')) or (0 == fileExtension.lower().find('.png')) or (0 == fileExtension.lower().find('.gif')) ) :
+		if(img_name.count('http') == 0 ): # and ( (0 == fileExtension.lower().find('.jpg')) or (0 == fileExtension.lower().find('.jpeg')) or (0 == fileExtension.lower().find('.png')) or (0 == fileExtension.lower().find('.gif')) ) :
 			
 			# 이미지 URL 변경 및 다운로드
 			decode_url = urllib.parse.unquote(img_url)
@@ -359,16 +359,9 @@ if __name__ == '__main__':
 					'http://bshop.phinf.naver.net/20180228_188/500114562_1519788750343wKc9w_JPEG/%25C7%25C1%25B7%25B9%25C0%25CC%25C1%25AE%25B9%25EB%25B8%25AE_%25BE%25EE%25B4%25FA%25C6%25AE.jpg', \
 					'http://bshop.phinf.naver.net/20180928_157/500114562_1538118683770AjAh4_JPEG/%25C6%25DB%25BD%25C3%25C7%25C8_%25BB%25F3%25BC%25BC.jpg']
 	
-	#img_url_list = ['http://www.biteme.co.kr/data/editor/goods/191227/7805ca8e141a54f6153887ee6df3b76a_193117.jpg', 
-	#				'https://shop-phinf.pstatic.net/20170323_60/heedong00_1490257504112mW19K_PNG/%25B4%25EB%25B1%25B8.png', \
-	#				'https://shop-phinf.pstatic.net/20170323_270/heedong00_1490257504571nGe92_PNG/%25C6%25DB%25BD%25C3%25C7%25C8.png', \
-	#				'http://bshop.phinf.naver.net/20180228_188/500114562_1519788750343wKc9w_JPEG/%25C7%25C1%25B7%25B9%25C0%25CC%25C1%25AE%25B9%25EB%25B8%25AE_%25BE%25EE%25B4%25FA%25C6%25AE.jpg', \
-	#				'http://bshop.phinf.naver.net/20180928_157/500114562_1538118683770AjAh4_JPEG/%25C6%25DB%25BD%25C3%25C7%25C8_%25BB%25F3%25BC%25BC.jpg']
+	img_url_list = ['http://uglugl.com/web/upload/NNEditor/20181203/EC82ACEB9498EC9794ECB5B8EBB984_EC8381EC84B81.jpg', 'http://uglugl.com/web/upload/NNEditor/20181203/EC82ACEB9498EC9794ECB5B8EBB984_EC8381EC84B82.jpg']
 	
-	#img_url_list = ['http://www.biteme.co.kr/data/editor/goods/191227/7805ca8e141a54f6153887ee6df3b76a_193117.jpg', \
-	#				'http://www.biteme.co.kr/data/editor/goods/191227/ee0020d241d634c96b29304451414fdd_193125.jpg', \
-	#				'http://www.biteme.co.kr/data/editor/goods/191227/9de850f91f0f92252fb21b777619ad67_193133.jpg', \
-	#				'http://www.biteme.co.kr/data/editor/goods/191227/07b5922c90a15ba239d505c66f37f248_191733.jpg']
+	#img_url_list = ['https://proxy.smartstore.naver.com/img/YWkuZXNtcGx1cy5jb20vZXNhbjcxOTgvcGV0L3ppd2lwZWFrLzIwMjAwNTI2L2RvZy9kb2dfdmVuaXNvbi5qcGc=?token=7e5449146a076086273959e748112d4a']
 					
 					
 	rtn , rtn_img = get_merge_img( img_url_list )

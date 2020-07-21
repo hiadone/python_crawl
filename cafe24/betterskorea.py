@@ -139,15 +139,17 @@ class shop(Cafe24) :
 
 
 			# 상품 이미지 확인
-			img_link_ctx = product_ctx.find('a')
-			if( img_link_ctx != None) : 
-				img_ctx = img_link_ctx.find('img')
-				if( img_ctx != None) : 
-					if('src' in img_ctx.attrs ) :
-						img_src = img_ctx.attrs['src'].strip()
-						if( img_src != '' ) :
-							img_link = self.set_img_url( self.BASIC_IMAGE_URL, img_src )
-							product_data.product_img = self.get_hangul_url_convert( img_link )
+			img_link_list = product_ctx.find_all('a')
+			for img_link_ctx in img_link_list :
+				if('name' in img_link_ctx.attrs) :
+					if(0 <= img_link_ctx.attrs['name'].find('anchorBoxName')) :
+						img_ctx = img_link_ctx.find('img')
+						if( img_ctx != None) : 
+							if('src' in img_ctx.attrs ) :
+								img_src = img_ctx.attrs['src'].strip()
+								if( img_src != '' ) :
+									img_link = self.set_img_url( self.BASIC_IMAGE_URL, img_src )
+									if(product_data.product_img == '' ) : product_data.product_img = self.get_hangul_url_convert( img_link )
 		
 			# 품절여부 확인
 			self.set_product_soldout_first(product_data, product_ctx ) 

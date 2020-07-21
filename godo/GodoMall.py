@@ -171,15 +171,17 @@ class GodoMall(Mall) :
 			####################################	
 			img_div_list = product_ctx.find_all('div', class_='thumbnail')
 			for img_div_ctx in img_div_list :
-				img_list = img_div_ctx.find_all('img')
-				for img_ctx in img_list :
+				img_ctx = img_div_ctx.find('img')
+				#for img_ctx in img_list :
+
+				if(img_ctx != None) :
 					img_src = ''
 					if('data-original' in img_ctx.attrs ) : img_src = img_ctx.attrs['data-original'].strip()
 					elif('src' in img_ctx.attrs ) : img_src = img_ctx.attrs['src'].strip()
 						
 					if( img_src != '' ) :
 						img_link = self.set_img_url( self.BASIC_IMAGE_URL, img_src )
-						product_data.product_img = self.get_hangul_url_convert( img_link )
+						if(product_data.product_img == '' ) : product_data.product_img = self.get_hangul_url_convert( img_link )
 			
 			
 			####################################
@@ -338,15 +340,17 @@ class GodoMall(Mall) :
 			####################################
 			img_div_list = product_ctx.find_all('div', class_='item_photo_box')
 			for img_div_ctx in img_div_list :
-				img_list = img_div_ctx.find_all('img')
-				for img_ctx in img_list :
+				img_ctx = img_div_ctx.find('img')
+				#for img_ctx in img_list :
+
+				if(img_ctx != None) :
 					img_src = ''
 					if('data-original' in img_ctx.attrs ) : img_src = img_ctx.attrs['data-original'].strip()
 					elif('src' in img_ctx.attrs ) : img_src = img_ctx.attrs['src'].strip()
 						
 					if( img_src != '' ) :
 						img_link = self.set_img_url( self.BASIC_IMAGE_URL, img_src )
-						product_data.product_img = self.get_hangul_url_convert( img_link )
+						if(product_data.product_img == '' ) : product_data.product_img = self.get_hangul_url_convert( img_link )
 
 							
 			####################################

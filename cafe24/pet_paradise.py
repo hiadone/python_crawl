@@ -54,7 +54,7 @@ class shop(Cafe24) :
 		
 		#self.C_CATEGORY_VALUE = '#header > div > div.xans-element-.xans-layout.xans-layout-category.category.top_cate.-hover > ul > li > a'
 		self.C_CATEGORY_VALUE = '#header > div > div.xans-element-.xans-layout.xans-layout-category.category.top_cate.-hover > ul > li > a'
-		self.C_CATEGORY_IGNORE_STR = ['BEST','NEW','개린이날 세트']
+		self.C_CATEGORY_IGNORE_STR = ['BEST','BEST 10','NEW','개린이날 세트']
 		self.C_CATEGORY_STRIP_STR = ''
 
 		
@@ -133,7 +133,7 @@ class shop(Cafe24) :
 			
 
 			# 상품 이미지 확인
-			self.set_product_image_first(product_data, product_ctx )
+			self.set_product_image_fourth(product_data, product_ctx )
 			
 		
 			# 품절여부 확인
@@ -143,28 +143,10 @@ class shop(Cafe24) :
 			#
 			# 상품 링크 정보 및 상품명
 			#
+			crw_post_url = self.set_product_name_url_second( product_data, product_ctx , 'div', 'description')
 			
-			name_div_list = product_ctx.find_all('div', class_='description')
-			for name_div_ctx in name_div_list :
-				self.set_product_price_brand_first(product_data, name_div_ctx )
-				#
-				# 상품 링크 정보 및 상품명 / 상품코드
-				#
-				name_strong_list = name_div_ctx.find_all('strong', class_='name')
-				for name_strong_ctx in name_strong_list :
-					product_link_list = name_strong_ctx.find_all('a')
-					for product_link_ctx in product_link_list :
-						if('href' in product_link_ctx.attrs ) : 
-							tmp_product_link = product_link_ctx.attrs['href'].strip()
-							if(0 != tmp_product_link.find('http')) : tmp_product_link = '%s%s' % ( self.BASIC_PRODUCT_URL, product_link_ctx.attrs['href'].strip() )
-							crw_post_url = tmp_product_link
-
-							if(self.C_PRODUCT_STRIP_STR != '') : crw_post_url = tmp_product_link.replace( self.C_PRODUCT_STRIP_STR,'')
-							
-							split_list = crw_post_url.split('/')
-							product_data.crw_name = split_list[4].strip()
-							product_data.crw_goods_code = split_list[5].strip()
-
+			self.set_product_price_brand_first(product_data, product_ctx )
+			
 
 			if( crw_post_url != '' ) :
 				self.set_product_url_hash( product_data, crw_post_url) 

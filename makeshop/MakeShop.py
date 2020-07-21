@@ -79,6 +79,8 @@ class MakeShop(Mall) :
 		# 	물품 상세 설명에서 이미지와 글이 포함된 DIV SELECTOR 
 		self.SET_PRODUCT_DETAIL_DATA_DIV_SELECTOR = ''
 		
+		self.SET_PRODUCT_DETAIL_DATA_DIV_SELECTOR_SECOND = ''
+		
 		#
 		# - 물품 상세 페이지
 		# 	self.SET_PRODUCT_DETAIL_DATA_DIV_SELECTOR 안에 글자에 세부 HTML 요소 
@@ -246,7 +248,7 @@ class MakeShop(Mall) :
 			
 			# 제품 상세 부분
 			detail_page_txt, detail_page_img = self.get_text_img_in_detail_content_part( soup, self.SET_PRODUCT_DETAIL_DATA_DIV_SELECTOR, self.SET_PRODUCT_DETAIL_DATA_TEXT_SELECTOR, 'src' )
-			
+			if(len(detail_page_img) == 0 ) : detail_page_txt, detail_page_img = self.get_text_img_in_detail_content_part( soup, self.SET_PRODUCT_DETAIL_DATA_DIV_SELECTOR_SECOND, self.SET_PRODUCT_DETAIL_DATA_TEXT_SELECTOR, 'src' )
 			self.set_detail_page( product_data, detail_page_txt, detail_page_img)
 			
 			

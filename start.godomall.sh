@@ -19,7 +19,6 @@ $PYTHON_EXE ./godo/edenchien.py
 $PYTHON_EXE ./godo/mytrianon.py
 $PYTHON_EXE ./godo/petesthe.py
 $PYTHON_EXE ./godo/bourdog.py
-#$PYTHON_EXE ./godo/naturalex.py
 $PYTHON_EXE ./godo/vlab.py
 $PYTHON_EXE ./godo/wangzzang.py
 $PYTHON_EXE ./godo/petgear.py

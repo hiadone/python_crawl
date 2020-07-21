@@ -39,7 +39,8 @@ class shop(Mall) :
 	
 		Mall.__init__(self)
 
-		self.SITE_HOME = 'https://www.wconcept.co.kr/Life/001014'
+		self.SITE_HOME = 'https://www.wconcept.co.kr/Life/008'
+		#self.SITE_HOME = 'https://www.wconcept.co.kr/Life/001014'
 		
 		self.SITE_ORG_HOME = 'https://www.wconcept.co.kr'
 		
@@ -50,8 +51,11 @@ class shop(Mall) :
 		self.C_CATEGORY_CASE = __DEFINE__.__C_SELECT__
 		self.C_CATEGORY_TYPE = ''
 		
-		self.C_CATEGORY_VALUE = '#container > div > div.filter_wrap > div.filter_con > ul.depth.depth4.category > li > p > button'
-		self.C_CATEGORY_IGNORE_STR = []
+		#container > div > div.lnb_wrap.lnb_depth > dl > dd > a
+		
+		#self.C_CATEGORY_VALUE = '#container > div > div.filter_wrap > div.filter_con > ul.depth.depth4.category > li > p > button'
+		self.C_CATEGORY_VALUE = '#container > div > div.lnb_wrap.lnb_depth > dl > dd > a'
+		self.C_CATEGORY_IGNORE_STR = ['VIEW ALL PET']
 		self.C_CATEGORY_STRIP_STR = ''
 
 		
@@ -59,7 +63,7 @@ class shop(Mall) :
 		self.C_PAGE_CASE = __DEFINE__.__C_SELECT__
 		self.C_PAGE_TYPE = ''
 		self.C_PAGE_VALUE = '#container > div > ul.pagination > li > a'
-		self.C_PAGE_STRIP_STR = '../'
+		self.C_PAGE_STRIP_STR = ''
 		
 		self.C_PAGE_IGNORE_STR = []			# 페이지 중에 무시해야 하는 스트링
 		self.C_PAGE_COUNT_PER_DISPLAY = 10	# 화면당 페이지 갯수
@@ -69,23 +73,23 @@ class shop(Mall) :
 		self.C_PRODUCT_TYPE = ''
 	
 		self.C_PRODUCT_VALUE = '#container > div > div.thumbnail_list > ul > li'
-		self.C_PRODUCT_STRIP_STR = '/Life/001014'
+		self.C_PRODUCT_STRIP_STR = ''
 		
 		# self.PAGE_LAST_LINK = True 일때 사용
 		self.C_LAST_PAGE_CASE = __DEFINE__.__C_SELECT__
 		self.C_LAST_PAGE_TYPE = ''
 		self.C_LAST_PAGE_VALUE = '#container > div > ul.pagination > li.last > a'
 		
-		self.PAGE_SPLIT_STR = '&page='		# 페이지 링크에서 page를 구분할수 있는 구분자
+		self.PAGE_SPLIT_STR = '?page='		# 페이지 링크에서 page를 구분할수 있는 구분자
 		self.PAGE_LAST_VALUE = 0		# 페이지 맨끝 링크의 값
 		
 		self.PAGE_LAST_LINK = True		# 페이지에서 맨끝 링크 존재 여부
 
 		
 		
-		self.BASIC_CATEGORY_URL = self.SITE_HOME
-		self.BASIC_PAGE_URL = self.SITE_HOME
-		self.BASIC_PRODUCT_URL = self.SITE_HOME
+		self.BASIC_CATEGORY_URL = self.SITE_ORG_HOME
+		self.BASIC_PAGE_URL = self.SITE_ORG_HOME
+		self.BASIC_PRODUCT_URL = self.SITE_ORG_HOME
 		self.BASIC_IMAGE_URL = self.SITE_ORG_HOME
 		
 	
@@ -250,6 +254,55 @@ class shop(Mall) :
 		for category_ctx in category_link_list :
 			try :
 				if(self.check_ignore_category( category_ctx ) ) :
+					if('href' in category_ctx.attrs ) : 
+						tmp_category_link = category_ctx.attrs['href']
+
+						if(tmp_category_link.find('javascript') < 0 ) and (0 <= tmp_category_link.find('/Life/008') ) :
+							if(0 != tmp_category_link.find('http')) : tmp_category_link = '%s%s' % ( self.BASIC_CATEGORY_URL, category_ctx.attrs['href'] )
+							
+							#category_link = self.get_hangul_url_convert( tmp_category_link )
+							category_link = tmp_category_link
+							
+							if(self.C_CATEGORY_STRIP_STR != '') : category_link = tmp_category_link.replace( self.C_CATEGORY_STRIP_STR,'')
+							
+							category_name = category_ctx.get_text().strip()
+							if( self.CATEGORY_URL_HASH.get( category_link , -1) == -1) : 
+								self.CATEGORY_URL_HASH[category_link] = category_name
+								if( config.__DEBUG__ ) :
+									__LOG__.Trace('%s : %s' % ( category_name, category_link ) )
+
+								rtn = True
+
+			except Exception as ex:
+				__LOG__.Error(ex)
+				pass
+		
+
+		
+		if(config.__DEBUG__) : __LOG__.Trace( '카테고리 수 : %d' % len(self.CATEGORY_URL_HASH))
+		
+		return rtn
+		
+	'''
+	def get_category_data(self, html):
+		rtn = False
+		
+		self.set_param_category(html)
+		
+		category_link_list = []
+		
+		soup = bs4.BeautifulSoup(html, 'lxml')
+		
+		if( config.__DEBUG__ ) :
+			__LOG__.Trace( self.C_CATEGORY_CASE )
+			__LOG__.Trace( self.C_CATEGORY_VALUE )
+			
+		if( self.C_CATEGORY_CASE == __DEFINE__.__C_SELECT__ ) : category_link_list = soup.select(self.C_CATEGORY_VALUE)
+
+
+		for category_ctx in category_link_list :
+			try :
+				if(self.check_ignore_category( category_ctx ) ) :
 					if('data-depthcd' in category_ctx.attrs ) : 
 						tmp_category_link = category_ctx.attrs['data-depthcd']
 						category_link = '%s?ccd=3_%s' % (self.BASIC_CATEGORY_URL , tmp_category_link )
@@ -270,6 +323,7 @@ class shop(Mall) :
 		if(config.__DEBUG__) : __LOG__.Trace( '카테고리 수 : %d' % len(self.CATEGORY_URL_HASH))
 		
 		return rtn
+	'''
 	
 	
 	

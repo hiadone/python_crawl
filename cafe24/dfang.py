@@ -347,14 +347,11 @@ class shop(Cafe24) :
 			#
 			product_data.crw_category1 = self.PAGE_URL_HASH[ page_url ]
 
-
 			# 상품 이미지 확인
-			self.set_product_image_third(product_data, product_ctx )
+			self.set_product_image_fourth(product_data, product_ctx )
 				
-		
 			# 품절여부 확인
 			self.set_product_soldout_first(product_data, product_ctx ) 
-			
 			
 			img_div_list = product_ctx.find_all('div', class_=self.C_PRODUCT_IMG_SELECTOR_CLASSNAME)
 
@@ -365,13 +362,11 @@ class shop(Cafe24) :
 						crw_post_url = self.get_crw_post_url( product_link_ctx, 'href')
 						if(crw_post_url != '') :
 							split_list = crw_post_url.split('/')
-							product_data.crw_goods_code = split_list[5].strip()
+							if(5 < len(split_list) ) : product_data.crw_goods_code = split_list[5].strip()
 
-	
 			name_div_list = product_ctx.find_all('div', class_='description')
 
 			for name_div_ctx in name_div_list :
-				self.set_product_price_brand_second( product_data, name_div_ctx )
 				#
 				# 상품 링크 정보 및 상품명 / 상품코드
 				#

@@ -130,7 +130,7 @@ class shop(Cafe24) :
 
 
 			# 상품 이미지 확인
-			self.set_product_image_first(product_data, product_ctx )
+			self.set_product_image_third(product_data, product_ctx )
 				
 		
 			# 품절여부 확인

@@ -146,7 +146,6 @@ class shop(Cafe24) :
 			# 품절여부 확인
 			self.set_product_soldout_first(product_data, product_ctx ) 
 
-			
 			name_div_list = product_ctx.find_all('p', class_='name')
 
 			for name_div_ctx in name_div_list :
@@ -172,7 +171,7 @@ class shop(Cafe24) :
 						split_list = crw_post_url.split('?product_no=')
 						crw_goods_code_list = split_list[1].strip().split('&')
 						product_data.crw_goods_code = crw_goods_code_list[0].strip()
-				
+
 	
 			self.set_product_price_brand_first(product_data, product_ctx )
 			

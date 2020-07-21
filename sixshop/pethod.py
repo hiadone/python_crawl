@@ -53,12 +53,10 @@ class shop(SixShop) :
 		self.C_CATEGORY_CASE = __DEFINE__.__C_SELECT__
 		self.C_CATEGORY_TYPE = ''
 		
-		#siteHeader > div.row.row-main.desktop > div.column.header-left > nav > ul > li.menu-navi.menu-main.pageMenu.hover > a
-		#siteHeader > div.row.row-main.desktop > div.column.header-left > nav > ul > li.menu-navi.menu-main.pageMenu.hover > a
-		
-		#displayCanvas > div > div > section > div > div > div.productListFilterCollection > div.productListFilterCollectionNavi > div.productListFilter-navi
-		self.C_CATEGORY_VALUE = '#siteHeader > div.row.row-main.desktop > div.column.header-left > nav > ul > li.menu-navi.menu-main.pageMenu > a'
-		self.C_CATEGORY_IGNORE_STR = ['Community','Only you']
+
+		#self.C_CATEGORY_VALUE = '#siteHeader > div.row.row-main.desktop > div.column.header-left > nav > ul > li.menu-navi.menu-main.pageMenu > a'
+		self.C_CATEGORY_VALUE = '#siteHeader > div.row.row-main.desktop > div.column.header-right > nav > ul > li > div.subMenuNaviListDiv > ul > li > a'
+		self.C_CATEGORY_IGNORE_STR = ['SAMPLE','DP&MISTAKE','SEASON OFF','ONLY YOU','News','Review','Q&A','주문제작']
 		self.C_CATEGORY_STRIP_STR = ''
 
 		

@@ -35,8 +35,8 @@ $PYTHON_EXE ./cafe24/pethroom.py
 $PYTHON_EXE ./cafe24/su_su.py
 $PYTHON_EXE ./cafe24/terrylatte.py
 $PYTHON_EXE ./cafe24/tustus.py
-$PYTHON_EXE ./cafe24/uglugl.py
 $PYTHON_EXE ./cafe24/yolohollo.py
+$PYTHON_EXE ./cafe24/uglugl.py
 
 
 

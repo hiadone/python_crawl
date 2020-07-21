@@ -88,7 +88,7 @@ class Cafe24(Mall) :
 					if(key == 'name') : category_name = category_ctx[key]
 					elif(key == 'param') : category_param = category_ctx[key]
 					elif(key == 'design_page_url') : category_design_page_url = category_ctx[key]
-					__LOG__.Trace( '%s : %s' % (key, category_ctx[key]  ) )
+					#__LOG__.Trace( '%s : %s' % (key, category_ctx[key]  ) )
 				
 
 				if(self.check_ignore_category_text( category_name ) ) :
@@ -185,7 +185,7 @@ class Cafe24(Mall) :
 					img_src = img_ctx.attrs['src'].strip()
 					if( img_src != '' ) :
 						img_link = self.set_img_url( self.BASIC_IMAGE_URL, img_src )
-						product_data.product_img = self.get_hangul_url_convert( img_link )
+						if(product_data.product_img == '' ) : product_data.product_img = self.get_hangul_url_convert( img_link )
 
 	
 	def set_product_image_second(self, product_data, product_ctx ) :
@@ -199,7 +199,7 @@ class Cafe24(Mall) :
 				img_src = img_div_ctx.attrs['src'].strip()
 				if( img_src != '' ) :
 					img_link = self.set_img_url( self.BASIC_IMAGE_URL, img_src )
-					product_data.product_img = self.get_hangul_url_convert( img_link )
+					if(product_data.product_img == '' ) : product_data.product_img = self.get_hangul_url_convert( img_link )
 					
 	
 	def set_product_image_third(self, product_data, product_ctx ) :
@@ -217,8 +217,28 @@ class Cafe24(Mall) :
 						img_src = img_ctx.attrs['src'].strip()
 						if( img_src != '' ) :
 							img_link = self.set_img_url( self.BASIC_IMAGE_URL, img_src )
-							product_data.product_img = self.get_hangul_url_convert( img_link )	
-						
+							if(product_data.product_img == '' ) : product_data.product_img = self.get_hangul_url_convert( img_link )	
+
+
+	def set_product_image_fourth(self, product_data, product_ctx ) :
+		#
+		# 다른 html 요소 에 class name이 있고 , 그안에 A 링크 안에 이미지가 있는 경우
+		#
+		img_div_list = product_ctx.find_all(self.C_PRODUCT_IMG_SELECTOR, class_= self.C_PRODUCT_IMG_SELECTOR_CLASSNAME )
+			
+		for img_div_ctx in img_div_list :
+			a_link_list = img_div_ctx.find_all('a')
+			for a_link_ctx in a_link_list :
+				if('name' in a_link_ctx.attrs) :
+					if(0 <= a_link_ctx.attrs['name'].find('anchorBoxName')) :
+						img_list = a_link_ctx.find_all('img')
+						for img_ctx in img_list :
+							if('src' in img_ctx.attrs ) :
+								img_src = img_ctx.attrs['src'].strip()
+								if( img_src != '' ) :
+									img_link = self.set_img_url( self.BASIC_IMAGE_URL, img_src )
+									if(product_data.product_img == '' ) : product_data.product_img = self.get_hangul_url_convert( img_link )	
+	
 	'''
 	######################################################################
 	#
@@ -251,7 +271,105 @@ class Cafe24(Mall) :
 				if('alt' in img_ctx.attrs ) :
 					if( img_ctx.attrs['alt'].strip() == '품절') : product_data.crw_is_soldout = 1
 					
+	'''
+	######################################################################
+	#
+	# 상품명 및 crw_goods_code 데이터를 추출하는 함수
+	#
+	######################################################################
+	'''	
+	
+	def set_product_name_url_first(self, product_data, product_ctx , name_ctx_css, name_ctx_css_class) :
+		#
+		# crw_post_url 안에 ?product_no= 가 들어가 있는 경우
+		# http://carmineproject.com/product/detail.html?product_no=59&cate_no=27&display_group=1
+		# 
+		crw_post_url = ''
+
+		try :
+
+			name_div_list = product_ctx.find_all(name_ctx_css, class_=name_ctx_css_class)
+			
+			for name_div_ctx in name_div_list :
 				
+				#
+				# 상품 링크 정보 및 상품명 / 상품코드
+				#
+				product_link_list = name_div_ctx.find_all('a')
+				for product_link_ctx in product_link_list :
+					
+					if('href' in product_link_ctx.attrs ) : 
+						span_list = product_link_ctx.find_all('span')
+						for span_ctx in span_list :
+							name_value = span_ctx.get_text().strip()
+							
+							if(0 != name_value.find('상품명') ) and (0 != name_value.find(':') ) : product_data.crw_name = name_value
+							
+						tmp_product_link = product_link_ctx.attrs['href'].strip()
+
+						if(0 != tmp_product_link.find('http')) : tmp_product_link = '%s%s' % ( self.BASIC_PRODUCT_URL, product_link_ctx.attrs['href'].strip() )
+						crw_post_url = tmp_product_link
+
+						if(self.C_PRODUCT_STRIP_STR != '') : crw_post_url = tmp_product_link.replace( self.C_PRODUCT_STRIP_STR,'')
+
+						split_list = crw_post_url.split('?product_no=')
+						crw_goods_code_list = split_list[1].strip().split('&')
+						product_data.crw_goods_code = crw_goods_code_list[0].strip()
+
+						
+		except Exception as ex :
+			__LOG__.Error( ex )
+			pass
+		
+		return crw_post_url
+		
+		
+	def set_product_name_url_second(self, product_data, product_ctx , name_ctx_css, name_ctx_css_class) :
+		#
+		# crw_post_url 안에 /product/ 가 들어가 있는 경우
+		#
+		# http://amor-ange.com/product/safari-padding-navy/67/category/25/display/1/
+		# 
+		crw_post_url = ''
+
+		try :
+
+			name_div_list = product_ctx.find_all(name_ctx_css, class_=name_ctx_css_class)
+			
+			for name_div_ctx in name_div_list :
+				
+				#
+				# 상품 링크 정보 및 상품명 / 상품코드
+				#
+				product_link_list = name_div_ctx.find_all('a')
+				for product_link_ctx in product_link_list :
+					
+					if('href' in product_link_ctx.attrs ) : 
+						span_list = product_link_ctx.find_all('span')
+						for span_ctx in span_list :
+							name_value = span_ctx.get_text().strip()
+							
+							if(0 != name_value.find('상품명') ) and (0 != name_value.find(':') ) : product_data.crw_name = name_value
+							
+						tmp_product_link = product_link_ctx.attrs['href'].strip()
+
+						if(0 != tmp_product_link.find('http')) : tmp_product_link = '%s%s' % ( self.BASIC_PRODUCT_URL, product_link_ctx.attrs['href'].strip() )
+						crw_post_url = tmp_product_link
+
+						if(self.C_PRODUCT_STRIP_STR != '') : crw_post_url = tmp_product_link.replace( self.C_PRODUCT_STRIP_STR,'')
+
+						split_list = crw_post_url.split('/')
+						if( product_data.crw_name == '') : product_data.crw_name = split_list[4].strip()
+						product_data.crw_goods_code = split_list[5].strip()
+
+						
+		except Exception as ex :
+			__LOG__.Error( ex )
+			pass
+		
+		return crw_post_url
+		
+	
 	'''
 	######################################################################
 	#
@@ -266,9 +384,11 @@ class Cafe24(Mall) :
 			span_ctx = li_ctx.find_all('span')
 			if(strong_ctx != None) :
 				title_name = strong_ctx.get_text().strip()
+				split_list = span_ctx[1].get_text().strip().split('(')
+				value_str = split_list[0].strip()
 				if( 0 == title_name.find( '브랜드')) : product_data.crw_brand1 = span_ctx[1].get_text().strip()
-				elif( 0 == title_name.find( '판매가')) : product_data.crw_price = int( __UTIL__.get_only_digit( span_ctx[1].get_text().strip() ) )
-				elif( 0 == title_name.find( '할인판매가')) : product_data.crw_price_sale = int( __UTIL__.get_only_digit( span_ctx[1].get_text().strip() ))
+				elif( 0 == title_name.find( '판매가')) : product_data.crw_price = int( __UTIL__.get_only_digit( value_str ) )
+				elif( 0 == title_name.find( '할인판매가')) : product_data.crw_price_sale = int( __UTIL__.get_only_digit( value_str ))
 	
 	
 	def set_product_price_brand_second(self, product_data, name_div_ctx ) :
@@ -278,11 +398,27 @@ class Cafe24(Mall) :
 			span_ctx = li_ctx.find_all('span')
 			if(strong_ctx != None) :
 				title_name = strong_ctx.get_text().strip()
+				split_list = span_ctx[1].get_text().strip().split('(')
+				value_str = split_list[0].strip()
 				if( 0 == title_name.find( '브랜드')) : product_data.crw_brand1 = span_ctx[1].get_text().strip()
-				elif( 0 == title_name.find( '소비자가')) : product_data.crw_price = int( __UTIL__.get_only_digit( span_ctx[1].get_text().strip() ) )
-				elif( 0 == title_name.find( '판매가')) : product_data.crw_price_sale = int( __UTIL__.get_only_digit( span_ctx[1].get_text().strip() ))
-	
-	
+				elif( 0 == title_name.find( '소비자가')) : product_data.crw_price = int( __UTIL__.get_only_digit( value_str ) )
+				elif( 0 == title_name.find( '판매가')) : product_data.crw_price_sale = int( __UTIL__.get_only_digit( value_str ))
+
+				
+	def set_product_price_brand_third(self, product_data, name_div_ctx ) :
+		li_list = name_div_ctx.find_all('li')
+		for li_ctx in li_list :
+			strong_ctx = li_ctx.find('strong')
+			span_ctx = li_ctx.find_all('span')
+			if(strong_ctx != None) :
+				title_name = strong_ctx.get_text().strip()
+				split_list = span_ctx[1].get_text().strip().split('(')
+				value_str = split_list[0].strip()
+				if( 0 == title_name.find( '브랜드')) : product_data.crw_brand1 = span_ctx[1].get_text().strip()
+				elif( 0 == title_name.find( '판매가')) : product_data.crw_price = int( __UTIL__.get_only_digit( value_str ) )
+				elif( 0 == title_name.find( '상품요약정보')) : 
+					span_str = span_ctx[1].get_text().strip()
+					if(0 <= span_str.find('할인')) or (0 <= span_str.find('이벤트')) : product_data.crw_price_sale = int( __UTIL__.get_only_digit( span_str ))	
 				
 	'''
 	######################################################################

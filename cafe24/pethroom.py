@@ -129,41 +129,16 @@ class shop(Cafe24) :
 
 
 			# 상품 이미지 확인
-			self.set_product_image_third(product_data, product_ctx )
+			self.set_product_image_fourth(product_data, product_ctx )
 			
 		
 			# 품절여부 확인
 			self.set_product_soldout_first(product_data, product_ctx ) 
 
-
-			name_div_list = product_ctx.find_all('div', class_='description')
-
-			for name_div_ctx in name_div_list :
+			crw_post_url = self.set_product_name_url_second( product_data, product_ctx , 'div', 'description')
 			
-				self.set_product_price_brand_second(product_data, name_div_ctx )
-				#
-				# 상품 링크 정보 및 상품명 / 상품코드
-				#
-				name_strong_list = name_div_ctx.find_all('strong', class_='name')
-				for name_strong_ctx in name_strong_list :
-					product_link_list = name_strong_ctx.find_all('a')
-					for product_link_ctx in product_link_list :
-	
-						if('href' in product_link_ctx.attrs ) : 
-							name_value = product_link_ctx.get_text().strip()
-							
-							product_data.crw_name = name_value[5:].strip()
-								
-							tmp_product_link = product_link_ctx.attrs['href'].strip()
-							if(0 != tmp_product_link.find('http')) : tmp_product_link = '%s%s' % ( self.BASIC_PRODUCT_URL, product_link_ctx.attrs['href'].strip() )
-							crw_post_url = tmp_product_link
-
-							if(self.C_PRODUCT_STRIP_STR != '') : crw_post_url = tmp_product_link.replace( self.C_PRODUCT_STRIP_STR,'')
-							
-							split_list = crw_post_url.split('/')
-							if( product_data.crw_name == '') : product_data.crw_name = split_list[4].strip()
-							product_data.crw_goods_code = split_list[5].strip()
-
+			self.set_product_price_brand_second(product_data, product_ctx )
+			
 			
 			if( crw_post_url != '' ) :
 				self.set_product_url_hash( product_data, crw_post_url) 

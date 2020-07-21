@@ -452,20 +452,22 @@ class SixShop(Mall) :
 	######################################################################
 	'''	
 	def get_product_detail_data(self, product_data, html):
-		self.get_product_detail_data_sixshop( product_data, html, '#productDescriptionDetailPage', 'p', 'src')
+		self.get_product_detail_data_sixshop( product_data, html, '#productDescriptionDetailPage', 'p')
 	
-	def get_product_detail_data_sixshop(self, product_data, html, content_selector, text_sub_selector, img_attr, img_selector='img'):
+	def get_product_detail_data_sixshop(self, product_data, html, content_selector, text_sub_selector, img_selector='img'):
 		rtn = False
 		try :
 			
 			detail_page_txt = []
 			detail_page_img = []
-			
+
 			self.get_detail_brand_data(product_data, html)
 			
 			soup = bs4.BeautifulSoup(html, 'lxml')
-			#detail_page_txt, detail_page_img = self.get_text_img_in_detail_content_part( soup, '#productDescriptionDetailPage', 'p', 'src' )
-			detail_page_txt, detail_page_img = self.get_text_img_in_detail_content_part( soup, content_selector, text_sub_selector, img_attr, img_selector )
+
+			detail_page_txt, detail_page_img = self.get_text_img_in_detail_content_part( soup, content_selector, text_sub_selector, 'data-src', img_selector )
+			if(len(detail_page_img) == 0 ) : detail_page_txt, detail_page_img = self.get_text_img_in_detail_content_part( soup, content_selector, text_sub_selector, 'src', img_selector )
+				
 			self.set_detail_page( product_data, detail_page_txt, detail_page_img)
 			
 

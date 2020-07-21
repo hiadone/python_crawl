@@ -137,8 +137,10 @@ class shop(Mall) :
 
 			img_div_list = product_ctx.find_all('div', class_='img')
 			for img_div_ctx in img_div_list :
-				img_list = img_div_ctx.find_all('img')
-				for img_ctx in img_list :
+				img_ctx = img_div_ctx.find('img')
+
+				#for img_ctx in img_list :
+				if( img_ctx != None ) :
 					img_src = ''
 					if('src' in img_ctx.attrs ) : img_src = img_ctx.attrs['src'].strip()
 						

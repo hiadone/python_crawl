@@ -99,6 +99,8 @@ class shop(MakeShop) :
 		
 		
 		self.SET_PRODUCT_DETAIL_DATA_DIV_SELECTOR = '#productDetail > div > div.prd-detail > center > div'
+		self.SET_PRODUCT_DETAIL_DATA_DIV_SELECTOR_SECOND = '#productDetail > div > div'
+		
 		self.SET_PRODUCT_DETAIL_DATA_TEXT_SELECTOR = ''
 		
 

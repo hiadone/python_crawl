@@ -271,7 +271,8 @@ class Mall(Browser) :
 			break
 		
 		return rtn
-		
+	
+	'''	
 	def get_detail_text_with_strip(self, detail_text) :
 		rtn_data = []
 		split_list = detail_text.split('\n')
@@ -285,6 +286,13 @@ class Mall(Browser) :
 				#rtn_data.append( split_data )
 			
 		return ' '.join(rtn_data)
+	'''
+	
+		
+	def get_detail_text_with_strip(self, detail_text) :			
+		return detail_text
+		
+		
 	
 	'''
 	##########################################
@@ -331,8 +339,19 @@ class Mall(Browser) :
 	def set_img_url(self, img_basic_url, img_org_src) :
 		
 		# 이미지 파일명에 "?" 뒤에 옵션 있는 것을 제거하기.
-		split_list = img_org_src.split('?')
-		img_src = split_list[0].strip()
+		img_src = img_org_src
+		if(0 <= img_org_src.find('https://proxy.smartstore.naver.com')) : 
+			img_src = img_org_src
+		else :
+			split_list = img_org_src.split('?')
+			img_src = split_list[0].strip()
+			
+		#elif(0 <= img_org_src.find('https://ifh.cc')) : 
+		#	split_list = img_org_src.split('/')
+		#	if(5 <= len(split_list) ) : 
+		#		sub_split_list = split_list[4].split('.')
+		#		img_src = 'https://ifh.cc/v-%s' % (sub_split_list[0].strip())
+
 		
 		#img_link = '%s%s' % ( self.BASIC_IMAGE_URL, img_src )
 		img_link = '%s%s' % ( img_basic_url, img_src )
@@ -1428,10 +1447,9 @@ class Mall(Browser) :
 				#__LOG__.Trace( product_data.detail_page_img )
 				rtn , d_crw_file_1 = __IMGJOB__.get_merge_img(product_data.detail_page_img)
 				
-				if(rtn ) :
-					product_data.d_crw_file_1 = d_crw_file_1
-					__API__.insert_itemdetail(product_data)
-					__IMGJOB__.remove_img(d_crw_file_1)
+				if(rtn ) : product_data.d_crw_file_1 = d_crw_file_1
+				__API__.insert_itemdetail(product_data)
+				if(rtn ) : __IMGJOB__.remove_img(d_crw_file_1)
 
 	
 	
