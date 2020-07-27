@@ -86,7 +86,7 @@ class shop(Cafe24) :
 		
 		
 		self.BASIC_CATEGORY_URL = self.SITE_HOME
-		self.BASIC_PAGE_URL = self.SITE_HOME + '/product/list.html'
+		self.BASIC_PAGE_URL = self.SITE_HOME
 		self.BASIC_PRODUCT_URL = self.SITE_HOME
 		self.BASIC_IMAGE_URL = self.SITE_HOME
 		

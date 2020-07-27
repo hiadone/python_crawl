@@ -1165,40 +1165,42 @@ class smartstore(Mall) :
 		__LOG__.Trace("***********************************************************")
 		
 		try :
-			
-			self.init_mall(brd_id)
-			
-			if(0 < site_home.find('/category/') ) :
-				# 특정 카테고리만 지정하는 경우
-				split_data = site_home.split('/category/')
-				self.set_site_home( split_data[0] )
+			if(0 < site_home.find('/products/') ) :
+				__LOG__.Trace("특정 product URL에 대해서는 상품정보를 얻을수 없습니다.")
+			else :
+				self.init_mall(brd_id)
 				
-				cateogory_list = split_data[1].split('?')
-				self.SPECIAL_CATEGORY = cateogory_list[0].strip()
-				self.CATEGORY_URL_HASH = None
-				self.CATEGORY_URL_HASH = {}
-				self.CATEGORY_URL_HASH[site_home] = ''
-			else : 
-				# 전체 카테고리 경우
-				self.set_site_home( site_home )
-				# 전체 카테고리 리스트 갖고 오기
-				self.process_category_list()
-			
-				#
-				# https://smartstore.naver.com//smallbatch 처럼 카테고리가 없을때
-				if(len(self.CATEGORY_URL_HASH) == 0 ) : self.CATEGORY_URL_HASH[site_home] = ''
-			
-			#페이지 URL 갖고 오기
-			self.process_page_list()
-			
-			#물품 URL 갖고 오기
-			self.process_product_list()
-			
-			#물품의 상세 페이지 정보 갖고 오기
-			self.process_product_detail_page()
-			
-			#삭제된 물품리스트에 대해서, 삭제처리 
-			self.process_product_delete_api()
+				if(0 < site_home.find('/category/') ) :
+					# 특정 카테고리만 지정하는 경우
+					split_data = site_home.split('/category/')
+					self.set_site_home( split_data[0] )
+					
+					cateogory_list = split_data[1].split('?')
+					self.SPECIAL_CATEGORY = cateogory_list[0].strip()
+					self.CATEGORY_URL_HASH = None
+					self.CATEGORY_URL_HASH = {}
+					self.CATEGORY_URL_HASH[site_home] = ''
+				else : 
+					# 전체 카테고리 경우
+					self.set_site_home( site_home )
+					# 전체 카테고리 리스트 갖고 오기
+					self.process_category_list()
+				
+					#
+					# https://smartstore.naver.com//smallbatch 처럼 카테고리가 없을때
+					if(len(self.CATEGORY_URL_HASH) == 0 ) : self.CATEGORY_URL_HASH[site_home] = ''
+				
+				#페이지 URL 갖고 오기
+				self.process_page_list()
+				
+				#물품 URL 갖고 오기
+				self.process_product_list()
+				
+				#물품의 상세 페이지 정보 갖고 오기
+				self.process_product_detail_page()
+				
+				#삭제된 물품리스트에 대해서, 삭제처리 
+				self.process_product_delete_api()
 			
 		except Exception as ex :  
 			__LOG__.Error(ex)            
@@ -1240,6 +1242,10 @@ if __name__ == '__main__':
 	
 
 	BRD_ID_HASH = __API__.get_storelist('smartstore.naver.com')
+	#if(len(BRD_ID_HASH) == 0) :
+	#	time.sleep(self.WAIT_TIME)
+	#	BRD_ID_HASH = __API__.get_storelist( 'smartstore.naver.com' )
+			
 	app = smartstore()
 
 	for app_url in BRD_ID_HASH.keys() :

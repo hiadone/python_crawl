@@ -72,9 +72,19 @@ class Cafe24(Mall) :
 	######################################################################
 	'''
 	
-	def get_sub_category_data(self, html):
+	def get_sub_category_data_in_category(self, html, parent_cate_list):
+		# 
+		# 특정 카테고리 값에 해당되는 카테고리만 검색
 		rtn = False
-		category_link_list = []
+		
+		category_no_list = []
+		
+		category_hash_tmp = {}
+		
+		# 특정카테고리만 추출하기 위해 추가
+		parent_category_hash_tmp = {}
+		for parent_cate_value in parent_cate_list :
+			parent_category_hash_tmp[str(parent_cate_value)] = 1
 		
 		category_list = json.loads( html )
 		
@@ -84,11 +94,145 @@ class Cafe24(Mall) :
 				category_name = ''
 				category_param = ''
 				category_design_page_url = ''
+				category_no = 0
+				category_parent_cate_no = ''
+				for key in category_ctx :
+					if(key == 'name') : category_name = category_ctx[key]
+					elif(key == 'param') : category_param = category_ctx[key]
+					elif(key == 'cate_no') : category_no = int(category_ctx[key])
+					elif(key == 'parent_cate_no') : category_parent_cate_no = str(category_ctx[key])
+					elif(key == 'design_page_url') : category_design_page_url = category_ctx[key]
+					#__LOG__.Trace( '------------------%s : %s' % (key, category_ctx[key]  ) )
+				
+				if( parent_category_hash_tmp.get( category_parent_cate_no , -1) != -1) : 
+					if( category_hash_tmp.get( category_no , -1) == -1) : 
+						parent_category_hash_tmp[str(category_no)] = 1
+						category_hash_tmp[category_no] = [category_parent_cate_no,category_name, category_param, category_design_page_url ]
+						category_no_list.append(category_no)
+			
+			except Exception as ex:
+				__LOG__.Error(ex)
+				pass
+		
+		category_no_list.sort(reverse=True)
+		
+		for category_no in category_no_list :
+			try :
+				value_list = category_hash_tmp[category_no]
+				__LOG__.Trace('--------------------------------------------')
+
+				category_parent_cate_no = value_list[0]
+				category_name = value_list[1]
+				category_param = value_list[2]
+				category_design_page_url = value_list[3]
+				#__LOG__.Trace('%s %s %s %s' % (category_parent_cate_no, category_name, category_param, category_design_page_url ))
+				
+				if(self.check_ignore_category_text( category_name ) ) and (self.check_ignore_category_text( category_parent_cate_no ) ) :
+					__LOG__.Trace('OK : %s %s %s %s' % (category_parent_cate_no, category_name, category_param, category_design_page_url ))
+					tmp_category_link = '%s/%s%s' % ( self.BASIC_CATEGORY_URL, category_design_page_url, category_param  )
+					category_link = tmp_category_link
+					if(self.C_CATEGORY_STRIP_STR != '') : category_link = tmp_category_link.replace( self.C_CATEGORY_STRIP_STR,'')
+							
+					if( self.CATEGORY_URL_HASH.get( category_link , -1) == -1) : 
+						self.CATEGORY_URL_HASH[category_link] = category_name
+						
+						if( config.__DEBUG__ ) : __LOG__.Trace('%s : %s' % ( category_name, category_link ) )
+
+						rtn = True
+			
+			except Exception as ex:
+				__LOG__.Error(ex)
+				pass
+		
+		if(config.__DEBUG__) : __LOG__.Trace( '카테고리 수 : %d' % len(self.CATEGORY_URL_HASH))
+		
+		return rtn
+		
+	def get_sub_category_data(self, html):
+		rtn = False
+		
+		category_no_list = []
+		
+		category_hash_tmp = {}
+		
+		category_list = json.loads( html )
+		
+		for category_ctx in category_list :
+			try :
+				#__LOG__.Trace('--------------------------------------------')
+				category_name = ''
+				category_param = ''
+				category_design_page_url = ''
+				category_no = 0
+				category_parent_cate_no = ''
+				for key in category_ctx :
+					if(key == 'name') : category_name = category_ctx[key]
+					elif(key == 'param') : category_param = category_ctx[key]
+					elif(key == 'cate_no') : category_no = int(category_ctx[key])
+					elif(key == 'parent_cate_no') : category_parent_cate_no = str(category_ctx[key])
+					elif(key == 'design_page_url') : category_design_page_url = category_ctx[key]
+					#__LOG__.Trace( '------------------%s : %s' % (key, category_ctx[key]  ) )
+				
+				if( category_hash_tmp.get( category_no , -1) == -1) : 
+					category_hash_tmp[category_no] = [category_parent_cate_no,category_name, category_param, category_design_page_url ]
+					category_no_list.append(category_no)
+			
+			except Exception as ex:
+				__LOG__.Error(ex)
+				pass
+		
+		category_no_list.sort(reverse=True)
+		
+		for category_no in category_no_list :
+			try :
+				value_list = category_hash_tmp[category_no]
+				__LOG__.Trace('--------------------------------------------')
+
+				category_parent_cate_no = value_list[0]
+				category_name = value_list[1]
+				category_param = value_list[2]
+				category_design_page_url = value_list[3]
+				#__LOG__.Trace('%s %s %s %s' % (category_parent_cate_no, category_name, category_param, category_design_page_url ))
+				
+				if(self.check_ignore_category_text( category_name ) ) and (self.check_ignore_category_text( category_parent_cate_no ) ) :
+					__LOG__.Trace('OK : %s %s %s %s' % (category_parent_cate_no, category_name, category_param, category_design_page_url ))
+					tmp_category_link = '%s/%s%s' % ( self.BASIC_CATEGORY_URL, category_design_page_url, category_param  )
+					category_link = tmp_category_link
+					if(self.C_CATEGORY_STRIP_STR != '') : category_link = tmp_category_link.replace( self.C_CATEGORY_STRIP_STR,'')
+							
+					if( self.CATEGORY_URL_HASH.get( category_link , -1) == -1) : 
+						self.CATEGORY_URL_HASH[category_link] = category_name
+						
+						if( config.__DEBUG__ ) : __LOG__.Trace('%s : %s' % ( category_name, category_link ) )
+
+						rtn = True
+			
+			except Exception as ex:
+				__LOG__.Error(ex)
+				pass
+		
+		if(config.__DEBUG__) : __LOG__.Trace( '카테고리 수 : %d' % len(self.CATEGORY_URL_HASH))
+		
+		return rtn
+		
+	'''	
+	def get_sub_category_data(self, html):
+		rtn = False
+		category_link_list = []
+		
+		category_list = json.loads( html )
+		
+		for category_ctx in category_list :
+			try :
+				__LOG__.Trace('--------------------------------------------')
+				category_name = ''
+				category_param = ''
+				category_design_page_url = ''
 				for key in category_ctx :
 					if(key == 'name') : category_name = category_ctx[key]
 					elif(key == 'param') : category_param = category_ctx[key]
 					elif(key == 'design_page_url') : category_design_page_url = category_ctx[key]
-					#__LOG__.Trace( '%s : %s' % (key, category_ctx[key]  ) )
+					__LOG__.Trace( '------------------%s : %s' % (key, category_ctx[key]  ) )
 				
 
 				if(self.check_ignore_category_text( category_name ) ) :
@@ -110,7 +254,7 @@ class Cafe24(Mall) :
 		if(config.__DEBUG__) : __LOG__.Trace( '카테고리 수 : %d' % len(self.CATEGORY_URL_HASH))
 		
 		return rtn
-
+	'''
 		
 	def get_header_subcategory(self):
 	
@@ -284,6 +428,19 @@ class Cafe24(Mall) :
 		# crw_post_url 안에 ?product_no= 가 들어가 있는 경우
 		# http://carmineproject.com/product/detail.html?product_no=59&cate_no=27&display_group=1
 		# 
+		# 상품명이 <a><strong><span>상품명</span></strong><span>"상품명"</span></a> 타입
+		# 
+		#
+		# <p class="name">
+		# <a href="/product/detail.html?product_no=195&amp;cate_no=55&amp;display_group=1"><span style="font-size:12px;color:#555555;">[공구상품]알로하 원피스</span></a><br><span class="zoom"><img src="//img.echosting.cafe24.com/design/skin/admin/ko_KR/btn_prd_zoom.gif" onclick="zoom('195', '55', '1','', '');" style="cursor:pointer" alt="상품 큰 이미지 보기"></span>
+		# </p>
+		#-----------------------------------------------------
+		#
+		# <p class="name">
+		# <a href="/product/detail.html?product_no=286&amp;cate_no=43&amp;display_group=1"><strong class="title displaynone"><span style="font-size:12px;color:#555555;">상품명</span> :</strong> <span style="font-size:12px;color:#555555;">Frill Neck Sleeve Blouse Lavender [20%SALE]</span></a>
+		# </p>
+		#
+		
 		crw_post_url = ''
 
 		try :
@@ -303,7 +460,8 @@ class Cafe24(Mall) :
 						for span_ctx in span_list :
 							name_value = span_ctx.get_text().strip()
 							
-							if(0 != name_value.find('상품명') ) and (0 != name_value.find(':') ) : product_data.crw_name = name_value
+							if(0 != name_value.find('상품명') ) and (0 != name_value.find(':') ) : 
+								if(product_data.crw_name == '') : product_data.crw_name = name_value
 							
 						tmp_product_link = product_link_ctx.attrs['href'].strip()
 
@@ -322,7 +480,8 @@ class Cafe24(Mall) :
 			pass
 		
 		return crw_post_url
-		
+
+	
 		
 	def set_product_name_url_second(self, product_data, product_ctx , name_ctx_css, name_ctx_css_class) :
 		#
@@ -368,8 +527,101 @@ class Cafe24(Mall) :
 			pass
 		
 		return crw_post_url
+
 		
-	
+	def set_product_name_url_third(self, product_data, product_ctx , name_ctx_css, name_ctx_css_class) :
+		#
+		# crw_post_url 안에 ?product_no= 가 들어가 있는 경우
+		# http://carmineproject.com/product/detail.html?product_no=59&cate_no=27&display_group=1
+		# 
+		# 상품명이 <a><span>상품명</span>"상품명"</a> 타입
+		#
+		# <a href="/product/detail.html?product_no=140&amp;cate_no=25&amp;display_group=1" class=""><span class="title displaynone"><span style="font-size:12px;color:#555555;font-weight:bold;">상품명</span> :</span> 코코넛칠면조베지스틱</a>
+		#
+		crw_post_url = ''
+
+		try :
+
+			name_div_list = product_ctx.find_all(name_ctx_css, class_=name_ctx_css_class)
+			
+			for name_div_ctx in name_div_list :
+				
+				#
+				# 상품 링크 정보 및 상품명 / 상품코드
+				#
+				product_link_list = name_div_ctx.find_all('a')
+				for product_link_ctx in product_link_list :
+					
+					if('href' in product_link_ctx.attrs ) : 
+						name_value = product_link_ctx.get_text().strip()
+						if(0 <= name_value.find('상품명') ) and (0 < name_value.find(':') ) : 
+							split_list = name_value.split(':') 
+							if(product_data.crw_name == '') : product_data.crw_name = split_list[1].strip()
+							
+						tmp_product_link = product_link_ctx.attrs['href'].strip()
+
+						if(0 != tmp_product_link.find('http')) : tmp_product_link = '%s%s' % ( self.BASIC_PRODUCT_URL, product_link_ctx.attrs['href'].strip() )
+						crw_post_url = tmp_product_link
+
+						if(self.C_PRODUCT_STRIP_STR != '') : crw_post_url = tmp_product_link.replace( self.C_PRODUCT_STRIP_STR,'')
+
+						split_list = crw_post_url.split('?product_no=')
+						crw_goods_code_list = split_list[1].strip().split('&')
+						product_data.crw_goods_code = crw_goods_code_list[0].strip()
+
+						
+		except Exception as ex :
+			__LOG__.Error( ex )
+			pass
+		
+		return crw_post_url		
+		
+	def set_product_name_url_fourth(self, product_data, product_ctx , name_ctx_css, name_ctx_css_class) :
+		#
+		# crw_post_url 안에 ?product_no= 가 들어가 있는 경우
+		# http://carmineproject.com/product/detail.html?product_no=59&cate_no=27&display_group=1
+		# 
+		# 상품명이 <a><span>"상품명"</span></a> 타입
+		#
+		# <p class="name"><a href="/product/detail.html?product_no=123&amp;cate_no=24&amp;display_group=1"><span style="font-size:12px;color:#555555;">애견 수제 간식 영양식 호박죽 화식</span></a></p>
+		#
+		crw_post_url = ''
+
+		try :
+
+			name_div_list = product_ctx.find_all(name_ctx_css, class_=name_ctx_css_class)
+			
+			for name_div_ctx in name_div_list :
+				
+				#
+				# 상품 링크 정보 및 상품명 / 상품코드
+				#
+				product_link_list = name_div_ctx.find_all('a')
+				for product_link_ctx in product_link_list :
+					
+					if('href' in product_link_ctx.attrs ) : 
+						name_value = product_link_ctx.get_text().strip()
+						if(product_data.crw_name == '') : product_data.crw_name = name_value
+							
+						tmp_product_link = product_link_ctx.attrs['href'].strip()
+
+						if(0 != tmp_product_link.find('http')) : tmp_product_link = '%s%s' % ( self.BASIC_PRODUCT_URL, product_link_ctx.attrs['href'].strip() )
+						crw_post_url = tmp_product_link
+
+						if(self.C_PRODUCT_STRIP_STR != '') : crw_post_url = tmp_product_link.replace( self.C_PRODUCT_STRIP_STR,'')
+
+						split_list = crw_post_url.split('?product_no=')
+						crw_goods_code_list = split_list[1].strip().split('&')
+						product_data.crw_goods_code = crw_goods_code_list[0].strip()
+
+						
+		except Exception as ex :
+			__LOG__.Error( ex )
+			pass
+		
+		return crw_post_url	
+
+		
 	'''
 	######################################################################
 	#
@@ -383,26 +635,31 @@ class Cafe24(Mall) :
 			strong_ctx = li_ctx.find('strong')
 			span_ctx = li_ctx.find_all('span')
 			if(strong_ctx != None) :
-				title_name = strong_ctx.get_text().strip()
-				split_list = span_ctx[1].get_text().strip().split('(')
-				value_str = split_list[0].strip()
-				if( 0 == title_name.find( '브랜드')) : product_data.crw_brand1 = span_ctx[1].get_text().strip()
-				elif( 0 == title_name.find( '판매가')) : product_data.crw_price = int( __UTIL__.get_only_digit( value_str ) )
-				elif( 0 == title_name.find( '할인판매가')) : product_data.crw_price_sale = int( __UTIL__.get_only_digit( value_str ))
+				if(1 < len(span_ctx) ) :
+					title_name = strong_ctx.get_text().strip()
+					split_list = span_ctx[1].get_text().strip().split('(')
+					value_str = split_list[0].strip()
+					if( 0 == title_name.find( '브랜드')) : product_data.crw_brand1 = value_str
+					elif( 0 == title_name.find( '판매가')) : product_data.crw_price = int( __UTIL__.get_only_digit( value_str ) )
+					elif( 0 == title_name.find( '할인판매가')) : product_data.crw_price_sale = int( __UTIL__.get_only_digit( value_str ))
 	
 	
 	def set_product_price_brand_second(self, product_data, name_div_ctx ) :
 		li_list = name_div_ctx.find_all('li')
 		for li_ctx in li_list :
+		
 			strong_ctx = li_ctx.find('strong')
 			span_ctx = li_ctx.find_all('span')
 			if(strong_ctx != None) :
-				title_name = strong_ctx.get_text().strip()
-				split_list = span_ctx[1].get_text().strip().split('(')
-				value_str = split_list[0].strip()
-				if( 0 == title_name.find( '브랜드')) : product_data.crw_brand1 = span_ctx[1].get_text().strip()
-				elif( 0 == title_name.find( '소비자가')) : product_data.crw_price = int( __UTIL__.get_only_digit( value_str ) )
-				elif( 0 == title_name.find( '판매가')) : product_data.crw_price_sale = int( __UTIL__.get_only_digit( value_str ))
+				if(1 < len(span_ctx) ) :
+					title_name = strong_ctx.get_text().strip()
+					split_list = span_ctx[1].get_text().strip().split('(')
+					value_str = split_list[0].strip()
+
+					if( 0 == title_name.find( '브랜드')) : product_data.crw_brand1 = value_str
+					elif( 0 == title_name.find( '제조사')) : product_data.crw_brand2 = value_str
+					elif( 0 == title_name.find( '소비자가')) : product_data.crw_price = int( __UTIL__.get_only_digit( value_str ) )
+					elif( 0 == title_name.find( '판매가')) : product_data.crw_price_sale = int( __UTIL__.get_only_digit( value_str ))
 
 				
 	def set_product_price_brand_third(self, product_data, name_div_ctx ) :
@@ -411,15 +668,19 @@ class Cafe24(Mall) :
 			strong_ctx = li_ctx.find('strong')
 			span_ctx = li_ctx.find_all('span')
 			if(strong_ctx != None) :
-				title_name = strong_ctx.get_text().strip()
-				split_list = span_ctx[1].get_text().strip().split('(')
-				value_str = split_list[0].strip()
-				if( 0 == title_name.find( '브랜드')) : product_data.crw_brand1 = span_ctx[1].get_text().strip()
-				elif( 0 == title_name.find( '판매가')) : product_data.crw_price = int( __UTIL__.get_only_digit( value_str ) )
-				elif( 0 == title_name.find( '상품요약정보')) : 
-					span_str = span_ctx[1].get_text().strip()
-					if(0 <= span_str.find('할인')) or (0 <= span_str.find('이벤트')) : product_data.crw_price_sale = int( __UTIL__.get_only_digit( span_str ))	
-				
+				if(1 < len(span_ctx) ) :
+					title_name = strong_ctx.get_text().strip()
+					split_list = span_ctx[1].get_text().strip().split('(')
+					value_str = split_list[0].strip()
+					if( 0 == title_name.find( '브랜드')) : product_data.crw_brand1 = value_str
+					elif( 0 == title_name.find( '판매가')) : product_data.crw_price = int( __UTIL__.get_only_digit( value_str ) )
+					elif( 0 == title_name.find( '상품요약정보')) : 
+						span_str = span_ctx[1].get_text().strip()
+						if(0 <= span_str.find('할인')) or (0 <= span_str.find('이벤트')) : product_data.crw_price_sale = int( __UTIL__.get_only_digit( span_str ))	
+
+	
+						
+					
 	'''
 	######################################################################
 	#

@@ -81,14 +81,14 @@ class shop(Cafe24) :
 		
 		self.C_LAST_PAGE_VALUE = '#contents > div > a.last'
 		
-		self.PAGE_SPLIT_STR = '&page='		# 페이지 링크에서 page를 구분할수 있는 구분자
+		self.PAGE_SPLIT_STR = '?page='		# 페이지 링크에서 page를 구분할수 있는 구분자
 		
 		self.PAGE_LAST_LINK = True		# 페이지에서 맨끝 링크 존재 여부
 
 		
 		
 		self.BASIC_CATEGORY_URL = self.SITE_HOME
-		self.BASIC_PAGE_URL = self.SITE_HOME + '/product/list.html'
+		self.BASIC_PAGE_URL = self.SITE_HOME
 		self.BASIC_PRODUCT_URL = self.SITE_HOME
 		self.BASIC_IMAGE_URL = self.SITE_HOME
 		

@@ -15,7 +15,8 @@ sleep 30
 #
 
 naver_check=`ps -ef|grep -v "grep" | grep "start.naver.sh" | wc -l`
-cafe_check=`ps -ef|grep -v "grep" | grep "start.cafe24.sh" | wc -l`
+cafe_check=`ps -ef|grep -v "grep" | grep "start.cafe24_second.sh" | wc -l`
+cafe_second_check=`ps -ef|grep -v "grep" | grep "start.cafe24.sh" | wc -l`
 godo_check=`ps -ef|grep -v "grep" | grep "start.godomall.sh" | wc -l`
 imweb_check=`ps -ef|grep -v "grep" | grep "start.imweb.sh" | wc -l`
 makeshop_check=`ps -ef|grep -v "grep" | grep "start.makeshop.sh" | wc -l`
@@ -26,20 +27,23 @@ sixshop_check=`ps -ef|grep -v "grep" | grep "start.sixshop.sh" | wc -l`
 
 if [ "$naver_check" == "0" ]; then
 	if [ "$cafe_check" == "0" ]; then
-		if [ "$godo_check" == "0" ]; then	
-			if [ "$imweb_check" == "0" ]; then	
-				if [ "$makeshop_check" == "0" ]; then	
-					if [ "$private_check" == "0" ]; then	
-						if [ "$wisa_check" == "0" ]; then	
-							if [ "$sixshop_check" == "0" ]; then
-								./start.naver.sh
-								./start.cafe24.sh
-								./start.godomall.sh
-								./start.imweb.sh
-								./start.makeshop.sh
-								./start.private.sh
-								./start.wisa.sh
-								./start.sixshop.sh
+		if [ "$cafe_second_check" == "0" ]; then
+			if [ "$godo_check" == "0" ]; then	
+				if [ "$imweb_check" == "0" ]; then	
+					if [ "$makeshop_check" == "0" ]; then	
+						if [ "$private_check" == "0" ]; then	
+							if [ "$wisa_check" == "0" ]; then	
+								if [ "$sixshop_check" == "0" ]; then
+									./start.naver.sh
+									./start.cafe24.sh
+									./start.cafe24_second.sh
+									./start.godomall.sh
+									./start.imweb.sh
+									./start.makeshop.sh
+									./start.private.sh
+									./start.wisa.sh
+									./start.sixshop.sh
+								fi
 							fi
 						fi
 					fi

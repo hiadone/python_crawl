@@ -39,9 +39,8 @@ class shop(Cafe24) :
 	
 		Cafe24.__init__(self)
 		
-		self.EUC_ENCODING = False
-
-		self.SITE_HOME = 'http://www.yolohollo.com'
+		
+		self.SITE_HOME = 'http://cjgsfood1.cafe24.com'
 		
 		self.SEARCH_MODE = __DEFINE__.__CATEGORY_ALL__
 
@@ -51,15 +50,17 @@ class shop(Cafe24) :
 		self.C_CATEGORY_TYPE = ''
 		
 		
-		self.C_CATEGORY_VALUE = '#category > div > ul > li.xans-record- > a'
-		self.C_CATEGORY_IGNORE_STR = ['고양이','강아지','욜로홀로 Life','Design LaB']
+		#self.C_CATEGORY_VALUE = '#categorymenu > ul > li > a'
+		self.C_CATEGORY_IGNORE_STR = ['베스트&전체상품','개인결제','전체상품']
 		self.C_CATEGORY_STRIP_STR = ''
 
 		
 		
 		self.C_PAGE_CASE = __DEFINE__.__C_SELECT__
 		self.C_PAGE_TYPE = ''
-		self.C_PAGE_VALUE = '#container_sub > div.xans-element-.xans-product.xans-product-normalpaging.ec-base-paginate > ol > li > a'
+		
+		
+		self.C_PAGE_VALUE = '#contents > div.xans-element-.xans-product.xans-product-normalpaging.ec-base-paginate > ol > li > a'
 		self.C_PAGE_STRIP_STR = ''
 		
 		self.C_PAGE_IGNORE_STR = ['1']			# 페이지 중에 무시해야 하는 스트링
@@ -68,28 +69,27 @@ class shop(Cafe24) :
 		
 		self.C_PRODUCT_CASE = __DEFINE__.__C_SELECT__
 		self.C_PRODUCT_TYPE = ''
+
+		self.C_PRODUCT_VALUE = '#contents > div.xans-element-.xans-product.xans-product-normalpackage > div.xans-element-.xans-product.xans-product-listnormal.ec-base-product > ul > li > div'
 		
-		#self.C_PRODUCT_VALUE = '#container_sub > div.xans-element-.xans-product.xans-product-normalpackage > div.xans-element-.xans-product.xans-product-listnormal.ec-base-product > ul > li > div.description > strong > a'
-		
-		self.C_PRODUCT_VALUE = '#container_sub > div.xans-element-.xans-product.xans-product-normalpackage > div.xans-element-.xans-product.xans-product-listnormal.ec-base-product > ul > li'
 		self.C_PRODUCT_STRIP_STR = ''
 		
 		# self.PAGE_LAST_LINK = True 일때 사용
 		self.C_LAST_PAGE_CASE = __DEFINE__.__C_SELECT__
 		self.C_LAST_PAGE_TYPE = ''
-		self.C_LAST_PAGE_VALUE = '#container_sub > div.xans-element-.xans-product.xans-product-normalpaging.ec-base-paginate > a.last'
 		
-		self.PAGE_SPLIT_STR = '?page='		# 페이지 링크에서 page를 구분할수 있는 구분자
+		self.C_LAST_PAGE_VALUE = '#contents > div.xans-element-.xans-product.xans-product-normalpaging.ec-base-paginate > a.last'
+		
+		self.PAGE_SPLIT_STR = '&page='		# 페이지 링크에서 page를 구분할수 있는 구분자
 		
 		self.PAGE_LAST_LINK = True		# 페이지에서 맨끝 링크 존재 여부
 
 		
 		
 		self.BASIC_CATEGORY_URL = self.SITE_HOME
-		self.BASIC_PAGE_URL = self.SITE_HOME
+		self.BASIC_PAGE_URL = self.SITE_HOME + '/product/list.html'
 		self.BASIC_PRODUCT_URL = self.SITE_HOME
 		self.BASIC_IMAGE_URL = self.SITE_HOME
-		
 		
 		'''
 		# Cafe24 전용 
@@ -98,14 +98,27 @@ class shop(Cafe24) :
 		
 		# 물품 이미지 CSS selector 정의
 		self.C_PRODUCT_IMG_SELECTOR = 'div'
-		self.C_PRODUCT_IMG_SELECTOR_CLASSNAME = 'prdImg'
+		self.C_PRODUCT_IMG_SELECTOR_CLASSNAME = 'thumbnail'
 		
 		
 		# 물품 SOLDOUT CSS selector 정의
+		# <div class="icon"><img src="//img.echosting.cafe24.com/design/skin/admin/ko_KR/ico_product_soldout.gif" class="icon_img" alt="품절"> <img src="//img.echosting.cafe24.com/design/skin/admin/ko_KR/ico_product_recommended.gif" class="icon_img" alt="추천">  </div>
+		#
 		self.C_PRODUCT_SOLDOUT_SELECTOR = 'div'
 		self.C_PRODUCT_SOLDOUT_SELECTOR_CLASSNAME = 'promotion'
 		
 		
+		
+	'''
+	######################################################################
+	#
+	# Mall.py 대체
+	#
+	######################################################################
+	'''
+	
+	def process_category_list(self):
+		self.process_sub_category_list()
 		
 	'''
 	######################################################################
@@ -127,20 +140,28 @@ class shop(Cafe24) :
 			#
 			self.set_product_category_first(product_data, soup)
 
-
+			###########################
 			# 상품 이미지 확인
-			self.set_product_image_fourth(product_data, product_ctx )
-			
-		
+			#
+			# <div class="thumbnail">
+			# <a href="/product/detail.html?product_no=335&amp;cate_no=24&amp;display_group=1" name="anchorBoxName_335"><img src="//cjgsfood1.cafe24.com/web/product/medium/201906/8161292e023f5f4e3d99fba4801742ab.jpg" id="eListPrdImage335_1" alt="돼지꼬리뼈 100g"></a>
+			# <span class="wish"></span>
+ 			# </div>
+			###########################
+			self.set_product_image_fourth( product_data, product_ctx )
+
 			# 품절여부 확인
 			self.set_product_soldout_first(product_data, product_ctx ) 
 
+			###########################
+			#
+			# <strong class="name"><a href="/product/detail.html?product_no=335&amp;cate_no=24&amp;display_group=1" class=""><span class="title displaynone"><span style="font-size:12px;color:#555555;">상품명</span> :</span> <span style="font-size:12px;color:#555555;">돼지꼬리뼈 100g</span></a></strong>
+			###########################
+			
+			crw_post_url = self.set_product_name_url_first( product_data, product_ctx , 'strong', 'name')
+	
+			self.set_product_price_brand_second(product_data, product_ctx )
 
-			crw_post_url = self.set_product_name_url_second( product_data, product_ctx , 'div', 'description')
-			
-			self.set_product_price_brand_first(product_data, product_ctx )
-			
-			
 			if( crw_post_url != '' ) :
 				self.set_product_url_hash( product_data, crw_post_url) 
 				rtn = True
@@ -152,7 +173,7 @@ class shop(Cafe24) :
 			pass
 			
 		return True	
-		
+
 		
 	'''
 	######################################################################
@@ -161,23 +182,50 @@ class shop(Cafe24) :
 	#
 	######################################################################
 	'''
-
+	
+	
+	
+						
 	def get_product_detail_data(self, product_data, html):
 		rtn = False
 		try :
+
 			
 			detail_page_txt = []
 			detail_page_img = []
 
 			
 			soup = bs4.BeautifulSoup(html, 'lxml')
+			####################################
+			# 상품 기본 정보에서 브랜드 등을 추출
+			####################################
+		
+			crw_brand = []
+			'''
+			for tag in soup.find_all("meta"):
+				if tag.get("name", None) == 'keywords' :
+					rtn = tag.get('content', None)
+					if(rtn != None) :
+						split_list = rtn.split(',')
+						if( split_list[1].strip() != '' ) : crw_brand.append( split_list[1].strip() )
+			'''
+
+			table_list = soup.select('#contents > div.xans-element-.xans-product.xans-product-detail > div.detailArea > div.infoArea > div.xans-element-.xans-product.xans-product-detaildesign > table')
 			
-						
+			rtn_dict = self.get_value_in_table_two_colume( table_list, '기본 정보', 'th', 'td')
+			if(rtn_dict.get('브랜드' , -1) != -1) : crw_brand.append( rtn_dict['브랜드'] )
+			if(rtn_dict.get('제조사' , -1) != -1) : crw_brand.append( rtn_dict['제조사'] )
+			if(rtn_dict.get('원산지' , -1) != -1) : crw_brand.append( rtn_dict['원산지'] )
+			
+			self.set_detail_brand( product_data, crw_brand )
+			
 			# 제품 상세 부분
 			detail_page_txt, detail_page_img = self.get_text_img_in_detail_content_part( soup, '#prdDetail > div.cont', 'p', 'ec-data-src' )
+
+			#__LOG__.Trace( detail_page_txt )
+			#__LOG__.Trace( detail_page_img )
 			
 			self.set_detail_page( product_data, detail_page_txt, detail_page_img)
-
 			
 		except Exception as ex:
 			__LOG__.Error(ex)
@@ -195,3 +243,7 @@ if __name__ == '__main__':
 
 	app = shop()
 	app.start()
+
+	
+	
+	

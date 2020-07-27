@@ -594,10 +594,42 @@ class Mall(Browser) :
 		
 
 		return rtn
+	
+
+	def get_page_url_split_max_value(self, page_link, is_last_page, page_split_str):
 		
+		if(page_split_str != '') and ( 0 < page_link.find(page_split_str) ) :
+			split_data = page_link.split(page_split_str)
+			
+			self.PAGE_FIRST_URL = split_data[0]
+			del_pos = split_data[1].find('&')
+			if(del_pos < 0 ) : 
+				self.PAGE_SECOND_URL = ''
+				page_num = int( split_data[1] )
+			else : 
+				self.PAGE_SECOND_URL = split_data[1][del_pos:]
+				page_num = int( split_data[1][:del_pos] )
+			
+			if(is_last_page) : 
+				self.PAGE_LAST_VALUE = page_num
+	
 	
 	def get_page_url_split(self, page_link, is_last_page):
+		
+		if(self.PAGE_SPLIT_STR == '&page=') or (self.PAGE_SPLIT_STR == '?page=') :		
+			# Cafe24 를 위해서
+			self.get_page_url_split_max_value( page_link, is_last_page, '&page=')
+			if(	self.PAGE_LAST_VALUE == 0 ) : self.get_page_url_split_max_value( page_link, is_last_page, '?page=')
+			
+		else :
+			self.get_page_url_split_max_value( page_link, is_last_page, self.PAGE_SPLIT_STR)
 
+
+
+			
+	'''
+	def get_page_url_split(self, page_link, is_last_page):
+		
 		if(self.PAGE_SPLIT_STR != '') and ( 0 < page_link.find(self.PAGE_SPLIT_STR) ) :
 			split_data = page_link.split(self.PAGE_SPLIT_STR)
 			
@@ -612,7 +644,7 @@ class Mall(Browser) :
 			
 			if(is_last_page) : 
 				self.PAGE_LAST_VALUE = page_num
-		
+	'''	
 
 
 	def set_page_list_with_last_link(self, category_url):
@@ -894,8 +926,10 @@ class Mall(Browser) :
 		product_data.brd_id = self.BRD_ID
 		product_data.crw_post_url = crw_post_url
 		
-		self.PRODUCT_URL_HASH[crw_post_url] = product_data
-		self.PRODUCT_AVAIBLE_ITEM_HASH[product_data.crw_goods_code] = product_data.crw_id
+		# 상품코드 하나에 대해서 상품 URL 을 하나만 갖게 함.
+		if( self.PRODUCT_AVAIBLE_ITEM_HASH.get(product_data.crw_goods_code, -1) == -1 ) :
+			self.PRODUCT_URL_HASH[crw_post_url] = product_data
+			self.PRODUCT_AVAIBLE_ITEM_HASH[product_data.crw_goods_code] = product_data.crw_id
 					
 	
 	def set_product_data(self , soup, product_ctx ) :
@@ -1361,7 +1395,7 @@ class Mall(Browser) :
 			# 제품 상세 부분
 			
 			detail_content_list = soup.select(content_selector)
-			
+			__LOG__.Trace(len(detail_content_list))
 			for detail_content_ctx in detail_content_list :
 				# 제품 상세 텍스트
 				if(text_sub_selector =='') :
@@ -1407,6 +1441,9 @@ class Mall(Browser) :
 		#
 		# 상품 INSERT / UPDATE 하는 API 진행
 		#
+		# 
+		if(product_data.crw_category1 == '') : product_data.crw_category1 = '카테고리없음'
+		
 		if( config.__DEBUG__ ) : self.print_product_page_info( product_data )
 		
 		# config.__REAL__ = True 일때 실서버 작업
@@ -1569,10 +1606,10 @@ class Mall(Browser) :
 		if(search_web_str.startswith('www.')) : search_web_str = split_list[2].replace('www.','')
 		elif(search_web_str.startswith('shop.')) : search_web_str = split_list[2].replace('shop.','')
 		
-
-		BRD_ID_HASH = __API__.get_storelist( search_web_str )		
+		
 		brd_id = 1
 		app_url = self.SITE_HOME
+
 		self.main(app_url, brd_id)
 			
 			

@@ -291,8 +291,9 @@ class shop(Mall) :
 					if( name_link_ctx != None ) :
 						if('href' in name_link_ctx.attrs ) : 
 							product_data.crw_name = name_link_ctx.get_text().strip()
-							tmp_product_link = name_link_ctx.attrs['href'].strip()
-							if(0 != tmp_product_link.find('http')) : tmp_product_link = '%s%s' % ( self.BASIC_PRODUCT_URL, name_link_ctx.attrs['href'].strip() )
+							split_list = name_link_ctx.attrs['href'].strip().split(';')
+							tmp_product_link = split_list[0].strip()
+							if(0 != tmp_product_link.find('http')) : tmp_product_link = '%s%s' % ( self.BASIC_PRODUCT_URL, split_list[0].strip() )
 							crw_post_url = tmp_product_link
 
 							if(self.C_PRODUCT_STRIP_STR != '') : crw_post_url = tmp_product_link.replace( self.C_PRODUCT_STRIP_STR,'')

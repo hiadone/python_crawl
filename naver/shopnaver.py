@@ -749,7 +749,7 @@ if __name__ == '__main__':
 	LOG_NAME = "%s/%s.log" % (config.LOG_PATH , os.path.basename(sys.argv[0]))
 	Log.Init(Log.CRotatingLog(LOG_NAME, 10000000, 10))
 
-	BRD_ID_HASH = __API__.get_storelist('shopping.naver.com')
+	BRD_ID_HASH = __API__.get_storelist('shopping.naver.com')		
 	app = shopnaver()
 	
 	for app_url in BRD_ID_HASH.keys() :

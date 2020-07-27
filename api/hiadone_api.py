@@ -35,8 +35,8 @@ def get_storelist_by_brd_id(mall_brd_id):
 				data = json.loads(res.text)
 				if('list' in data ) :
 					brd_id_list_json = data['list']
-					for list_idx in brd_id_list_json :
-						sub_list_json = brd_id_list_json[list_idx]
+					for sub_list_json in brd_id_list_json :
+						#sub_list_json = brd_id_list_json[list_idx]
 						brd_id = 0
 						brd_url = ''
 						for key in sub_list_json :
@@ -84,17 +84,22 @@ def get_storelist(mall_type=''):
 			__LOG__.Error( "실패 : GET_STORELIST API res.status_code : %s " % str(res.status_code) )
 		else : 
 			try :
+
 				data = json.loads(res.text)
+				
 				if('list' in data ) :
 					brd_id_list_json = data['list']
-					for list_idx in brd_id_list_json :
-						sub_list_json = brd_id_list_json[list_idx]
+					
+					for sub_list_json in brd_id_list_json :
+						#__LOG__.Trace(list_idx)
+						#sub_list_json = brd_id_list_json[list_idx]
+						#__LOG__.Trace(sub_list_json)
 						brd_id = 0
 						brd_url = ''
 						for key in sub_list_json :
 							if(key == 'brd_id') : brd_id = int( sub_list_json[key] )
 							elif(key == 'brd_url') : brd_url = sub_list_json[key].strip()
-							
+						
 						if(brd_url != '' ) and ( 0 <= brd_url.find(mall_type) ):
 							if(BRD_ID_HASH.get(brd_url, -1) == -1) : 
 								BRD_ID_HASH[brd_url] = brd_id
