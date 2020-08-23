@@ -52,11 +52,9 @@ class shop(ImWeb) :
 		self.C_CATEGORY_CASE = __DEFINE__.__C_SELECT__
 		self.C_CATEGORY_TYPE = ''
 		
-		#inline_header_normal > div > div.inline-inside._inline-inside > div > div > ul > div.viewport-nav.desktop._main_menu > li > ul > li > a
-		
-		#self.C_CATEGORY_VALUE = 'body > div > div > div > div.owl-stage-outer > div > div > div > div > div > div > div > h5 > span > a'
+
 		self.C_CATEGORY_VALUE = 'body > div > main > div.doz_aside._doz_aside > div > div > div > div > div > div > div > ul > li > a'	#하위 메뉴용
-		self.C_CATEGORY_IGNORE_STR = ['인기상품','스크래치상품','개인결제창']																
+		self.C_CATEGORY_IGNORE_STR = ['개인결제창']																
 		self.C_CATEGORY_STRIP_STR = ''
 
 		

@@ -444,10 +444,32 @@ def get_order_data_fourth( order_data, html ) :
 		__LOG__.Error('에러 : get_order_data_fourth')
 		__LOG__.Error( ex )
 		pass
-		
+
+
+
+
+
+##############################################################
+#
+# 주문결과
+##############################################################		
 def get_order_status_data( order_status_data, html ) :
+	#__LOG__.Trace( order_status_data.search_web_str )
+	
 	if(order_status_data.search_web_str == 'yolohollo.com' ) : get_order_status_data_yolohollo( order_status_data, html )
+	
+	elif(order_status_data.search_web_str == 'j-o-yi.com' ) : get_order_status_data_third( order_status_data, html )
+	elif(order_status_data.search_web_str == 'ba-ttang.com' ) : get_order_status_data_third( order_status_data, html )
+	elif(order_status_data.search_web_str == 'bokseul.com' ) : get_order_status_data_third( order_status_data, html )
+	elif(order_status_data.search_web_str == 'oneofus.co.kr' ) : get_order_status_data_third( order_status_data, html )
+	elif(order_status_data.search_web_str == 'boondog.co.kr' ) : get_order_status_data_third( order_status_data, html )
+	elif(order_status_data.search_web_str == 'studioaloitti.com' ) : get_order_status_data_third( order_status_data, html )
+	
 	elif(order_status_data.search_web_str == 'hutsandbay.com' ) : get_order_status_data_hutsandbay( order_status_data, html )
+	elif(order_status_data.search_web_str == 'babiana.co.kr' ) : get_order_status_data_babiana( order_status_data, html )
+	elif(order_status_data.search_web_str == 'studioalive.co.kr' ) : get_order_status_data_studioalive( order_status_data, html )
+	
+	elif(order_status_data.search_web_str == 'vemvem.com' ) : get_order_status_data_vemvem( order_status_data, html )
 	else : get_order_status_data_second( order_status_data, html )
 
 	
@@ -460,10 +482,14 @@ def get_order_status_data_second( order_status_data, html ) :
 		#order_status_data.cos_order_no = ''				# 테스트용
 		
 		soup = bs4.BeautifulSoup(html, 'lxml')
-		
+
 		div_list = soup.find_all('div', class_='xans-element- xans-myshop xans-myshop-orderhistorydetail xans-record-')
+		#if(len(div_list) == 0 ) : div_list = soup.find_all('div', class_='xans-element- xans-myshop xans-myshop-orderhistorydetail xans-record-')
 		if(len(div_list) == 0 ) : div_list = soup.find_all('div', class_='xans-element- xans-myshop xans-myshop-orderhistorydetail p25 xans-record-')
 
+		#__LOG__.Trace( len(div_list) )
+		#if( len(div_list) == 0 ) : __LOG__.Trace( html )
+		
 		for div_ctx in div_list :
 			if( cor_order_no != '' ) and (cor_order_no == order_status_data.cos_order_no ) : break		# 해당되는 주문번호만 추출
 			######################
@@ -480,6 +506,7 @@ def get_order_status_data_second( order_status_data, html ) :
 				if(0 <= text.find('주문번호') ) : 
 					cor_order_no = get_cor_order_no(text)
 					#order_status_data.cos_order_no = get_cor_order_no(text)		# 테스트용
+
 			
 			#if( True ) :	# 테스트용
 			if( cor_order_no == order_status_data.cos_order_no ) :	
@@ -541,7 +568,9 @@ def get_order_status_data_second( order_status_data, html ) :
 				product_list = div_ctx.find_all('div', class_='prdInfo xans-record-')
 				if(len(product_list) == 0 ) : product_list = div_ctx.find_all('div', class_='ec-base-prdInfo xans-record-')
 				
+				
 				for product_ctx in product_list :
+					#__LOG__.Trace( product_ctx )
 					cor_memo_ctx = div_ctx.find('span', class_='delivery_state')
 					if(cor_memo_ctx != None) : order_status_data.cor_memo = cor_memo_ctx.get_text().replace(')','').replace('(','').strip()
 					
@@ -587,14 +616,364 @@ def get_order_status_data_second( order_status_data, html ) :
 								split_list = status_text.split('\n')
 								sub_split_list = split_list[0].strip().split(' ')
 								order_status_data.cor_memo = sub_split_list[0].strip()
-								
 		
+
 	except Exception as ex:
 		__LOG__.Error('에러 : get_order_status_data_second')
 		__LOG__.Error( ex )
 		pass
 
+
+		
+def get_order_status_data_third( order_status_data, html ) :
+	try :
 	
+		cor_order_no = ''
+		
+		#cor_order_no = order_status_data.cos_order_no	# 테스트용
+		#order_status_data.cos_order_no = ''				# 테스트용
+		
+		soup = bs4.BeautifulSoup(html, 'lxml')
+		
+		div_list = soup.find_all('div', class_='orderList')
+
+		for div_ctx in div_list :
+			li_list = div_ctx.find_all('div', class_='order xans-record-')
+			for li_ctx in li_list :
+				if( cor_order_no != '' ) and (cor_order_no == order_status_data.cos_order_no ) : break		# 해당되는 주문번호만 추출
+				######################
+				# 주문번호
+				#
+				# <span class="orderNum">2020.06.29<br>20200629-RA22K</span>
+				######################
+				cor_order_no_ctx = li_ctx.find('span', class_='number')
+				if( cor_order_no_ctx != None ) :
+					text = cor_order_no_ctx.get_text().strip()
+					cor_order_no = get_cor_order_no(text)
+					#order_status_data.cos_order_no = get_cor_order_no(text)		# 테스트용
+				
+				#if( True ) :	# 테스트용
+				if( cor_order_no == order_status_data.cos_order_no ) :	
+					######################
+					# 물품리스트
+					#
+					# <div class="description">
+					# <p class="prdImg"><a href="/product/detail.html?product_no=197&amp;cate_no=54"><img src="http://img.echosting.cafe24.com/thumb/img_product_small.gif" onerror="this.src='http://img.echosting.cafe24.com/thumb/img_product_small.gif';" width="73" height="73" alt=""></a></p>
+					# <strong class="prdName" title="상품명"><a href="/product/detail.html?product_no=197&amp;cate_no=54">Crochet Crop dress - Pink</a></strong>
+					# <ul class="info">
+					# <li>
+					# <span class="price" title="판매가"><strong>78,000</strong>원<span class="displaynone"> </span></span>
+					# <span class="quantity" title="수량"><strong>1</strong>개</span>
+					# </li>
+					# <li class="displaynone">무이자할부 상품</li>
+					# </ul>
+					# </div>
+					######################
+					
+					product_list = li_ctx.find_all('strong', class_='prdName')
+					if(len(product_list) == 0 ) : product_list = li_ctx.find_all('p', class_='prdName')
+					
+					for product_ctx in product_list :						
+						product_url_list = product_ctx.find_all('a')
+						for product_url_ctx in product_url_list :
+							
+							if('href' in product_url_ctx.attrs) :
+								product_url = product_url_ctx.attrs['href']
+								if( 0 < product_url.find('product_no=') ) :
+									product_no_list = product_url.split('product_no=')
+									if(len(product_no_list) == 2 ) :
+										sub_product_no_list = product_no_list[1].split('&')
+										order_status_data.cor_goods_code.append( sub_product_no_list[0].strip() )
+								else :
+									product_no_list = product_url.split('/')
+									order_status_data.cor_goods_code.append( product_no_list[3].strip() )
+						
+					ea_span_list = li_ctx.find_all('span', class_='quantity')
+					for ea_span_ctx in ea_span_list :
+						ea_span_text = ea_span_ctx.get_text().strip()
+						order_status_data.cod_count.append( int( __UTIL__.get_only_digit( get_cod_count(ea_span_text) )) )
+							
+					status_div_ctx = li_ctx.find('p', class_='status')
+					if( status_div_ctx != None) : 
+						if(order_status_data.cor_memo == '') : 
+							split_list = status_div_ctx.get_text().strip().split('\n')
+							order_status_data.cor_memo = split_list[0].strip()
+					
+					
+
+	except Exception as ex:
+		__LOG__.Error('에러 : get_order_status_data_third')
+		__LOG__.Error( ex )
+		pass
+
+		
+		
+		
+def get_order_status_data_vemvem( order_status_data, html ) :
+	try :
+	
+		cor_order_no = ''
+		
+		#cor_order_no = order_status_data.cos_order_no	# 테스트용
+		#order_status_data.cos_order_no = ''				# 테스트용
+		
+		soup = bs4.BeautifulSoup(html, 'lxml')
+
+		div_list = soup.find_all('li', class_='list-item xans-record-')
+
+		for div_ctx in div_list :
+			#if( cor_order_no != '' ) and (cor_order_no == order_status_data.cos_order_no ) : break		# 해당되는 주문번호만 추출
+			######################
+			# 주문번호
+			#
+			# <tr>
+			# <th scope="row">주문번호</th>
+			# <td>20200629-0000058</td>
+			# </tr>
+			######################
+			cor_order_no_list = div_ctx.find_all('div', class_='col col70 floatleft')
+			for cor_order_no_ctx in cor_order_no_list :
+				text = cor_order_no_ctx.get_text().strip()
+				if(text != '주문번호') : 
+					cor_order_no = get_cor_order_no(text)
+					#order_status_data.cos_order_no = get_cor_order_no(text)		# 테스트용
+
+			
+			#if( True ) :	# 테스트용
+			if( cor_order_no == order_status_data.cos_order_no ) :	
+				######################
+				# 물품리스트
+				#
+				# <li class="list-item xans-record-">
+				# <div class="col col40 floatleft list-col">
+				# <div class="col col30 floatleft">2020-08-05</div>
+				# <div class="col col70 floatleft">
+				# <a href="detail.html?order_id=20200805-0000024&amp;page=1&amp;history_start_date=2020-05-07&amp;history_end_date=2020-08-05">20200805-0000024</a>
+				# <p>Layer: Freezing Cut - Shark Silver</p>
+				# </div>
+				# </div>
+				# <div class="col col60 floatleft list-col">
+				# <div class="col col25 floatleft alignright">1</div>
+				# <div class="col col25 floatleft alignright">KRW 34,000</div>
+				# <div class="col col25 floatleft alignright">입금전</div>
+				# <div class="col col25 floatleft alignright">
+				# <p class="displaynone"><a href="#none" class="line" onclick="OrderHistory.getDetailInfo('?product_no=83&amp;cate_no=42&amp;order_id=20200805-0000024&amp;ord_item_code=20200805-0000024-01');">[상세정보]</a></p>
+				# <p class="">-</p>
+				# </div>
+				# </div>
+				# </li>
+				######################
+				
+				product_list = div_ctx.find_all('div', class_='col col60 floatleft list-col')
+				
+				for product_ctx in product_list :
+					prdname_list = product_ctx.find_all('div')		
+					idx = 0
+					for prdname_ctx in prdname_list :
+						idx += 1
+						if(idx == 1) : order_status_data.cod_count.append( int( __UTIL__.get_only_digit( prdname_ctx.get_text().strip() )) )
+						elif(idx == 3) :
+							split_list = prdname_ctx.get_text().strip().split('\n')
+							if( order_status_data.cor_memo == '') : order_status_data.cor_memo = split_list[0].strip()
+						elif(idx == 4) :
+							product_url_ctx = prdname_ctx.find('a')
+							if(product_url_ctx != None) : 
+								if('onclick' in product_url_ctx.attrs) :
+									product_url = product_url_ctx.attrs['onclick']
+									product_no_list = product_url.split('product_no=')
+									if(len(product_no_list) == 2 ) :
+										sub_product_no_list = product_no_list[1].split('&')
+										order_status_data.cor_goods_code.append( sub_product_no_list[0].strip() )
+
+	except Exception as ex:
+		__LOG__.Error('에러 : get_order_status_data_vemvem')
+		__LOG__.Error( ex )
+		pass		
+		
+		
+		
+def get_order_status_data_studioalive( order_status_data, html ) :
+	try :
+	
+		cor_order_no = ''
+		
+		#cor_order_no = order_status_data.cos_order_no	# 테스트용
+		#order_status_data.cos_order_no = ''				# 테스트용
+		
+		soup = bs4.BeautifulSoup(html, 'lxml')
+
+		div_list = soup.find_all('div', class_='xans-element- xans-myshop xans-myshop-orderhistorydetail cart-wrap xans-record-')
+
+		
+		for div_ctx in div_list :
+			if( cor_order_no != '' ) and (cor_order_no == order_status_data.cos_order_no ) : break		# 해당되는 주문번호만 추출
+			######################
+			# 주문번호
+			#
+			# <tr>
+			# <th scope="row">주문번호</th>
+			# <td>20200629-0000058</td>
+			# </tr>
+			######################
+			board_div_ctx = div_ctx.find('div', class_='board')
+			if( board_div_ctx != None) :
+				cor_order_no_list = board_div_ctx.find_all('li', class_='subject')
+				for cor_order_no_ctx in cor_order_no_list :
+					text = cor_order_no_ctx.get_text().strip()
+					if(text != '주문번호') : 
+						cor_order_no = get_cor_order_no(text)
+						#order_status_data.cos_order_no = get_cor_order_no(text)		# 테스트용
+
+			
+			#if( True ) :	# 테스트용
+			if( cor_order_no == order_status_data.cos_order_no ) :	
+				######################
+				# 물품리스트
+				#
+				# <div class="xans-element- xans-myshop xans-myshop-orderhistorydetailbasic"><ul class="xans-record-">
+				# <li class="thumb"><a href="/product/detail.html?product_no=67&amp;cate_no=52"><img src="http://img.echosting.cafe24.com/thumb/img_product_small.gif" alt="달걀판 먹이퍼즐식기 S" onerror="this.src='http://img.echosting.cafe24.com/thumb/img_product_small.gif';"></a></li>
+				# <li class="subject product">
+				# <a href="/product/detail.html?product_no=67&amp;cate_no=52"><strong>달걀판 먹이퍼즐식기 S</strong></a>
+				# <div class="option">프레임 사이즈=먹이퍼즐식기_S10, 색상=화이트  <span class="displaynone">(+0원)</span>
+				# </div>
+				# <br><a href="/board/product/write.html?board_no=4&amp;product_no=67&amp;order_id=20200805-0000013"><span class="btn3">REVIEW</span></a>
+				# </li>
+				# <li class="quantity">1</li>
+				# <li class="price"><strong>57,000</strong></li>
+				# <li class="state">
+				# <p>입금전</p>
+				# <p></p>
+				# <p><a href="#none" onclick="" class="displaynone"><img src="http://img.echosting.cafe24.com/skin/base_ko_KR/myshop/btn_order_delivery.gif" alt="배송추적"></a></p>
+				# </li>
+				# </ul>
+				# </div>
+				######################
+				
+				product_list = div_ctx.find_all('div', class_='xans-element- xans-myshop xans-myshop-orderhistorydetailbasic')
+				
+				for product_ctx in product_list :
+
+					cor_memo_ctx = product_ctx.find('li', class_='state')
+					if(cor_memo_ctx != None) : 
+						split_list = cor_memo_ctx.get_text().strip().split('\n')
+						if( order_status_data.cor_memo == '') : order_status_data.cor_memo = split_list[0].strip()
+						
+					
+					prdname_list = product_ctx.find_all('li', class_='subject product')		
+
+					for prdname_ctx in prdname_list :
+						product_url_ctx = prdname_ctx.find('a')
+						if(product_url_ctx != None) : 
+							if('href' in product_url_ctx.attrs) :
+								product_url = product_url_ctx.attrs['href']
+								product_no_list = product_url.split('product_no=')
+								if(len(product_no_list) == 2 ) :
+									sub_product_no_list = product_no_list[1].split('&')
+									order_status_data.cor_goods_code.append( sub_product_no_list[0].strip() )
+									
+									
+					ea_span_list = product_ctx.find_all('li', class_='quantity')
+					for ea_span_ctx in ea_span_list :
+						ea_span_text = ea_span_ctx.get_text().strip()
+						order_status_data.cod_count.append( int( __UTIL__.get_only_digit( get_cod_count(ea_span_text) )) )
+						
+
+	except Exception as ex:
+		__LOG__.Error('에러 : get_order_status_data_studioalive')
+		__LOG__.Error( ex )
+		pass		
+		
+		
+def get_order_status_data_babiana( order_status_data, html ) :
+	try :
+	
+		cor_order_no = ''
+		
+		#cor_order_no = order_status_data.cos_order_no	# 테스트용
+		#order_status_data.cos_order_no = ''				# 테스트용
+		
+		soup = bs4.BeautifulSoup(html, 'lxml')
+		
+		div_list = soup.find_all('div', class_='xans-element- xans-myshop xans-myshop-orderhistorydetail mResult xans-record-')
+
+		for div_ctx in div_list :
+			if( cor_order_no != '' ) and (cor_order_no == order_status_data.cos_order_no ) : break		# 해당되는 주문번호만 추출
+			######################
+			# 주문번호
+			# <tr>
+			# <th scope="row">주문번호</th>
+			# <td>20200804-0000050</td>
+			# </tr>
+			######################
+			cor_order_no_list = div_ctx.find_all('table')
+			for cor_order_no_ctx in cor_order_no_list :
+				tr_list = cor_order_no_ctx.find_all('tr')
+				for tr_ctx in tr_list :
+					th_ctx = tr_ctx.find('th')
+					td_ctx = tr_ctx.find('td')
+					if(th_ctx != None ) and (td_ctx != None) :
+						th_text = th_ctx.get_text().strip()
+						td_text = td_ctx.get_text().strip()
+						if(th_text == '주문/배송상태') :
+							order_status_data.cor_memo = td_text
+						if(th_text == '주문번호') :
+							cor_order_no = td_text
+							#order_status_data.cos_order_no = td_text		# 테스트용
+
+			#if( True ) :	# 테스트용	
+			if( cor_order_no == order_status_data.cos_order_no ) :	
+			
+				table_ctx = div_ctx.find('table', id='order_cart_table')
+				'''
+				if( table_ctx != None) :
+					######################
+					# 물품리스트
+					#
+					# <tr class="xans-record-">
+					# <td class="thumb"><a href="/product/detail.html?product_no=1154&amp;cate_no=44"><img src="//m.hutsandbay.com/web/product/tiny/20200518/8fb8f618867836da0c61df7ed04c2c66.jpg" alt="HB Cooling Vest Lemon"></a></td>
+					# <td class="item">
+					# <a href="/product/detail.html">HB Cooling Vest Lemon</a><br>[옵션: L]<br><a href="http://review5.cre.ma/hutsandbay.com/mobile/reviews/new?product_code=1154&amp;review_source=15&amp;close_url=http%3A%2F%2Fm.hutsandbay.com%2Fmyshop%2Forder%2Fdetail.html%3Forder_id%3D20200626-0000072%26page%3D1&amp;app=0&amp;device=mobile&amp;secure_username=V271172322df31144f483e1afbbbc01eba&amp;secure_user_name=V267587aa4446ea9f50736c428a939e895&amp;widget_env=100" class="crema-new-review-link crema-applied" data-cafe24-product-link="?board_no=4&amp;product_no=1154&amp;order_id=20200626-0000072" data-review-source="mobile_my_orders">구매후기</a>
+					# </td>
+					# <td>34,000</td>
+					# <td>340</td>
+					# <td>1</td>
+					# <td class="state">입금전</td>
+					# <td><a href="#none" onclick="" class="displaynone"><img src="http://img.echosting.cafe24.com/design/skin/default/myshop/btn_delivery.gif" alt="배송추적"></a></td>
+					# </tr>
+					######################
+					
+					product_list = table_ctx.find_all('tr', class_='xans-record-')
+					
+					for product_ctx in product_list :						
+						prdname_list = product_ctx.find_all('td')
+						td_idx = -1
+						for prdname_ctx in prdname_list :
+							td_idx += 1
+							if(td_idx == 4 ) : 
+								order_status_data.cod_count.append( int( __UTIL__.get_only_digit( prdname_ctx.get_text().strip() )) )
+							elif(td_idx == 5 ) : 
+								order_status_data.cor_memo = prdname_ctx.get_text().strip()
+							elif(td_idx == 0 ) : 
+								product_url_list = prdname_ctx.find_all('a')
+								for product_url_ctx in product_url_list :
+									if('href' in product_url_ctx.attrs) :
+										product_url = product_url_ctx.attrs['href']
+										product_no_list = product_url.split('product_no=')
+										if(len(product_no_list) == 2 ) :
+											sub_product_no_list = product_no_list[1].split('&')
+											order_status_data.cor_goods_code.append( sub_product_no_list[0].strip() )
+				'''
+				
+	except Exception as ex:
+		__LOG__.Error('에러 : get_order_status_data_babiana')
+		__LOG__.Error( ex )
+		pass
+		
+		
+		
+
+
+		
 def get_order_status_data_yolohollo( order_status_data, html ) :
 	try :
 	
@@ -762,7 +1141,7 @@ def get_order_status_data_hutsandbay( order_status_data, html ) :
 											order_status_data.cor_goods_code.append( sub_product_no_list[0].strip() )
 
 	except Exception as ex:
-		__LOG__.Error('에러 : get_order_status_data_yolohollo')
+		__LOG__.Error('에러 : get_order_status_data_hutsandbay')
 		__LOG__.Error( ex )
 		pass
 

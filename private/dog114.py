@@ -54,15 +54,16 @@ class shop(Mall) :
 		
 		#cate > span > a
 		
-		self.C_CATEGORY_VALUE = '#cate > span > a'
+		self.C_CATEGORY_VALUE = '#cate > table > tr > td > a'
+		#self.C_CATEGORY_VALUE_2 = '#cate > span > a'
 		self.C_CATEGORY_IGNORE_STR = []
 		self.C_CATEGORY_STRIP_STR = ''
-
 		
 		#layout_body > table > tr > td > table > tr > td > div > a
 		self.C_PAGE_CASE = __DEFINE__.__C_SELECT__
 		self.C_PAGE_TYPE = ''
 		self.C_PAGE_VALUE = '#layout_body > table > tr > td > table > tr > td > div > a'
+		
 		self.C_PAGE_STRIP_STR = '../'
 		
 		self.C_PAGE_IGNORE_STR = []			# 페이지 중에 무시해야 하는 스트링
@@ -151,17 +152,23 @@ class shop(Mall) :
 			product_data = ProductData()
 			crw_post_url = ''
 			
+			self.reset_product_category(product_data)
+			
 			####################################
 			# 상품 카테고리
 			####################################
 			div_list = soup.find_all('div', class_='category_depth clearbox')
 			for div_ctx in div_list :
-				li_list = div_ctx.find_all('li')
+				li_list = div_ctx.find_all('li', class_='item')
+				idx = 0
 				for li_ctx in li_list :
-					
-					if('class' in li_ctx.attrs) :
-						category_link = li_ctx.find('a')
-						if( category_link != None ) : product_data.crw_category1 = category_link.get_text().strip()
+					category_link = li_ctx.find('a')
+					if( category_link != None ) : 
+						idx += 1
+						category_name = category_link.get_text().strip()
+						if(idx == 2) : product_data.crw_category1 = category_link.get_text().strip()
+						elif(idx == 3) : product_data.crw_category2 = category_link.get_text().strip()
+						elif(idx == 4) : product_data.crw_category3 = category_link.get_text().strip()
 	
 			'''	
 			####################################
@@ -252,12 +259,10 @@ class shop(Mall) :
 					
 
 			if( crw_post_url != '' ) :
-				if( self.PRODUCT_URL_HASH.get( crw_post_url , -1) == -1) : 
+				#if( self.PRODUCT_URL_HASH.get( crw_post_url , -1) == -1) : 
 				
-					self.set_product_data_sub( product_data, crw_post_url )
-
-					#self.print_product_page_info( product_data ) 			
-					self.process_product_api(product_data)
+				self.set_product_data_sub( product_data, crw_post_url )		
+				self.process_product_api(product_data)
 										
 				rtn = True
 

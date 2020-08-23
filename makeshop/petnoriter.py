@@ -69,7 +69,8 @@ class shop(MakeShop) :
 		self.C_PRODUCT_CASE = __DEFINE__.__C_SELECT__
 		self.C_PRODUCT_TYPE = ''
 
-		self.C_PRODUCT_VALUE = '#productClass > div.page-body > div.prd-list.pdt30 > table > tbody > tr > td > div > div'
+		#self.C_PRODUCT_VALUE = '#contentWrapper > div > div.page-body > div.prd-list > table > tbody > tr > td'
+		self.C_PRODUCT_VALUE = 'tb-center'
 		self.C_PRODUCT_STRIP_STR = ''
 		
 		# self.PAGE_LAST_LINK = True 일때 사용
@@ -114,6 +115,23 @@ class shop(MakeShop) :
 	######################################################################
 	'''
 	
+	def get_product_data(self, page_url, html):
+		rtn = False
+		
+		self.set_param_product(html)
+		
+		soup = bs4.BeautifulSoup(html, 'lxml')
+		
+		if( self.C_PRODUCT_CASE == __DEFINE__.__C_SELECT__ ) : 
+			product_link_list = soup.find_all( 'div', class_=self.C_PRODUCT_VALUE )
+			#__LOG__.Trace('div tb-center list : %d' % len(product_link_list) )
+			for product_ctx in product_link_list :
+				self.set_product_data( page_url, soup, product_ctx )
+		
+		
+		return rtn
+		
+		
 	def set_product_data(self , page_url, soup, product_ctx ) :
 		
 		# 
@@ -206,12 +224,11 @@ class shop(MakeShop) :
 				if( sell_ctx != None ) : product_data.crw_price_sale = int( __UTIL__.get_only_digit( sell_ctx.get_text().strip() ))
 			
 			if( crw_post_url != '' ) :
-				if( self.PRODUCT_URL_HASH.get( crw_post_url , -1) == -1) : 
+				#if( self.PRODUCT_URL_HASH.get( crw_post_url , -1) == -1) : 
 				
-					self.set_product_data_sub( product_data, crw_post_url )
-
-					#self.print_product_page_info( product_data ) 			
-					self.process_product_api(product_data)
+				self.set_product_data_sub( product_data, crw_post_url )
+		
+				self.process_product_api(product_data)
 										
 				rtn = True
 

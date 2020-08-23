@@ -41,6 +41,7 @@ class shop(Cafe24) :
 		
 		
 		self.SITE_HOME = 'http://babiana.co.kr/product/list.html?cate_no=183'
+
 		self.ORG_SITE_HOME = 'http://babiana.co.kr'
 		
 		self.SEARCH_MODE = __DEFINE__.__CATEGORY_ALL__
@@ -50,9 +51,9 @@ class shop(Cafe24) :
 		self.C_CATEGORY_CASE = __DEFINE__.__C_SELECT__
 		self.C_CATEGORY_TYPE = ''
 		
-		
+		#self.C_CATEGORY_VALUE = '#menu > div > div > ul > li > a'
 		self.C_CATEGORY_VALUE = '#contents > div.xans-element-.xans-product.xans-product-normalmenu > div > div > div.menuCategory > ul > li > span > a'
-		self.C_CATEGORY_IGNORE_STR = ['전체보기']
+		self.C_CATEGORY_IGNORE_STR = []
 		self.C_CATEGORY_STRIP_STR = ''
 
 		
@@ -119,7 +120,7 @@ class shop(Cafe24) :
 	'''
 	
 	#def process_category_list(self):
-	#	self.process_sub_category_list()
+	#	self.process_category_list_second()
 		
 	'''
 	######################################################################
@@ -139,7 +140,8 @@ class shop(Cafe24) :
 			
 			# 상품 카테고리
 			#
-			self.set_product_category_first(product_data, soup)
+			#self.set_product_category_first(product_data, soup)
+			self.set_product_category_third( product_data, soup)
 
 			###########################
 			# 상품 이미지 확인
@@ -192,11 +194,6 @@ class shop(Cafe24) :
 		rtn = False
 		try :
 
-			#__LOG__.Trace( html )
-			detail_page_txt = []
-			detail_page_img = []
-
-			
 			soup = bs4.BeautifulSoup(html, 'lxml')
 			####################################
 			# 상품 기본 정보에서 브랜드 등을 추출
@@ -220,14 +217,9 @@ class shop(Cafe24) :
 			if(rtn_dict.get('원산지' , -1) != -1) : crw_brand.append( rtn_dict['원산지'] )
 			
 			self.set_detail_brand( product_data, crw_brand )
-			
-			# 제품 상세 부분
-			detail_page_txt, detail_page_img = self.get_text_img_in_detail_content_part( soup, '#detailArea', 'p', 'src' )
+			# 제품 상세 부분			
+			self.get_cafe24_text_img_in_detail_content_part( soup, product_data, '#detailArea', '' )
 
-			#__LOG__.Trace( detail_page_txt )
-			#__LOG__.Trace( detail_page_img )
-			
-			self.set_detail_page( product_data, detail_page_txt, detail_page_img)
 			
 		except Exception as ex:
 			__LOG__.Error(ex)

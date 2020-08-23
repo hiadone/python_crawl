@@ -51,10 +51,9 @@ class shop(Cafe24) :
 		self.C_CATEGORY_CASE = __DEFINE__.__C_SELECT__
 		self.C_CATEGORY_TYPE = ''
 		
-		
-		#self.C_CATEGORY_VALUE = '#header > div > div.xans-element-.xans-layout.xans-layout-category.category.top_cate.-hover > ul > li > a'
+
 		self.C_CATEGORY_VALUE = '#header > div > div.xans-element-.xans-layout.xans-layout-category.category.top_cate.-hover > ul > li > a'
-		self.C_CATEGORY_IGNORE_STR = ['BEST','BEST 10','NEW','개린이날 세트']
+		self.C_CATEGORY_IGNORE_STR = []
 		self.C_CATEGORY_STRIP_STR = ''
 
 		
@@ -82,14 +81,14 @@ class shop(Cafe24) :
 		
 		self.C_LAST_PAGE_VALUE = '#contents > div.xans-element-.xans-product.xans-product-normalpaging.ec-base-paginate > a.last'
 		
-		self.PAGE_SPLIT_STR = '?page='		# 페이지 링크에서 page를 구분할수 있는 구분자
+		self.PAGE_SPLIT_STR = '&page='		# 페이지 링크에서 page를 구분할수 있는 구분자
 		
 		self.PAGE_LAST_LINK = True		# 페이지에서 맨끝 링크 존재 여부
 
 		
 		
 		self.BASIC_CATEGORY_URL = self.SITE_HOME
-		self.BASIC_PAGE_URL = self.SITE_HOME
+		self.BASIC_PAGE_URL = self.SITE_HOME + '/product/list.html'
 		self.BASIC_PRODUCT_URL = self.SITE_HOME
 		self.BASIC_IMAGE_URL = self.SITE_HOME
 		
@@ -108,7 +107,18 @@ class shop(Cafe24) :
 		self.C_PRODUCT_SOLDOUT_SELECTOR = 'div'
 		self.C_PRODUCT_SOLDOUT_SELECTOR_CLASSNAME = 'promotion'
 	
-
+	'''
+	######################################################################
+	#
+	# Mall.py 대체
+	#
+	######################################################################
+	'''
+	
+	def process_category_list(self):
+		self.process_category_list_second()
+		
+		
 	'''
 	######################################################################
 	#
@@ -128,9 +138,10 @@ class shop(Cafe24) :
 			crw_post_url = ''
 			
 			# 상품 카테고리
-			split_list = page_url.split('/')
-			if(4 < len(split_list) ) : product_data.crw_category1 = split_list[4].strip()
-			
+			#split_list = page_url.split('/')
+			#if(4 < len(split_list) ) : product_data.crw_category1 = split_list[4].strip()
+			#self.set_product_category_first(product_data, soup)
+			self.set_product_category_second(page_url, product_data, soup)
 
 			# 상품 이미지 확인
 			self.set_product_image_fourth(product_data, product_ctx )
@@ -174,28 +185,33 @@ class shop(Cafe24) :
 		rtn = False
 		try :
 
-			detail_page_txt = []
-			detail_page_img = []
-
 			soup = bs4.BeautifulSoup(html, 'lxml')
 			
-			
+			crw_brand = []
+			'''
+			#
+			# <meta name="keywords" content="[상품검색어],[브랜드],[트렌드],[제조사]">
+			for tag in soup.find_all("meta"):
+				if tag.get("name", None) == 'keywords' :
+					rtn = tag.get('content', None)
+					if(rtn != None) :
+						split_list = rtn.split(',')
+						if( split_list[1].strip() != '' ) : crw_brand.append( split_list[1].strip() )
+			'''
+
 			table_list = soup.select('#prdinfo_fix > div.prdinfo_fix_wrap > div > div.xans-element-.xans-product.xans-product-detaildesign > table')
 			
 			rtn_dict = self.get_value_in_table_two_colume( table_list, '기본 정보', 'th', 'td')
-			if(rtn_dict.get('브랜드' , -1) != -1) :
-				product_data.d_crw_brand1 = rtn_dict['브랜드']
-			
-			# 제품 상세 부분
-			#prdDetail > div.cont > div:nth-child(3)
-
-			detail_page_txt, detail_page_img = self.get_text_img_in_detail_content_part( soup, '#prdDetail > center > div', 'p', 'src' )
-			#detail_page_txt, detail_page_img = self.get_text_img_in_detail_content_part( soup, '#prdDetail', 'p', 'ec-data-src' )
-			#
-
-			self.set_detail_page( product_data, detail_page_txt, detail_page_img)
+			if(rtn_dict.get('브랜드' , -1) != -1) : crw_brand.append( rtn_dict['브랜드'] )
+			if(rtn_dict.get('제조사' , -1) != -1) : crw_brand.append( rtn_dict['제조사'] )
+			if(rtn_dict.get('원산지' , -1) != -1) : crw_brand.append( rtn_dict['원산지'] )
 
 			
+			self.set_detail_brand( product_data, crw_brand )
+
+			# 제품 상세 부분			
+			self.get_cafe24_text_img_in_detail_content_part( soup, product_data, '#prdDetail > center > div', '' )
+
 		except Exception as ex:
 			__LOG__.Error(ex)
 			pass
@@ -212,11 +228,7 @@ if __name__ == '__main__':
 
 	app = shop()
 	app.start()
-	
-	#app.set_cookie()
-	#app.set_user_agent()
-	#product_data = ProductData()
-	#app.process_product_detail('http://pet-paradise.kr/product/쉐브론-교감주머니/3010/category/6038/display/1/', product_data)
+
 	
 	
 	

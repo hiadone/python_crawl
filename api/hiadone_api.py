@@ -157,8 +157,80 @@ def get_itemlist(brd_id):
 		pass
 		
 	return PRODUCT_ITEM_HASH
-	
 
+
+def get_itemlist_rev(brd_id): 
+	#
+	#
+	PRODUCT_ITEM_HASH = {}
+	data = None
+	URL = 'http://adm.denguru.kr/crawl/get_itemlist/%d/' % ( brd_id )
+	res = requests.get(URL)
+	try :
+		if(res.status_code != 200) :
+			__LOG__.Error( "실패 : GET_ITEMLIST_REV API res.status_code : %s " % str(res.status_code) )
+		else : 
+			try :
+				data = json.loads(res.text)
+				if('item' in data ) : 
+					jsondata = data['item']
+					for item in jsondata :
+						PRODUCT_ITEM_HASH[int( item['crw_id'] )] = item['crw_goods_code']
+						
+					
+			except Exception as ex :
+				__LOG__.Error( "실패 : GET_ITEMLIST_REV API")
+				__LOG__.Error( ex)
+				pass
+		
+		
+	except Exception as exb :
+		__LOG__.Error( "실패 : GET_ITEMLIST_REV API")
+		__LOG__.Error( exb)
+		pass
+		
+	return PRODUCT_ITEM_HASH
+
+
+
+	
+def get_itemdetail(brd_id): 
+	#
+	#
+	PRODUCT_ITEM_HASH = get_itemlist_rev(brd_id)
+	
+	PRODUCT_ITEM_DETAIL_HASH = {}
+	data = None
+	URL = 'http://adm.denguru.kr/crawl/get_itemdetail/%d/' % ( brd_id )
+	res = requests.get(URL)
+	try :
+		if(res.status_code != 200) :
+			__LOG__.Error( "실패 : GET_ITEMDETAIL API res.status_code : %s " % str(res.status_code) )
+		else : 
+			try :
+				data = json.loads(res.text)
+				for item in data :
+					crw_id = int( item['crw_id'] )
+					if(PRODUCT_ITEM_HASH.get( crw_id , -1) != -1 ) :
+						crw_goods_code = PRODUCT_ITEM_HASH[crw_id]
+						PRODUCT_ITEM_DETAIL_HASH[crw_goods_code] = crw_id
+						#print('%s : %d' % (crw_goods_code, crw_id ) )
+						
+					
+			except Exception as ex :
+				__LOG__.Error( "실패 : GET_ITEMDETAIL API")
+				__LOG__.Error( ex)
+				pass
+		
+		
+	except Exception as exb :
+		__LOG__.Error( "실패 : GET_ITEMDETAIL API")
+		__LOG__.Error( exb)
+		pass
+		
+	return PRODUCT_ITEM_DETAIL_HASH
+	
+	
 '''
 #################################################################################
 ##
@@ -171,6 +243,7 @@ def insert_itemlist(product_data):
 	#
 	# 상품리스트에서의 내용을 입력
 	#
+	restext = ''
 	crw_id = 0
 	try :
 		
@@ -208,7 +281,7 @@ def insert_itemlist(product_data):
 		if(res.status_code != 200) :
 			__LOG__.Error( "실패 : INSERT_ITEMLIST API res.status_code : %s " % str(res.status_code) )
 		else : 
-			
+			restext = res.text
 			data = json.loads(res.text)
 			if('resultcode' in data) :
 				if(data['resultcode'] == 1) : 
@@ -223,6 +296,7 @@ def insert_itemlist(product_data):
 	except Exception as exb :
 		__LOG__.Error( "실패 : INSERT_ITEMLIST API")
 		__LOG__.Error( exb)
+		__LOG__.Error( restext)
 		pass
 	
 	return crw_id
@@ -233,6 +307,7 @@ def update_itemlist(product_data):
 	# 상품리스트에서의 내용을 업데이트
 	# 업데이트시 이미지 업로드 미실시함.
 	# 
+	restext = ''
 	try :
 		data = None
 		URL = 'http://adm.denguru.kr/crawl/insert_itemlist/%d/%d' % ( product_data.brd_id, product_data.crw_id )
@@ -262,7 +337,7 @@ def update_itemlist(product_data):
 		if(res.status_code != 200) :
 			__LOG__.Error( "실패 : UPDATE_ITEMLIST res.status_code : %s " % str(res.status_code) )
 		else : 
-
+			restext = res.text
 			data = json.loads(res.text)
 			if('resultcode' in data) :
 				if(data['resultcode'] == 1) : __LOG__.Trace('성공 : UPDATE_ITEMLIST API (%s)' % ( URL ) )
@@ -275,6 +350,7 @@ def update_itemlist(product_data):
 	except Exception as exb :
 		__LOG__.Error( "실패 : UPDATE_ITEMLIST API")
 		__LOG__.Error( exb)
+		__LOG__.Error( restext)
 		pass
 		
 		
@@ -288,6 +364,7 @@ def update_itemlist(product_data):
 def is_delete(crw_id): 
 	#
 	#
+	restext = ''
 	data = None
 	URL = 'http://adm.denguru.kr/crawl/is_delete/%d' % ( crw_id )
 	res = requests.get(URL)
@@ -296,6 +373,7 @@ def is_delete(crw_id):
 			__LOG__.Error( "실패 : IS_DELETE API res.status_code : %s " % str(res.status_code) )
 		else : 
 			try :
+				restext = res.text
 				data = json.loads(res.text)
 				if('resultcode' in data) :
 					if(data['resultcode'] == 1) : __LOG__.Trace('성공 : IS_DELETE API (%s)' % ( URL ) )
@@ -312,6 +390,7 @@ def is_delete(crw_id):
 	except Exception as exb :
 		__LOG__.Error( "실패 : IS_DELETE API")
 		__LOG__.Error( exb)
+		__LOG__.Error( restext)
 		pass
 		
 	
@@ -327,6 +406,8 @@ def insert_itemdetail(product_data):
 	#
 	# 상품리스트에서의 내용을 입력
 	#
+	restext = ''
+	rtn = False
 	try :
 		
 		data = None
@@ -358,10 +439,12 @@ def insert_itemdetail(product_data):
 		if(res.status_code != 200) :
 			__LOG__.Error( "실패 : INSERT_ITEMDETAIL API res.status_code : %s " % str(res.status_code) )
 		else : 
-			
+			restext = res.text
 			data = json.loads(res.text)
 			if('resultcode' in data) :
-				if(data['resultcode'] == 1) : __LOG__.Trace('성공 : INSERT_ITEMDETAIL API (%s)' % ( URL) )
+				if(data['resultcode'] == 1) : 
+					__LOG__.Trace('성공 : INSERT_ITEMDETAIL API (%s)' % ( URL) )
+					rtn = True
 				else : 
 					__LOG__.Trace('실패 : INSERT_ITEMDETAIL API (%d)' % (data['resultcode']) )
 					__LOG__.Trace( URL )
@@ -370,7 +453,10 @@ def insert_itemdetail(product_data):
 	except Exception as exb :
 		__LOG__.Error( "실패 : INSERT_ITEMDETAIL")
 		__LOG__.Error( exb)
+		__LOG__.Error( restext)
 		pass
+		
+	return rtn
 
 '''
 #################################################################################
@@ -556,4 +642,4 @@ def update_order(order_status_data):
 		
 if __name__ == '__main__':
 
-    get_order_html_file(89)
+    get_itemdetail(131)

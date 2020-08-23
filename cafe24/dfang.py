@@ -58,9 +58,11 @@ class shop(Cafe24) :
 		self.C_CATEGORY_TYPE = ''
 		
 		
+
+		self.C_CATEGORY_VALUE = '#one_cate > div > ul > li'
+
 		
-		self.C_CATEGORY_VALUE = '#one_cate > div > ul > li > a'
-		self.C_CATEGORY_IGNORE_STR = ['오늘의 기획전 / 이벤트','추천','리뷰','디팡TV']
+		self.C_CATEGORY_IGNORE_STR = ['리뷰','디팡TV']
 		self.C_CATEGORY_STRIP_STR = ''
 
 		
@@ -111,7 +113,14 @@ class shop(Cafe24) :
 		self.C_PRODUCT_SOLDOUT_SELECTOR = 'div'
 		self.C_PRODUCT_SOLDOUT_SELECTOR_CLASSNAME = 'promotion'
 		
+		#
+		# dfang에서만 사용하는 값
+		#
+		self.CRW_CATEGORY_1 = ''
+		self.CRW_CATEGORY_2 = ''
+		self.CRW_CATEGORY_3 = ''
 		
+
 		
 	'''
 	######################################################################
@@ -120,8 +129,94 @@ class shop(Cafe24) :
 	#
 	######################################################################
 	'''
-	#def process_category_list(self):
-	#	self.process_sub_category_list()
+	'''
+	#
+	#
+	#
+	'''	
+	
+	def get_category_data(self, html):
+		rtn = False
+		
+		#__LOG__.Trace(html)
+		self.set_param_category(html)
+		
+		category_link_list = []
+		category_link_list_2 = []
+		
+		category_link_list_3 = []
+		
+		soup = bs4.BeautifulSoup(html, 'lxml')
+		
+		if( config.__DEBUG__ ) :
+			__LOG__.Trace( self.C_CATEGORY_CASE )
+			__LOG__.Trace( self.C_CATEGORY_VALUE )
+			
+		if( self.C_CATEGORY_CASE == __DEFINE__.__C_SELECT__ ) : 
+			category_link_list = soup.select(self.C_CATEGORY_VALUE)
+		
+		__LOG__.Trace('----------------------------------------------------------')
+		for li_ctx in category_link_list :
+			try :
+				#__LOG__.Trace(category_ctx)
+
+				if(self.check_ignore_category( li_ctx ) ) :
+					main_category_name = ''
+					category_ctx = li_ctx.find('a')
+					if( category_ctx != None ) :
+						main_category_name = category_ctx.get_text().strip()
+						if('href' in category_ctx.attrs ) : 
+							tmp_category_link = category_ctx.attrs['href']
+							if(tmp_category_link.find('javascript') < 0 ) :
+								if(0 != tmp_category_link.find('http')) : tmp_category_link = '%s%s' % ( self.BASIC_CATEGORY_URL, category_ctx.attrs['href'] )
+
+								category_link = tmp_category_link
+								
+								if(self.C_CATEGORY_STRIP_STR != '') : category_link = tmp_category_link.replace( self.C_CATEGORY_STRIP_STR,'')
+								
+								category_name = main_category_name
+								if( self.CATEGORY_URL_HASH.get( category_link , -1) == -1) : 
+									self.CATEGORY_URL_HASH[category_link] = category_name
+									if( config.__DEBUG__ ) :
+										__LOG__.Trace('%s : %s' % ( category_name, category_link ) )
+
+									rtn = True
+									
+					ul_ctx = li_ctx.find('ul')	
+					if( ul_ctx != None ) :
+						sub_li_list = ul_ctx.find_all('a')
+						for sub_category_ctx in sub_li_list :
+							if('href' in sub_category_ctx.attrs ) : 
+								tmp_category_link = sub_category_ctx.attrs['href']
+								if(tmp_category_link.find('javascript') < 0 ) :
+									if(0 != tmp_category_link.find('http')) : tmp_category_link = '%s%s' % ( self.BASIC_CATEGORY_URL, sub_category_ctx.attrs['href'] )
+
+									category_link = tmp_category_link
+									
+									if(self.C_CATEGORY_STRIP_STR != '') : category_link = tmp_category_link.replace( self.C_CATEGORY_STRIP_STR,'')
+									
+									category_name = sub_category_ctx.get_text().strip()
+									if( self.CATEGORY_URL_HASH.get( category_link , -1) == -1) : 
+										self.CATEGORY_URL_HASH[category_link] = '%s|%s' % (main_category_name, category_name )
+										if( config.__DEBUG__ ) :
+											__LOG__.Trace('%s|%s : %s' % ( main_category_name, category_name, category_link ) )
+
+										rtn = True
+						
+					
+
+
+			except Exception as ex:
+				__LOG__.Error(ex)
+				pass
+		
+		
+		
+		if(config.__DEBUG__) : __LOG__.Trace( '카테고리 수 : %d' % len(self.CATEGORY_URL_HASH))
+		
+		return rtn
+		
+		
 	
 	def get_page_data(self, category_url, html):
 		'''
@@ -266,7 +361,12 @@ class shop(Cafe24) :
 			
 			# 상품 카테고리
 			#
-			product_data.crw_category1 = self.PAGE_URL_HASH[ page_url ]
+			#self.set_product_category_second(page_url, product_data, soup)
+			#product_data.crw_category1 = self.PAGE_URL_HASH[ page_url ]
+			product_data.crw_category1 = self.CRW_CATEGORY_1
+			product_data.crw_category2 = self.CRW_CATEGORY_2
+			product_data.crw_category3 = self.CRW_CATEGORY_3
+			
 
 			for key in product_json :
 				#__LOG__.Trace('%s : %s' % (key, product_json[key] ))
@@ -345,7 +445,25 @@ class shop(Cafe24) :
 					
 			# 상품 카테고리
 			#
-			product_data.crw_category1 = self.PAGE_URL_HASH[ page_url ]
+			self.CRW_CATEGORY_1 = ''
+			self.CRW_CATEGORY_2 = ''
+			self.CRW_CATEGORY_3 = ''
+			
+			split_list = self.PAGE_URL_HASH[ page_url ].split('|')
+			
+			idx = 0
+			for split_data in split_list :
+				idx += 1
+				if(idx == 1) : product_data.crw_category1 = split_data
+				elif(idx == 2) : product_data.crw_category2 = split_data
+				elif(idx == 3) : product_data.crw_category3 = split_data
+				
+			#self.set_product_category_second(page_url, product_data, soup)
+			self.CRW_CATEGORY_1 = product_data.crw_category1
+			self.CRW_CATEGORY_2 = product_data.crw_category2
+			self.CRW_CATEGORY_3 = product_data.crw_category3
+		
+			#product_data.crw_category1 = self.PAGE_URL_HASH[ page_url ]
 
 			# 상품 이미지 확인
 			self.set_product_image_fourth(product_data, product_ctx )
@@ -415,23 +533,36 @@ class shop(Cafe24) :
 	def get_product_detail_data(self, product_data, html):
 		rtn = False
 		try :
-	
-			detail_page_txt = []
-			detail_page_img = []
-			
+
 			soup = bs4.BeautifulSoup(html, 'lxml')
-				
+			
+			crw_brand = []
+			
+			'''
+			#
+			# <meta name="keywords" content="[상품검색어],[브랜드],[트렌드],[제조사]">
+			for tag in soup.find_all("meta"):
+				if tag.get("name", None) == 'keywords' :
+					rtn = tag.get('content', None)
+					if(rtn != None) :
+						split_list = rtn.split(',')
+						if( split_list[1].strip() != '' ) : crw_brand.append( split_list[1].strip() )
+			'''
+
 			table_list = soup.select('#infoArea > div.xans-element-.xans-product.xans-product-detaildesign > table')
-			rtn_dict = self.get_value_in_table(table_list, '기본 정보', 'div', 'div', 1)
-			if(rtn_dict.get('브랜드' , -1) != -1) :
-				product_data.d_crw_brand1 = rtn_dict['브랜드']
-				
-			# 제품 상세 부분
 			
-			detail_page_txt, detail_page_img = self.get_text_img_in_detail_content_part( soup, '#prdDetail > div', '', 'src' )
+			rtn_dict = self.get_value_in_table_two_colume( table_list, '기본 정보', 'th', 'td')
+			if(rtn_dict.get('브랜드' , -1) != -1) : crw_brand.append( rtn_dict['브랜드'] )
+			if(rtn_dict.get('제조사' , -1) != -1) : crw_brand.append( rtn_dict['제조사'] )
+			if(rtn_dict.get('원산지' , -1) != -1) : crw_brand.append( rtn_dict['원산지'] )
+
 			
-			
-			self.set_detail_page( product_data, detail_page_txt, detail_page_img)
+			self.set_detail_brand( product_data, crw_brand )
+
+			# 제품 상세 부분			
+			self.get_cafe24_text_img_in_detail_content_part( soup, product_data, '#prdDetail > div', '' )
+
+
 
 			
 		except Exception as ex:

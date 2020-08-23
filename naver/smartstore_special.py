@@ -45,12 +45,17 @@ if __name__ == '__main__':
 		
 
 	#BRD_ID_LIST = ['140','141','161','126','190', '281','288','294','297','302','225','229','257','258','266','269','247','314','331']
-	BRD_ID_LIST = ['95']
+
+	#BRD_ID_LIST = ['331'] -- item 1
+	BRD_ID_LIST = [ '281']
+
+
 	
 	app = smartstore()
+
 	for brd_id in BRD_ID_LIST :
 		if(app.SHUTDOWN) : break
 		app_url = __API__.get_storelist_by_brd_id(brd_id)
 		__LOG__.Trace('%s : %s' % (app_url, str(brd_id ) ) )
 		app.main(app_url, int(brd_id))
-	
+

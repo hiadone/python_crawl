@@ -63,7 +63,7 @@ class shop(Cafe24) :
 		self.C_PAGE_STRIP_STR = ''
 		
 		self.C_PAGE_IGNORE_STR = ['1']			# 페이지 중에 무시해야 하는 스트링
-		self.C_PAGE_COUNT_PER_DISPLAY = 10	# 화면당 페이지 갯수
+		self.C_PAGE_COUNT_PER_DISPLAY = 5	# 화면당 페이지 갯수
 		
 		
 		self.C_PRODUCT_CASE = __DEFINE__.__C_SELECT__
@@ -146,6 +146,8 @@ class shop(Cafe24) :
 				# 상품 링크 정보 및 상품명 / 상품코드
 				#
 				name_strong_list = name_div_ctx.find_all('p', class_='name')
+				if(len(name_strong_list) == 0 ) : name_strong_list = name_div_ctx.find_all('strong', class_='name')
+				
 				for name_strong_ctx in name_strong_list :
 					product_link_list = name_strong_ctx.find_all('a')
 					for product_link_ctx in product_link_list :
@@ -190,12 +192,10 @@ class shop(Cafe24) :
 		rtn = False
 		try :
 
-			
-			detail_page_txt = []
-			detail_page_img = []
-			
 			soup = bs4.BeautifulSoup(html, 'lxml')
 			
+			crw_brand = []
+
 			#
 			# <meta name="keywords" content="[상품검색어],[브랜드],[트렌드],[제조사]">
 			for tag in soup.find_all("meta"):
@@ -203,24 +203,22 @@ class shop(Cafe24) :
 					rtn = tag.get('content', None)
 					if(rtn != None) :
 						split_list = rtn.split(',')
-						if( split_list[1].strip() != '' ) : product_data.d_crw_brand2 = split_list[1].strip()
-						#if( split_list[3].strip() != '' ) : product_data.d_crw_brand2 = split_list[3].strip()
-						
+						if( split_list[1].strip() != '' ) : crw_brand.append( split_list[1].strip() )
+
+
 			table_list = soup.select('#df-product-detail > div.detailArea > div.infoArea-wrap > div > div > div.scroll-wrapper.df-detail-fixed-scroll.scrollbar-macosx > div.df-detail-fixed-scroll.scrollbar-macosx.scroll-content > div.xans-element-.xans-product.xans-product-detaildesign > table')
 			
 			rtn_dict = self.get_value_in_table_two_colume( table_list, '기본 정보', 'th', 'td')
-			if(rtn_dict.get('브랜드' , -1) != -1) :
-				product_data.d_crw_brand1 = rtn_dict['브랜드']
-						
-			# 제품 상세 부분
+			if(rtn_dict.get('브랜드' , -1) != -1) : crw_brand.append( rtn_dict['브랜드'] )
+			if(rtn_dict.get('제조사' , -1) != -1) : crw_brand.append( rtn_dict['제조사'] )
+			if(rtn_dict.get('원산지' , -1) != -1) : crw_brand.append( rtn_dict['원산지'] )
+
 			
-			detail_page_txt, detail_page_img = self.get_text_img_in_detail_content_part( soup, '#prdDetail > div.cont', 'p', 'ec-data-src' )						
-			#
+			self.set_detail_brand( product_data, crw_brand )
 
-			self.set_detail_page( product_data, detail_page_txt, detail_page_img)
-
-			#__LOG__.Trace( detail_page_txt )
-			#__LOG__.Trace( detail_page_img )
+			# 제품 상세 부분			
+			self.get_cafe24_text_img_in_detail_content_part( soup, product_data, '#prdDetail > div.cont', '' )
+			
 			
 		except Exception as ex:
 			__LOG__.Error(ex)
@@ -238,11 +236,7 @@ if __name__ == '__main__':
 
 	app = shop()
 	app.start()
-	
-	#app.set_cookie()
-	#app.set_user_agent()
-	#product_data = ProductData()
-	#app.process_product_detail('http://terrylatte.com/product/detail.html?product_no=148&cate_no=27&display_group=1', product_data)
+
 	
 	
 	

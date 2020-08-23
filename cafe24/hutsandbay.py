@@ -43,7 +43,7 @@ class shop(Cafe24) :
 		
 		self.SITE_HOME = 'http://www.hutsandbay.com/product/list.html?cate_no=44'
 
-		self.SITE_ORG_HOME = 'http://www.hutsandbay.com'
+		self.ORG_SITE_HOME = 'http://www.hutsandbay.com'
 		
 		self.SEARCH_MODE = __DEFINE__.__CATEGORY_ALL__
 
@@ -52,6 +52,11 @@ class shop(Cafe24) :
 		self.C_CATEGORY_CASE = __DEFINE__.__C_SELECT__
 		self.C_CATEGORY_TYPE = ''
 		
+		
+		self.DETAIL_CATEGORY_ACTION = True
+		self.C_DETAIL_CATEGORY_VALUE = '#contents > div > div.sub-categories > div > div > table > tr > td > ul > li > a'
+		self.BASIC_DETAIL_CATEGORY_URL = self.ORG_SITE_HOME
+		self.C_DETAIL_CATEGORY_STRIP_STR = ''
 		
 		
 		self.C_CATEGORY_VALUE = '#sub_category > li > a'
@@ -87,10 +92,10 @@ class shop(Cafe24) :
 
 		
 		
-		self.BASIC_CATEGORY_URL = self.SITE_ORG_HOME
-		self.BASIC_PAGE_URL = self.SITE_ORG_HOME + '/product/list.html'
-		self.BASIC_PRODUCT_URL = self.SITE_ORG_HOME
-		self.BASIC_IMAGE_URL = self.SITE_ORG_HOME
+		self.BASIC_CATEGORY_URL = self.ORG_SITE_HOME
+		self.BASIC_PAGE_URL = self.ORG_SITE_HOME + '/product/list.html'
+		self.BASIC_PRODUCT_URL = self.ORG_SITE_HOME
+		self.BASIC_IMAGE_URL = self.ORG_SITE_HOME
 		
 		'''
 		# Cafe24 전용 
@@ -105,6 +110,8 @@ class shop(Cafe24) :
 		# 물품 SOLDOUT CSS selector 정의
 		self.C_PRODUCT_SOLDOUT_SELECTOR = 'span'
 		self.C_PRODUCT_SOLDOUT_SELECTOR_CLASSNAME = 'soldout'
+		
+	
 		
 		
 		
@@ -126,8 +133,16 @@ class shop(Cafe24) :
 					
 			# 상품 카테고리
 			#
-			self.set_product_category_first(product_data, soup)
-
+			split_list = self.PAGE_URL_HASH[page_url].split('|')
+			idx = 0
+			for split_data in split_list :
+				idx += 1
+				if(idx == 1) : product_data.crw_category1 = split_data
+				elif(idx == 2) : product_data.crw_category2 = split_data
+				elif(idx == 3) : product_data.crw_category3 = split_data
+					
+			#self.set_product_category_first(product_data, soup)
+			#self.set_product_category_second(page_url, product_data, soup)
 
 			# 상품 이미지 확인
 			self.set_product_image_third(product_data, product_ctx )
@@ -198,22 +213,12 @@ class shop(Cafe24) :
 	def get_product_detail_data(self, product_data, html):
 		rtn = False
 		try :
-	
-			detail_page_txt = []
-			detail_page_img = []
-
 			
 			soup = bs4.BeautifulSoup(html, 'lxml')
-				
-						
-			# 제품 상세 부분
 			
-			detail_page_txt, detail_page_img = self.get_text_img_in_detail_content_part( soup, '#product_detail_view', 'p', 'src' )
-			#detail_page_txt, detail_page_img = self.get_text_img_in_detail_content_part( soup, '#product_detail_view', 'p', 'ec-data-src' )
-			#
+			# 제품 상세 부분			
+			self.get_cafe24_text_img_in_detail_content_part( soup, product_data, '#product_detail_view', '' )
 			
-			self.set_detail_page( product_data, detail_page_txt, detail_page_img)
-
 			
 		except Exception as ex:
 			__LOG__.Error(ex)
@@ -231,11 +236,6 @@ if __name__ == '__main__':
 	app = shop()
 	app.start()
 	
-	'''
-	app.set_cookie()
-	app.set_user_agent()
-	product_data = ProductData()
-	app.process_product_detail('http://its-sunnyoutside.com/product/detail.html?product_no=351&cate_no=59&display_group=1', product_data)
-	'''
+
 	
 	

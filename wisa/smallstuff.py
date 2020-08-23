@@ -40,8 +40,9 @@ class shop(Mall) :
 		Mall.__init__(self)
 		
 		
-		self.SITE_HOME = 'https://www.smallstuff.kr/shop/big_section.php?cno1=1001'
+		#self.SITE_HOME = 'https://www.smallstuff.kr/shop/big_section.php?cno1=1001'
 		
+		self.SITE_HOME = 'https://www.smallstuff.kr'
 		self.SEARCH_MODE = __DEFINE__.__CATEGORY_ALL__
 
 		
@@ -50,8 +51,14 @@ class shop(Mall) :
 		self.C_CATEGORY_TYPE = ''
 		
 		
-		self.C_CATEGORY_VALUE = '#big_section > ul.midcate > li > a'		# 미들 카테고리
-		self.C_CATEGORY_IGNORE_STR = []
+		self.DETAIL_CATEGORY_ACTION = True
+		self.C_DETAIL_CATEGORY_VALUE = '#big_section > ul.midcate > li > a'
+		self.BASIC_DETAIL_CATEGORY_URL = self.SITE_HOME
+		self.C_DETAIL_CATEGORY_STRIP_STR = ''
+		
+		
+		self.C_CATEGORY_VALUE = '#header > div > div > ul > li > div.sub_menu > ul > li > a'		
+		self.C_CATEGORY_IGNORE_STR = ['PRIVATE','NOTICE','FLIM','REVIEW','Q&A']
 		self.C_CATEGORY_STRIP_STR = ''
 
 		
@@ -84,10 +91,67 @@ class shop(Mall) :
 		self.PAGE_LAST_LINK = False		# 페이지에서 맨끝 링크 존재 여부
 
 		
-		self.BASIC_CATEGORY_URL = 'https://www.smallstuff.kr'
-		self.BASIC_PAGE_URL = 'https://www.smallstuff.kr'
-		self.BASIC_PRODUCT_URL = 'https://www.smallstuff.kr'
-		self.BASIC_IMAGE_URL = 'https://www.smallstuff.kr'
+		self.BASIC_CATEGORY_URL = self.SITE_HOME
+		self.BASIC_PAGE_URL = self.SITE_HOME + '/shop/big_section.php'
+		self.BASIC_PRODUCT_URL = self.SITE_HOME
+		self.BASIC_IMAGE_URL = self.SITE_HOME
+		
+	'''
+	######################################################################
+	#
+	# 상품 리스트 페이지 : 사이트별 수정해야 함.
+	#
+	######################################################################
+	'''
+	
+	def get_page_data(self, category_url, html):
+		rtn = False
+		
+		self.set_param_page(html)
+		
+		page_link_list = []
+		
+		last_page_link_list = []
+		
+		soup = bs4.BeautifulSoup(html, 'lxml')
+		
+		if( self.C_PAGE_CASE == __DEFINE__.__C_SELECT__ ) : 
+			page_link_list = soup.select(self.C_PAGE_VALUE)
+			if(len(page_link_list) == 0) and (self.C_PAGE_VALUE_2 != '') : page_link_list = soup.select(self.C_PAGE_VALUE_2)
+
+			
+		
+		# 각 페이지 링크에 대한 처리
+		avaible_page_count = 0
+		for page_ctx in page_link_list :
+			try :
+				if(self.check_ignore_page( page_ctx ) ) :
+					if('href' in page_ctx.attrs ) : 
+						avaible_page_count += 1
+						tmp_page_link = page_ctx.attrs['href']
+						if(0 != tmp_page_link.find('http')) : 
+							if( 0 == tmp_page_link.find('?page=') ) : tmp_page_link = '%s%s' % ( self.BASIC_PAGE_URL, page_ctx.attrs['href'] )
+						
+						page_link = tmp_page_link
+
+						if(self.C_PAGE_STRIP_STR != '') : page_link = tmp_page_link.replace( self.C_PAGE_STRIP_STR,'')
+						if( page_link.find('javascript') < 0 ) :
+						
+							if( self.PAGE_URL_HASH.get( page_link , -1) == -1) : 
+								if( self.DETAIL_CATEGORY_ACTION ) : self.PAGE_URL_HASH[page_link] = self.DETAIL_CATEGORY_URL_HASH[category_url]
+								else : self.PAGE_URL_HASH[page_link] = self.CATEGORY_URL_HASH[category_url]
+								#self.PAGE_URL_HASH[page_link] = self.CATEGORY_URL_HASH[category_url]
+								if(self.PAGE_FIRST_URL == '' ) : self.get_page_url_split( page_link , False )
+								rtn = True
+								if( config.__DEBUG__ ) : __LOG__.Trace('page : %s' % ( page_link ) )
+
+			except Exception as ex:
+				__LOG__.Error(ex)
+				pass
+		
+		
+		
+		return rtn , avaible_page_count
 		
 	'''
 	######################################################################
@@ -105,14 +169,25 @@ class shop(Mall) :
 			product_data = ProductData()
 			crw_post_url = ''
 			
+			self.reset_product_category(product_data)
+			
 			####################################
 			# 상품 카테고리 추출
 			####################################
-			div_list = soup.find_all( 'div' , class_='sub_title_txt' )
-			for div_ctx in div_list :				
-				category_list = div_ctx.find_all( 'h2' )
-				for category_ctx in category_list :
-					product_data.crw_category1 = category_ctx.get_text().strip()
+			if(self.C_DETAIL_CATEGORY_VALUE.strip() != '') :
+				split_list = self.PAGE_URL_HASH[page_url].split('|')
+				idx = 0
+				for split_data in split_list :
+					idx += 1
+					if(idx == 1) : product_data.crw_category1 = split_data
+					elif(idx == 2) : product_data.crw_category2 = split_data
+					elif(idx == 3) : product_data.crw_category3 = split_data
+					
+			#div_list = soup.find_all( 'div' , class_='sub_title_txt' )
+			#for div_ctx in div_list :				
+			#	category_list = div_ctx.find_all( 'h2' )
+			#	for category_ctx in category_list :
+			#		product_data.crw_category1 = category_ctx.get_text().strip()
 	
 
 			'''			
@@ -208,12 +283,10 @@ class shop(Mall) :
 					
 			
 			if( crw_post_url != '' ) :
-				if( self.PRODUCT_URL_HASH.get( crw_post_url , -1) == -1) : 
+				#if( self.PRODUCT_URL_HASH.get( crw_post_url , -1) == -1) : 
 				
-					self.set_product_data_sub( product_data, crw_post_url )
-
-					#self.print_product_page_info( product_data ) 			
-					self.process_product_api(product_data)
+				self.set_product_data_sub( product_data, crw_post_url )			
+				self.process_product_api(product_data)
 										
 				rtn = True
 

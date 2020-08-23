@@ -96,7 +96,8 @@ class shop(MakeShop) :
 		self.SET_CATEGORY_DATA_X_CODE_SELECTOR = '#lnb > div > table > tr > td > a'
 		self.SET_CATEGORY_DATA_M_CODE_SELECTOR = '#category_nav > ul > li > span > a'
 		
-		
+		#self.SET_CATEGORY_DATA_S_CODE_SELECTOR = '#category_nav > ul > li > span > a'
+
 		self.SET_PRODUCT_DETAIL_DATA_DIV_SELECTOR = '#productDetail > div > div.prd-detail'
 		self.SET_PRODUCT_DETAIL_DATA_TEXT_SELECTOR = 'p'
 		
@@ -258,12 +259,11 @@ class shop(MakeShop) :
 				
 			
 			if( crw_post_url != '' ) :
-				if( self.PRODUCT_URL_HASH.get( crw_post_url , -1) == -1) : 
+				#if( self.PRODUCT_URL_HASH.get( crw_post_url , -1) == -1) : 
 				
-					self.set_product_data_sub( product_data, crw_post_url )
-
-					#self.print_product_page_info( product_data ) 			
-					self.process_product_api(product_data)
+				self.set_product_data_sub( product_data, crw_post_url )
+		
+				self.process_product_api(product_data)
 										
 				rtn = True
 

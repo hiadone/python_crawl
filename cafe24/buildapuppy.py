@@ -50,10 +50,11 @@ class shop(Cafe24) :
 		
 		self.C_CATEGORY_CASE = __DEFINE__.__C_SELECT__
 		self.C_CATEGORY_TYPE = ''
-		
 
+
+		#self.C_CATEGORY_VALUE = '#header > div > div > div.widget_lnb_menu > ul > li.lnb2 > div > ul > li > a'
 		self.C_CATEGORY_VALUE = '#header > div > div > div.widget_lnb_menu > ul > li.lnb2 > div > ul > li > a'
-		self.C_CATEGORY_IGNORE_STR = ['ALL']
+		self.C_CATEGORY_IGNORE_STR = []
 		self.C_CATEGORY_STRIP_STR = ''
 
 		
@@ -81,14 +82,14 @@ class shop(Cafe24) :
 		
 		self.C_LAST_PAGE_VALUE = '#contents > div > a.last'
 		
-		self.PAGE_SPLIT_STR = '?page='		# 페이지 링크에서 page를 구분할수 있는 구분자
+		self.PAGE_SPLIT_STR = '&page='		# 페이지 링크에서 page를 구분할수 있는 구분자
 		
 		self.PAGE_LAST_LINK = True		# 페이지에서 맨끝 링크 존재 여부
 
 		
 		
 		self.BASIC_CATEGORY_URL = self.SITE_HOME
-		self.BASIC_PAGE_URL = self.SITE_HOME
+		self.BASIC_PAGE_URL = self.SITE_HOME + '/product/list.html'
 		self.BASIC_PRODUCT_URL = self.SITE_HOME
 		self.BASIC_IMAGE_URL = self.SITE_HOME
 		
@@ -106,6 +107,16 @@ class shop(Cafe24) :
 		self.C_PRODUCT_SOLDOUT_SELECTOR = 'div'
 		self.C_PRODUCT_SOLDOUT_SELECTOR_CLASSNAME = 'promotion'
 		
+	'''
+	######################################################################
+	#
+	# Mall.py 대체
+	#
+	######################################################################
+	'''
+	
+	def process_category_list(self):
+		self.process_category_list_second()		
 		
 	'''
 	######################################################################
@@ -126,7 +137,8 @@ class shop(Cafe24) :
 			
 			# 상품 카테고리
 			#
-			self.set_product_category_first(product_data, soup)
+			#self.set_product_category_first(product_data, soup)
+			self.set_product_category_second(page_url, product_data, soup)
 
 
 			# 상품 이미지 확인
@@ -166,23 +178,13 @@ class shop(Cafe24) :
 	def get_product_detail_data(self, product_data, html):
 		rtn = False
 		try :
-			
-			detail_page_txt = []
-			detail_page_img = []
 
-			
 			soup = bs4.BeautifulSoup(html, 'lxml')
-
-			# 제품 상세 부분
-			#prdDetail > div.cont
-			detail_page_txt, detail_page_img = self.get_text_img_in_detail_content_part( soup, '#prdDetail > div.cont > div', '', 'src' )
-			#detail_page_txt, detail_page_img = self.get_text_img_in_detail_content_part( soup, '#prdDetail > div.cont > div', '', 'ec-data-src' )
-			#
-
 			
-			self.set_detail_page( product_data, detail_page_txt, detail_page_img)
-
+			# 제품 상세 부분			
+			self.get_cafe24_text_img_in_detail_content_part( soup, product_data, '#prdDetail > div.cont > div', '' )
 			
+
 		except Exception as ex:
 			__LOG__.Error(ex)
 			pass
@@ -199,11 +201,6 @@ if __name__ == '__main__':
 
 	app = shop()
 	app.start()
-	'''
-	app.set_cookie()
-	app.set_user_agent()
-	product_data = ProductData()
-	app.process_product_detail('http://www.coteacote.kr/product/detail.html?product_no=493&cate_no=66&display_group=1', product_data)
-	'''
+
 	
 	

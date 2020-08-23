@@ -170,7 +170,7 @@ def order_sixshop( action_type, order_data, order_status_data ) :
 		if( orderstatus_html != '' ) : __SIXSHOP__.get_order_status_data( order_status_data, orderstatus_html )
 
 
-
+		
 '''
 #
 # Cafe24
@@ -266,8 +266,8 @@ def print_order_status_data( order_status_data ) :
 		__LOG__.Trace( order_status_data.brd_id )
 		__LOG__.Trace( order_status_data.mem_id )
 		__LOG__.Trace( order_status_data.cos_order_no )
-		__LOG__.Trace( order_status_data.cor_carrier )
-		__LOG__.Trace( order_status_data.cor_track )
+		#__LOG__.Trace( order_status_data.cor_carrier )
+		#__LOG__.Trace( order_status_data.cor_track )
 		__LOG__.Trace( order_status_data.cor_goods_code )
 		__LOG__.Trace( order_status_data.cod_count )
 		__LOG__.Trace( order_status_data.cor_memo )
@@ -281,8 +281,8 @@ def get_file_name( brd_id, sel_file ) :
 	order_file = ''
 	orderstatus_file = ''
 	
-	order_file = '/home/crawling/HIADONE/order_html/%s/order_%s.html' % (brd_id , sel_file)
-	orderstatus_file = '/home/crawling/HIADONE/order_html/%s/orderstatus_%s결과.html' % (brd_id, sel_file)
+	order_file = '/home/crawling/HIADONE/order_html/cafe24/%s/order_%s.html' % (brd_id , sel_file)
+	orderstatus_file = '/home/crawling/HIADONE/order_html/cafe24/%s/orderstatus_%s결과.html' % (brd_id, sel_file)
 		
 		
 	return 	order_file, orderstatus_file
@@ -298,7 +298,7 @@ def open_html_from_file( html_file_path , encoding_str='utf-8') :
 			html = f.read()
 			f.close()
 	except Exception as ex:
-		__LOG__.Error('에러 : open_html')
+		__LOG__.Error('에러 : open_html_from_file')
 		__LOG__.Error( ex )
 		pass
 		
@@ -314,8 +314,7 @@ if __name__ == '__main__':
 	
 	order_math_func = {
 		'smartstore.naver.com' : order_naver,
-		'shopping.naver.com' : order_naver,
-		
+		'shopping.naver.com' : order_naver,		
 		'biteme.co.kr' : order_godo ,
 		'fitpetmall.com' : order_godo ,
 		'gaenimshop.com' : order_godo ,
@@ -330,8 +329,7 @@ if __name__ == '__main__':
 		'naturalex.co.kr' : order_godo ,
 		'vlab.kr' : order_godo ,
 		'wangzzang.com' : order_godo ,
-		'petgear.kr' : order_godo ,
-		
+		'petgear.kr' : order_godo ,		
 		'duit.kr' : order_imweb ,
 		'eledog.co.kr' : order_imweb ,
 		'andblank.com' : order_imweb ,
@@ -342,8 +340,7 @@ if __name__ == '__main__':
 		'plumstudio.co.kr' : order_imweb ,
 		'vavox.co.kr' : order_imweb ,
 		'gettouch.co.kr' : order_imweb ,
-		'cheesesun.com' : order_imweb ,
-		
+		'cheesesun.com' : order_imweb ,		
 		'oraeorae.com' : order_makeshop ,
 		'cocochien.kr' : order_makeshop ,
 		'hydewolf.co.kr' : order_makeshop ,
@@ -353,11 +350,9 @@ if __name__ == '__main__':
 		'puppygallery.co.kr' : order_makeshop ,
 		'amylovespet.co.kr' : order_makeshop ,
 		'dermadog.co.kr' : order_makeshop ,
-		'affetto.co.kr' : order_makeshop ,
-		
+		'affetto.co.kr' : order_makeshop ,		
 		'howlpot.com' : order_wisa ,
-		'smallstuff.kr' : order_wisa ,
-		
+		'smallstuff.kr' : order_wisa ,		
 		'guilty-pleasure.co.kr' : order_sixshop ,
 		'comercotte.com' : order_sixshop ,
 		'melonicoco.com' : order_sixshop ,
@@ -366,8 +361,7 @@ if __name__ == '__main__':
 		'harryspet.com' : order_sixshop ,
 		'wilddog.co.kr' : order_sixshop ,
 		'bonjourtou-tou.com' : order_sixshop ,
-		'pethod.co.kr' : order_sixshop ,
-		
+		'pethod.co.kr' : order_sixshop ,		
 		'purplestore.co.kr' : order_other ,
 		'dhuman.co.kr' : order_other ,
 		'montraum.com' : order_other ,
@@ -377,49 +371,166 @@ if __name__ == '__main__':
 		'queenpuppy.co.kr' : order_other ,
 		'dog114.kr' : order_other ,
 		'i-avec.com' : order_other ,
-		'wconcept.co.kr' : order_other ,
-		
-		'betterskorea.com' : order_cafe24 ,
-		'm.rudolphshop.kr' : order_cafe24 ,
-		'monchouchou.co.kr' : order_cafe24 ,
-		'pethroom.com' : order_cafe24 ,
-		'double-comma.com' : order_cafe24 ,
-		'honestmeal.kr' : order_cafe24 ,
-		'uglugl.com' : order_cafe24 ,
-		'peppymeal.kr' : order_cafe24 ,
-		'su-su.kr' : order_cafe24 ,
-		'bowbowpet.com' : order_cafe24 ,
-		'yolohollo.com' : order_cafe24 ,
-		'beatto.kr' : order_cafe24 ,
-		'munikund.com' : order_cafe24 ,
-		'terrylatte.com' : order_cafe24 ,
-		'its-sunnyoutside.com' : order_cafe24 ,
-		'littlecollin.kr' : order_cafe24 ,
-		'opaaap.com' : order_cafe24 ,
-		'hutsandbay.com' : order_cafe24 ,
-		'tustus.co.kr' : order_cafe24 ,
-		'choandkang.com' : order_cafe24 ,
-		'dfang.co.kr' : order_cafe24 ,
+		'wconcept.co.kr' : order_other ,		
+		'ai-doggi.com' : order_cafe24 ,
+		'allieelf.com' : order_cafe24 ,
+		'amor-ange.com' : order_cafe24 ,
 		'arrr.kr' : order_cafe24 ,
+		'babiana.co.kr' : order_cafe24 ,
+		'barker-korea.com' : order_cafe24 ,
+		'ba-ttang.com' : order_cafe24 ,
+		'beatto.kr' : order_cafe24 ,
+		'becomingstudio.com' : order_cafe24 ,
+		'betterskorea.com' : order_cafe24 ,
+		'bokseul.com' : order_cafe24 ,
+		'boondog.co.kr' : order_cafe24 ,
+		'bowbowpet.com' : order_cafe24 ,
+		'bowwowmill.com' : order_cafe24 ,
+		'bricbric.com' : order_cafe24 ,
 		'bridge.dog' : order_cafe24 ,
-		'eyoushop.co.kr' : order_cafe24 ,
-		'coteacote.kr' : order_cafe24 ,
-		'dogshower.co.kr' : order_cafe24 ,
-		'lora.kr' : order_cafe24 ,
 		'buildapuppy.com' : order_cafe24 ,
+		'burdog.co.kr' : order_cafe24 ,
+		'bybong.com' : order_cafe24 ,
+		'bymona.co.kr' : order_cafe24 ,
+		'carmineproject.com' : order_cafe24 ,
+		'charlie-market.com' : order_cafe24 ,
+		'cherpetit.co.kr' : order_cafe24 ,
+		'chloecolin.com' : order_cafe24 ,
+		'choandkang.com' : order_cafe24 ,
+		'cjgsfood1.cafe24.com' : order_cafe24 ,
+		'clusterround.com' : order_cafe24 ,
+		'cocasbin.com' : order_cafe24 ,
+		'cocotail.co.kr' : order_cafe24 ,
+		'cokemill.com' : order_cafe24 ,
+		'comofranche.com' : order_cafe24 ,
+		'coteacote.kr' : order_cafe24 ,
+		'dalbampicnic.com' : order_cafe24 ,
+		'ddasaroom.co.kr' : order_cafe24 ,
+		'dfang.co.kr' : order_cafe24 ,
+		'dogcook.co.kr' : order_cafe24 ,
+		'dogshower.co.kr' : order_cafe24 ,
+		'dogsnack.kr' : order_cafe24 ,
+		'dongmongtable.com' : order_cafe24 ,
+		'dontcrymypet.com' : order_cafe24 ,
+		'double-comma.com' : order_cafe24 ,
+		'drby.kr' : order_cafe24 ,
+		'drmamma.net' : order_cafe24 ,
+		'drmypet.co.kr' : order_cafe24 ,
+		'dugroo.com' : order_cafe24 ,
+		'elishop.co.kr' : order_cafe24 ,
+		'esdog.co.kr' : order_cafe24 ,
+		'eyoushop.co.kr' : order_cafe24 ,
+		'flotshop.com' : order_cafe24 ,
+		'foreverybari.com' : order_cafe24 ,
+		'forpet.net' : order_cafe24 ,
+		'fundlefarm.com' : order_cafe24 ,
+		'handsdog.co.kr' : order_cafe24 ,
+		'happypangpang.net' : order_cafe24 ,
+		'holicarebarf.co.kr' : order_cafe24 ,
+		'honestmeal.kr' : order_cafe24 ,
+		'hutsandbay.com' : order_cafe24 ,
+		'ig-apparel.com' : order_cafe24 ,
+		'ilikedogcasual.com' : order_cafe24 ,
 		'inherent.co.kr' : order_cafe24 ,
-		'pet-paradise.kr' : order_cafe24
-	}
-	'''
+		'inuvivre.com' : order_cafe24 ,
+		'its-sunnyoutside.com' : order_cafe24 ,
+		'janggeumi.com' : order_cafe24 ,
+		'j-o-yi.com' : order_cafe24 ,
+		'kyeonsadol.co.kr' : order_cafe24 ,
+		'laminarof.com' : order_cafe24 ,
+		'likalika.kr' : order_cafe24 ,
+		'littlecollin.kr' : order_cafe24 ,
+		'lora.kr' : order_cafe24 ,
+		'lottie.co.kr' : order_cafe24 ,
+		'lovecoco.co.kr' : order_cafe24 ,
+		'lovehotfit.com' : order_cafe24 ,
+		'love-more.co.kr' : order_cafe24 ,
+		'louisdogboutique.com' : order_cafe24 ,
+		'naspapet.co.kr' : order_cafe24 ,
+		'rudolphshop.kr' : order_cafe24 ,
+		'u-n-pet.com' : order_cafe24 ,
+		'magdog.co.kr' : order_cafe24 ,
+		'maisondemiu.co.kr' : order_cafe24 ,
+		'makemakit.com' : order_cafe24 ,
+		'marlonshop.com' : order_cafe24 ,
+		'merrypongo.com' : order_cafe24 ,
+		'milliong.co.kr' : order_cafe24 ,
+		'milloty.com' : order_cafe24 ,
+		'monchouchou.co.kr' : order_cafe24 ,
+		'munikund.com' : order_cafe24 ,
+		'mypetmeat.com' : order_cafe24 ,
+		'natress.ifupet.com' : order_cafe24 ,
+		'needsthepet.com' : order_cafe24 ,
+		'nixen.co.kr' : order_cafe24 ,
+		'noashop.co.kr' : order_cafe24 ,
+		'noutti.kr' : order_cafe24 ,
+		'npmp.co.kr' : order_cafe24 ,
+		'odd-pet.com' : order_cafe24 ,
+		'ohdodog.com' : order_cafe24 ,
+		'oneofus.co.kr' : order_cafe24 ,
+		'opaaap.com' : order_cafe24 ,
+		'parisdog.co.kr' : order_cafe24 ,
+		'peppymeal.kr' : order_cafe24 ,
+		'peppytail.com' : order_cafe24 ,
+		'petcaresoap.com' : order_cafe24 ,
+		'petdaddy.co.kr' : order_cafe24 ,
+		'pethroom.com' : order_cafe24 ,
+		'petpapa.co.kr' : order_cafe24 ,
+		'pet-paradise.kr' : order_cafe24 ,
+		'pets-plate.com' : order_cafe24 ,
+		'petto.kr' : order_cafe24 ,
+		'plushpuppykr.com' : order_cafe24 ,
+		'pooch-dog.com' : order_cafe24 ,
+		'project21.kr' : order_cafe24 ,
+		'pupping.co.kr' : order_cafe24 ,
+		'puppyangel.com' : order_cafe24 ,
+		'puppyangel.co.kr' : order_cafe24 ,
+		'pup-son.com' : order_cafe24 ,
+		'raffinett.com' : order_cafe24 ,
+		'riribubu.cafe24.com' : order_cafe24 ,
+		'rorodog.com' : order_cafe24 ,
+		'saltyhearty.com' : order_cafe24 ,
+		'samdung2ne.com' : order_cafe24 ,
+		'sectionkproject.com' : order_cafe24 ,
+		'see-kitchen.com' : order_cafe24 ,
+		'selectedpet.cafe24.com' : order_cafe24 ,
+		'sempre-pet.com' : order_cafe24 ,
+		'seoul-pet.com' : order_cafe24 ,
+		'stroll.co.kr' : order_cafe24 ,
+		'studioalive.co.kr' : order_cafe24 ,
+		'studioaloitti.com' : order_cafe24 ,
+		'su-su.kr' : order_cafe24 ,
+		'sweetpet.co.kr' : order_cafe24 ,
+		'tangleangel.co.kr' : order_cafe24 ,
+		'terrylatte.com' : order_cafe24 ,
+		'thesallyslaw.com' : order_cafe24 ,
+		'totonroy.co.kr' : order_cafe24 ,
+		'tustus.co.kr' : order_cafe24 ,
+		'twoinplace.com' : order_cafe24 ,
+		'ubuntu-korea.com' : order_cafe24 ,
+		'uglugl.com' : order_cafe24 ,
+		'urbanbeast.co.kr' : order_cafe24 ,
+		'velynmore.com' : order_cafe24 ,
+		'vemvem.com' : order_cafe24 ,
+		'wefam.co.kr' : order_cafe24 ,
+		'withtory.com' : order_cafe24 ,
+		'wowdogshop.com' : order_cafe24 ,
+		'xn--hw4ba51ra.com' : order_cafe24 ,
+		'yasico.co.kr' : order_cafe24 ,
+		'yolohollo.com' : order_cafe24 ,
+		'youareapeach.co.kr' : order_cafe24 }
 	
+	
+	
+	'''	
 	#
 	# 로컬 테스트시 사용
 	#
-	action_type = __ORDER_STATUS__
+	#action_type = __ORDER_STATUS__
 	
-	#action_type = __ORDER__
+	action_type = __ORDER__
 	
-	LOG_NAME = "%s/ORDER/%s.%s.log" % (config.LOG_PATH , os.path.basename(sys.argv[0]), __ORDER_STATUS__ )
+	LOG_NAME = "%s/ORDER/%s.%s.log" % (config.LOG_PATH , os.path.basename(sys.argv[0]), action_type )
 	Log.Init(Log.CRotatingLog(LOG_NAME, 10000000, 10))
 
 	
@@ -429,7 +540,7 @@ if __name__ == '__main__':
 	
 	#brd_id_list = [ '2', '28', '86', '97', '103', '134', '221', '233', '250', '251', '273', '278', '309', '323' ]	# GODO -- 테스트 완료 (0706)
 	
-	brd_id_list = [ '84', '91', '95', '105','109','110','111','140','307','314','324','326' ]	# NAVER -- 테스트 완료 (0706)
+	#brd_id_list = [ '84', '91', '95', '105','109','110','111','140','307','314','324','326' ]	# NAVER -- 테스트 완료 (0706)
 	#brd_id_list = [ '314' ]	# NAVER -- html 안에 내용없음
 	#brd_id_list = [ '24', '82' , '115', '130', '142', '154', '155', '157', '213', '301']	# MAKESHOP -- 테스트 완료 (0706)
 	#brd_id_list = [ '15', '30' ,'64', '88', '92', '102', '113', '175', '185', '187', '254']	# IMWEB - 테스트 완료 (0706)
@@ -438,6 +549,24 @@ if __name__ == '__main__':
 	
 	# naverpay
 	#brd_id_list = [ '102',	'103',	'113',	'115',	'119',	'120',	'130',	'134',	'142',	'143' , '15',	'154',	'155',	'157',	'163',	'165',	'173',	'175',	'187',	'189',	'19',	'2' ,'205',	'213',	'215',	'22',	'24',	'250',	'251',	'254',	'278',	'28',	'301',	'315', '323',	'63',	'64',	'81',	'85',	'86',	'88',	'92',	'93',	'97']
+	
+	# 무통장 - brd_id_list = [ '124','125','127','128','131','132','135','136','137','138','139','14','146','147','148','149','150','151','153','156','16','160','164','167','168','17','171','172','177','178','179','180','181','182','186','191','196','29','306','31','311','316','322','35','36','37','39','41','46','48','75','77' ]	# CAFE24 second
+	#brd_id_list = [ '124','125','127','128','131','132','135','136','137','138','139','14','146','147','148','149','150','151','153','156','16','160','164','167','168','17','171','172','177','178','179','180','181','182','186','191','196','29','306','31','311','316','322','35','36','37','39','41','46','48','69','75','77' ]	# CAFE24 second
+	
+	#brd_id_list = [ '179'] #-- 에러, html이 없음
+	#brd_id_list = [ '29','306','31','311','316','322','35','36','37','39','41','46','48','75','77' ]
+	
+	#brd_id_list = [ '124', '127','128','131','132','135','136','137','138','139','14','146','147','148','149','150','151','153','156','16','160','164','167','168','17','171','172','177','178','179','180','181','182','186','191','196','29','306','31','311','316','322','35','36','37','39','41','46','48','75','77' ]
+	#brd_id_list = [ '29', '35' ]
+	
+	#brd_id_list = [ '124', '127','128','131','132','135','136','137','138','139','14','146','147','148','149','150','151','153','156','16','160','164','167','168','17','171','172','177','178','179','180','181','182','186','191','196','29','306','31','311','316','322','35','36','37','39','41','46','48','75','77' ]
+	#brd_id_list = [ '150' ] -- babiana.co.kr 주문결과 파일이 주문파일과 동일한것 같음..
+	
+	# npay
+	#brd_id_list = [ '124','131','135','136','137','139','146','147','153','156','16','160','167','168','17','171','172','177','179','180','182','186','191','196','29','306','322','35','37','39','41','46','48','69']
+	
+	brd_id_list = [ '57', '64', '69', '94', '99', '104', '108', '125', '165', '176' ]
+	brd_id_list = [ '165' ]
 	
 	for brd_id in brd_id_list :
 
@@ -452,15 +581,17 @@ if __name__ == '__main__':
 		if(brd_url == '') :
 			__LOG__.Trace('ERROR url : %s' % ( brd_id ) )
 		else :
+		
 			split_list = brd_url.split('/')
 			search_web_str = split_list[2].strip()
 			
 			if(search_web_str.startswith('www.')) : search_web_str = split_list[2].replace('www.','')
 			elif(search_web_str.startswith('shop.')) : search_web_str = split_list[2].replace('shop.','')
-
+			elif(search_web_str.startswith('m.')) : search_web_str = split_list[2].replace('m.','')
+			
 			if(config.__DEBUG__) : __LOG__.Trace('%d - %s ( %s )' % ( int(brd_id), brd_url, search_web_str) )
 			
-			#sel_file_list = ['무통장주문','실거래주문']
+			#sel_file_list = ['무통장주문','npay주문']
 			sel_file_list = ['무통장주문']
 			
 			for sel_file in sel_file_list :
@@ -489,8 +620,8 @@ if __name__ == '__main__':
 					order_data.cor_file_1 = order_file
 					order_status_data.cos_file_1 = orderstatus_file
 
-					order_naver( action_type, order_data, order_status_data )
-					#order_math_func[search_web_str]( action_type, order_data, order_status_data )
+					#order_naver( action_type, order_data, order_status_data )
+					order_math_func[search_web_str]( action_type, order_data, order_status_data )
 
 					if(action_type == __ORDER__ ) : print_order_data( order_data )
 					else : print_order_status_data( order_status_data )
@@ -548,7 +679,8 @@ if __name__ == '__main__':
 				
 				if(search_web_str.startswith('www.')) : search_web_str = split_list[2].replace('www.','')
 				elif(search_web_str.startswith('shop.')) : search_web_str = split_list[2].replace('shop.','')
-
+				elif(search_web_str.startswith('m.')) : search_web_str = split_list[2].replace('m.','')
+				
 				#if(config.__DEBUG__) : __LOG__.Trace('brd_url : %s ( %s )' % ( brd_url, search_web_str) )
 				
 				order_data.search_web_str = search_web_str
@@ -580,5 +712,5 @@ if __name__ == '__main__':
 			__LOG__.Trace("Program End......")
 			__LOG__.Trace("***********************************************************")
 	
-		
+	
 	

@@ -41,8 +41,7 @@ class shop(Cafe24) :
 		
 		
 		self.SITE_HOME = 'http://cocotail.co.kr'
-		
-		#self.ORG_SITE_HOME = 'http://cocasbin.com'
+
 		
 		self.SEARCH_MODE = __DEFINE__.__CATEGORY_ALL__
 
@@ -51,9 +50,10 @@ class shop(Cafe24) :
 		self.C_CATEGORY_CASE = __DEFINE__.__C_SELECT__
 		self.C_CATEGORY_TYPE = ''
 		
-		
-		#self.C_CATEGORY_VALUE = '#category > ul > li > a'
-		self.C_CATEGORY_IGNORE_STR = ['특별 할인','New Arrivals','리퍼상품','문의게시판','SHOP REVIEW']
+
+		self.C_CATEGORY_VALUE = '#menu_v'
+		#self.C_CATEGORY_VALUE = '#menu_v > ul > li > ul > li > a'
+		self.C_CATEGORY_IGNORE_STR = ['NOTICE', 'EVENT', 'REVIEW', 'Q&A']
 		self.C_CATEGORY_STRIP_STR = ''
 
 		
@@ -119,8 +119,65 @@ class shop(Cafe24) :
 	######################################################################
 	'''
 	
+	def web_get_category_data_second(self, html):
+		rtn = False
+		
+		self.set_param_category(html)
+		
+		category_link_list = []
+		
+		soup = bs4.BeautifulSoup(html, 'lxml')
+		
+		if( config.__DEBUG__ ) :
+			__LOG__.Trace( self.C_CATEGORY_CASE )
+			__LOG__.Trace( self.C_CATEGORY_VALUE )
+			
+		if( self.C_CATEGORY_CASE == __DEFINE__.__C_SELECT__ ) : 
+			category_link_list = soup.select(self.C_CATEGORY_VALUE)
+
+		
+		for category_ctx in category_link_list :
+			li_list = category_ctx.find_all('li', class_='text xans-record-')
+			__LOG__.Trace('web category : %d' % len(li_list) )
+			for li_ctx in li_list :
+				#__LOG__.Trace(li_ctx)
+				try :
+					menu_link_ctx = li_ctx.find('a')
+					if(menu_link_ctx != None) :
+						if(self.check_ignore_category( menu_link_ctx ) ) :
+						
+							if('href' in menu_link_ctx.attrs ) : 
+								tmp_category_link = menu_link_ctx.attrs['href']
+								if(tmp_category_link.find('javascript') < 0 ) :
+									if(0 != tmp_category_link.find('http')) : tmp_category_link = '%s%s' % ( self.BASIC_CATEGORY_URL, menu_link_ctx.attrs['href'] )
+									
+									category_link = tmp_category_link
+									
+									if(self.C_CATEGORY_STRIP_STR != '') : category_link = tmp_category_link.replace( self.C_CATEGORY_STRIP_STR,'')
+									
+									category_name = menu_link_ctx.get_text().strip()
+									if( self.WEB_CATEGORY_NAME_HASH.get( category_link , -1) == -1) : 
+										self.WEB_CATEGORY_NAME_HASH[category_name] = category_link
+										if( config.__DEBUG__ ) :
+											__LOG__.Trace('WEB 카테고리 %s : %s' % ( category_name, category_link ) )
+
+										rtn = True
+
+
+				except Exception as ex:
+					__LOG__.Error(ex)
+					pass
+
+		if(config.__DEBUG__) : __LOG__.Trace( 'WEB 카테고리 수 : %d' % len(self.WEB_CATEGORY_NAME_HASH))
+		
+		return rtn
+
+	
 	def process_category_list(self):
-		self.process_sub_category_list()
+		self.process_category_list_second()			
+		
+	#def process_category_list(self):
+	#	self.process_sub_category_list()
 		
 	'''
 	######################################################################
@@ -140,8 +197,10 @@ class shop(Cafe24) :
 			
 			# 상품 카테고리
 			#
-			self.set_product_category_first(product_data, soup)
-
+			#self.set_product_category_first(product_data, soup)
+			self.set_product_category_second(page_url, product_data, soup)
+			
+			
 			###########################
 			# 상품 이미지 확인
 			#
@@ -164,7 +223,8 @@ class shop(Cafe24) :
 			###########################
 			
 			crw_post_url = self.set_product_name_url_first( product_data, product_ctx , 'strong', 'name')
-	
+			if(crw_post_url == '') : crw_post_url = self.set_product_name_url_first( product_data, product_ctx , 'p', 'name')
+			
 			self.set_product_price_brand_first(product_data, product_ctx )
 
 			if( crw_post_url != '' ) :
@@ -195,11 +255,6 @@ class shop(Cafe24) :
 		rtn = False
 		try :
 
-			
-			detail_page_txt = []
-			detail_page_img = []
-
-			
 			soup = bs4.BeautifulSoup(html, 'lxml')
 			####################################
 			# 상품 기본 정보에서 브랜드 등을 추출
@@ -224,13 +279,9 @@ class shop(Cafe24) :
 			
 			self.set_detail_brand( product_data, crw_brand )
 			
-			# 제품 상세 부분
-			detail_page_txt, detail_page_img = self.get_text_img_in_detail_content_part( soup, '#prdDetail > div', 'p', 'ec-data-src' )
+			# 제품 상세 부분			
+			self.get_cafe24_text_img_in_detail_content_part( soup, product_data, '#prdDetail > div', '' )
 
-			#__LOG__.Trace( detail_page_txt )
-			#__LOG__.Trace( detail_page_img )
-			
-			self.set_detail_page( product_data, detail_page_txt, detail_page_img)
 			
 		except Exception as ex:
 			__LOG__.Error(ex)

@@ -48,7 +48,13 @@ class shop(Mall) :
 		self.C_CATEGORY_CASE = __DEFINE__.__C_SELECT__
 		self.C_CATEGORY_TYPE = ''
 		
-		self.C_CATEGORY_VALUE = '#gnb > div > ul.gnb > li > a.gnbDep1'
+		#gnb > div > ul.sub_ctg_dep > li > ul > li > a
+		#gnb > div > ul.sub_ctg_dep > li > a
+		
+		#self.C_CATEGORY_VALUE = '#gnb > div > ul.gnb > li > a.gnbDep1'
+		self.C_CATEGORY_VALUE = '#gnb > div > ul.sub_ctg_dep > li > ul > li > a'
+		#self.C_CATEGORY_VALUE_2 = '#gnb > div > ul.sub_ctg_dep > li > a'
+		
 		self.C_CATEGORY_IGNORE_STR = ['듀먼 후기','이벤트/혜택','브랜드 스토리']
 		self.C_CATEGORY_STRIP_STR = ''
 
@@ -90,7 +96,7 @@ class shop(Mall) :
 	#
 	#
 	#
-	'''
+
 	
 	def get_category_data(self, html):
 		rtn = False
@@ -137,7 +143,7 @@ class shop(Mall) :
 		if(config.__DEBUG__) : __LOG__.Trace( '카테고리 수 : %d' % len(self.CATEGORY_URL_HASH))
 		
 		return rtn
-		
+	'''	
 	
 	#def set_param_product(self, html) :
 	#	__LOG__.Trace(html)
@@ -216,8 +222,53 @@ class shop(Mall) :
 	#
 	######################################################################
 	'''
+	
+	def get_product_data(self, page_url, html):
+		rtn = False
 		
-	def set_product_data(self , page_url, soup, product_ctx ) :
+		self.set_param_product(html)
+		
+		soup = bs4.BeautifulSoup(html, 'lxml')
+		
+		category_path_str = []
+		category_path_list = soup.select('#contents > ul > li > a')
+		if(len(category_path_list) == 0 ) : category_path_list = soup.select('#container > ul > li > a')	# 세트 메뉴 카테고리 path 리스트
+		
+		for category_path_ctx in category_path_list :
+			category_path_str.append( category_path_ctx.get_text().strip() )
+
+		
+		contents_list = soup.select('#contents')
+		
+		for contents_ctx in contents_list :
+			sub_category_ctx_list = contents_ctx.find_all('div' , class_='titWrap')
+			prdtList_list = contents_ctx.find_all('div' , class_='prdtList')
+			idx = -1
+			for prdtList_ctx in prdtList_list :
+				idx += 1
+				sub_category_str = ''
+				product_link_list = prdtList_ctx.find_all('div', class_='itemWrap')
+				h3_ctx = sub_category_ctx_list[idx].find('h3')
+				if(h3_ctx != None) :
+					tmp_sub_category_str = h3_ctx.get_text().strip()
+					max_sub_len = len( tmp_sub_category_str )
+					strip_ctx = h3_ctx.find('a')
+					strip_len = 0
+					if(strip_ctx != None) : 
+						strip_len = len(strip_ctx.get_text().strip())
+						max_sub_len = len( tmp_sub_category_str ) - strip_len
+						
+					sub_category_str = tmp_sub_category_str[:max_sub_len].strip()
+					
+				for product_ctx in product_link_list :
+					self.set_product_data( page_url, soup, category_path_str, sub_category_str, product_ctx )
+		
+		
+		return rtn
+		
+		
+	
+	def set_product_data(self , page_url, soup, category_path_str, sub_category_str, product_ctx ) :
 		
 		# 
 		#
@@ -225,8 +276,21 @@ class shop(Mall) :
 			product_data = ProductData()
 			crw_post_url = ''
 			
+			self.reset_product_category(product_data)
 			
-			product_data.crw_category1 = self.PAGE_URL_HASH[ page_url ]
+			idx = 0
+			for category_name in category_path_str :
+				idx += 1
+				if(idx == 2 ) : product_data.crw_category1 = category_name
+				elif(idx == 3 ) : product_data.crw_category2 = category_name
+				elif(idx == 4 ) : product_data.crw_category3 = category_name
+			
+			if(sub_category_str != '') : 
+				if(idx == 2 ) : product_data.crw_category2 = sub_category_str
+				elif(idx == 3 ) : product_data.crw_category3 = sub_category_str
+
+			
+			#product_data.crw_category1 = self.PAGE_URL_HASH[ page_url ]
 	
 			'''	
 			####################################
@@ -324,12 +388,10 @@ class shop(Mall) :
 					
 			
 			if( crw_post_url != '' ) :
-				if( self.PRODUCT_URL_HASH.get( crw_post_url , -1) == -1) : 
+				#if( self.PRODUCT_URL_HASH.get( crw_post_url , -1) == -1) : 
 				
-					self.set_product_data_sub( product_data, crw_post_url )
-
-					#self.print_product_page_info( product_data ) 			
-					self.process_product_api(product_data)
+				self.set_product_data_sub( product_data, crw_post_url )		
+				self.process_product_api(product_data)
 										
 				rtn = True
 

@@ -47,6 +47,9 @@ class smartstore(Mall) :
 		
 		self.SPECIAL_CATEGORY = ''
 
+		self.SMARTSTORE_CATEGORY_JSON = None
+		
+		self.SMARTSTORE_PRODUCT_CATEGORY_HASH = {}
 	
 	'''
 	######################################################
@@ -141,25 +144,27 @@ class smartstore(Mall) :
 		
 		category_url = ''
 		
-		if('subShopCategories' in json_data ) :  
-			if( subShopCategories_len == 0) :
-				if(self.SPECIAL_CATEGORY != '' ) :
-					# 특정 카데고리에 대해서 찾을 때 사용.
-					#
-					if( CategoryId == self.SPECIAL_CATEGORY) or ( parentShopCategoryId == self.SPECIAL_CATEGORY) : category_url = '%s/category/%s?cp=1' % ( self.SITE_HOME, str(CategoryId) )
+		#if('subShopCategories' in json_data ) :  
+		#	if( subShopCategories_len == 0) :
+		
+		if(self.SPECIAL_CATEGORY != '' ) :
+			# 특정 카데고리에 대해서 찾을 때 사용.
+			#
+			if( CategoryId == self.SPECIAL_CATEGORY) or ( parentShopCategoryId == self.SPECIAL_CATEGORY) : category_url = '%s/category/%s?cp=1' % ( self.SITE_HOME, str(CategoryId) )
 
-				else :
-					# 전체 카데고리에 대해서 찾을 때 사용.
-					#
-					#if(CategoryId != 'ALL') and (CategoryId != '') and ( parentShopCategoryId != '0' ) : category_url = '%s/category/%s?cp=1' % ( self.SITE_HOME, str(CategoryId) )
-					if(CategoryId != 'ALL') and (CategoryId != '') : category_url = '%s/category/%s?cp=1' % ( self.SITE_HOME, str(CategoryId) )
-				
-				if( category_url != '' ) :
-					if(self.CATEGORY_URL_HASH.get(category_url , -1) == -1) and ( self.check_ignore_category_text(shopCategoryName) ) : 
-						self.CATEGORY_URL_HASH[category_url] = shopCategoryName
-						__LOG__.Trace('-----------------------------------------------------------')
-						__LOG__.Trace('카테고리명 : %s' % shopCategoryName )
-						__LOG__.Trace('카테고리 Sel ID : %s ' % str(CategoryId ))
+		else :
+			# 전체 카데고리에 대해서 찾을 때 사용.
+			#
+			#if(CategoryId != 'ALL') and (CategoryId != '') and ( parentShopCategoryId != '0' ) : category_url = '%s/category/%s?cp=1' % ( self.SITE_HOME, str(CategoryId) )
+			#if(CategoryId != 'ALL') and (CategoryId != '') : category_url = '%s/category/%s?cp=1' % ( self.SITE_HOME, str(CategoryId) )
+			if(CategoryId != '') : category_url = '%s/category/%s?cp=1' % ( self.SITE_HOME, str(CategoryId) )
+		
+		if( category_url != '' ) :
+			if(self.CATEGORY_URL_HASH.get(category_url , -1) == -1) and ( self.check_ignore_category_text(shopCategoryName) ) : 
+				self.CATEGORY_URL_HASH[category_url] = shopCategoryName
+				__LOG__.Trace('-----------------------------------------------------------')
+				__LOG__.Trace('카테고리명 : %s' % shopCategoryName )
+				__LOG__.Trace('카테고리 Sel ID : %s ' % str(CategoryId ))
 					
 
 
@@ -174,6 +179,7 @@ class smartstore(Mall) :
 		
 		#if('sCategoryUrl' in jsondata) : __LOG__.Trace( jsondata['sCategoryUrl'] )
 		if('aCategoryList' in jsondata) : 
+			self.SMARTSTORE_CATEGORY_JSON = jsondata['aCategoryList']
 			for category_level_1 in jsondata['aCategoryList'] :
 				rtn = True
 				self.get_json_category(1, category_level_1)
@@ -244,9 +250,20 @@ class smartstore(Mall) :
 		for div_ctx in count_div_list :
 			strong_list = div_ctx.find_all('strong', class_='num')
 			for strong_ctx in strong_list :
-				product_count = int( strong_ctx.get_text().strip() )
-				#__LOG__.Trace( product_count )
+				product_count = int( __UTIL__.get_only_digit( strong_ctx.get_text().strip() ) )
+				__LOG__.Trace( 'TOTAL COUNT : %d ' % product_count )
 		
+		if( product_count == 0) :
+			# 조회 물품수
+			count_div_list = soup.find_all('span', class_='last_depth')
+			for div_ctx in count_div_list :
+				split_list = div_ctx.get_text().strip().split('(')
+				cate_str = split_list[0].strip()
+				strong_list = div_ctx.find_all('span', class_='thm')
+				for strong_ctx in strong_list :
+					strong_str = strong_ctx.get_text().strip()
+					product_count = int( __UTIL__.get_only_digit(strong_str ))
+					__LOG__.Trace( '%s - TOTAL COUNT : %d ' % (cate_str, product_count ) )
 		
 		# 화면상 표시하는 물품		
 		sort_div_list = soup.find_all('select', {'name':'size'})
@@ -255,7 +272,7 @@ class smartstore(Mall) :
 			for option_ctx in option_list :
 				if('selected' in option_ctx.attrs ) : 
 					display_count = int( option_ctx.attrs['value'] )
-					#__LOG__.Trace( display_count )
+					#__LOG__.Trace( 'DISPLAY COUNT : %d ' % display_count )
 					break
 				
 		split_data = category_url.split('?cp=')
@@ -340,6 +357,58 @@ class smartstore(Mall) :
 	######################################################################
 	'''
 	
+	def sub_search_category_depth(self, clevel, json_data, current_category_id, current_category_name) :
+		rtn = False
+		shopCategoryName = ''
+		
+		standardCategoryId = ''
+		displayCategoryId = ''
+		
+		if('shopCategoryName' in json_data ) : shopCategoryName = json_data['shopCategoryName']
+		if('standardCategoryId' in json_data ) : standardCategoryId = json_data['standardCategoryId']
+		if('displayCategoryId' in json_data ) : displayCategoryId = json_data['displayCategoryId']
+		
+		if( shopCategoryName == current_category_name ) : 
+			if( standardCategoryId == current_category_id ) or ( displayCategoryId == current_category_id ) : 
+				rtn = True
+		
+		return rtn, shopCategoryName
+		
+	
+	def search_category_depth(self, current_category_id, current_category_name) :
+		rtn_category_name = ''
+		category_level_1_name = ''
+		category_level_2_name = ''
+		category_level_3_name = ''
+		
+		for category_level_1 in self.SMARTSTORE_CATEGORY_JSON :
+			rtn, category_name = self.sub_search_category_depth(1, category_level_1, current_category_id, current_category_name)
+			if(rtn) :
+				rtn_category_name = category_name
+			else :
+				category_level_1_name = category_name
+				if('subShopCategories' in category_level_1 ) : 
+					for category_level_2 in category_level_1['subShopCategories'] :
+						rtn, category_name = self.sub_search_category_depth(2, category_level_2, current_category_id, current_category_name)
+						if(rtn) :
+							rtn_category_name = '%s|%s' % (category_level_1_name, category_name )
+						else :
+							category_level_2_name = category_name
+							if('subShopCategories' in category_level_2 ) : 
+								for category_level_3 in category_level_2['subShopCategories'] :
+									rtn, category_name =  self.sub_search_category_depth(3, category_level_3, current_category_id, current_category_name)
+									if(rtn) : 
+										rtn_category_name = '%s|%s|%s' % (category_level_1_name, category_level_2_name, category_name )
+									else :
+										category_level_3_name = category_name
+										if('subShopCategories' in category_level_3 ) : 
+											for category_level_4 in category_level_3['subShopCategories'] :
+												rtn, category_name = self.sub_search_category_depth(4, category_level_4, current_category_id, current_category_name)
+												if(rtn) : rtn_category_name = '%s|%s|%s|%s' % (category_level_1_name, category_level_2_name, category_level_3_name, category_name )
+												
+		return 	rtn_category_name						
+									
+
 	def get_current_category(self, html ) :	
 		#
 		# 상품리스트 페이지에서 현재 카테고리 추출
@@ -349,7 +418,11 @@ class smartstore(Mall) :
 		current_category = ''
 		
 		try :
-			current_category = self.get_strip_string( html, "_nao['catnm'] =", ';' , ['"'] )
+			
+
+			current_category_id = self.get_strip_string( html, "_nao['catid'] =", ';' , ['"'] )
+			current_category_name = self.get_strip_string( html, "_nao['catnm'] =", ';' , ['"'] )
+			current_category = self.search_category_depth(current_category_id , current_category_name)
 			
 		except Exception as ex :
 			__LOG__.Error(ex)
@@ -357,6 +430,71 @@ class smartstore(Mall) :
 			
 		return current_category
 		
+		
+	def get_current_category_web(self, soup ) :	
+		#
+		# 상품리스트 페이지에서 현재 카테고리 추출
+		#
+		# catnm_str : 현재의 카테고리
+
+		current_category = []
+		
+		try :
+			category_div_list = soup.find_all('div', class_='module_breadcrumb' )
+			for category_div_ctx in category_div_list :
+				li_list = category_div_ctx.find_all('li', class_='item_breadcrumb' )
+				for li_ctx in li_list :
+					a_link = li_ctx.find('a')
+					split_list = a_link.get_text().strip().split('(')
+					now_cate = split_list[0].strip()
+					if(now_cate != '') and (now_cate != '홈') : current_category.append( split_list[0].strip() )
+			
+			if(len(current_category) == 0 ) :
+				category_div_list = soup.find_all('div', class_='_shopcategory_list' )
+				for category_div_ctx in category_div_list :
+					li_list = category_div_ctx.find_all('a', class_='path')
+					for li_ctx in li_list :
+						split_list = li_ctx.get_text().strip().split('(')
+						now_cate = split_list[0].strip()
+						if(now_cate != '') and (now_cate != '홈') : current_category.append( split_list[0].strip() )
+						
+					span_ctx = category_div_ctx.find('span', class_='path')
+					if(span_ctx != None) :
+						split_list = span_ctx.get_text().strip().split('(')
+						now_cate = split_list[0].strip()
+						if(now_cate != '') and (now_cate != '홈') : current_category.append( split_list[0].strip() )
+			
+		except Exception as ex :
+			__LOG__.Error(ex)
+			pass
+			
+		return '|'.join(current_category) 
+		
+	
+	def set_current_category(self, product_data, current_category) :
+		self.reset_product_category(product_data)
+		
+		category_depth_name = current_category.split('|')
+		category_len = len(category_depth_name)
+		
+		if( category_len == 1 ) :
+			product_data.crw_category1 = category_depth_name[0].strip()
+			
+		elif( category_len == 2 ) :
+			product_data.crw_category1 = category_depth_name[0].strip()
+			product_data.crw_category2 = category_depth_name[1].strip()
+			
+		elif( 3 == category_len ) :
+			product_data.crw_category1 = category_depth_name[0].strip()
+			product_data.crw_category2 = category_depth_name[1].strip()
+			product_data.crw_category3 = category_depth_name[2].strip()
+			
+		elif( 4 == category_len ) :
+			product_data.crw_category1 = category_depth_name[1].strip()
+			product_data.crw_category2 = category_depth_name[2].strip()
+			product_data.crw_category3 = category_depth_name[3].strip()
+			
+			
 	
 	def set_product_data(self, product_data, crw_post_url, current_category, li_ctx, product_ctx ) :
 		
@@ -420,7 +558,11 @@ class smartstore(Mall) :
 				
 			product_data.brd_id = self.BRD_ID
 			
-			product_data.crw_category1  = current_category
+			
+			self.set_current_category( product_data, current_category)
+			
+			#product_data.crw_category1  = current_category
+
 			product_data.crw_post_url = crw_post_url
 			product_data.crw_goods_code  = crw_goods_code
 			
@@ -489,7 +631,9 @@ class smartstore(Mall) :
 				
 			product_data.brd_id = self.BRD_ID
 			
-			product_data.crw_category1  = current_category
+			self.set_current_category( product_data, current_category)
+			
+			#product_data.crw_category1  = current_category
 			product_data.crw_post_url = crw_post_url
 			product_data.crw_goods_code  = crw_goods_code
 			
@@ -628,11 +772,13 @@ class smartstore(Mall) :
 		# <a class="button N=a:lst.simple _click(nmp.front.sellershop.openSimpleProduct(aboutmeal,4891125789,NORMAL)) _stopDefault more" role="button" href="##"><span class="blind">더보기</span></a>
 		# </div>
 		# </li>
-
+		#__LOG__.Trace('get_product_data_first' )
+		
 		rtn = False	
 		try :
 			li_list = form_ctx.find_all('li', class_='item')
-
+			#if(len(li_list) == 0 ) : li_list = form_ctx.find_all('li')
+				
 			for li_ctx in li_list :
 				product_data = None
 				product_link_list = li_ctx.find_all('a')
@@ -649,15 +795,15 @@ class smartstore(Mall) :
 									#__LOG__.Trace( product_ctx.attrs['href'] )
 									crw_post_url = 'https://smartstore.naver.com%s' % product_ctx.attrs['href']
 
-									if( self.PRODUCT_URL_HASH.get( crw_post_url , -1) == -1) : 
-										product_data = ProductData()
-										
-										# 기본 정보
-										self.set_product_data( product_data, crw_post_url, current_category, li_ctx, product_ctx )
+									#if( self.PRODUCT_URL_HASH.get( crw_post_url , -1) == -1) : 
+									product_data = ProductData()
+									
+									# 기본 정보
+									self.set_product_data( product_data, crw_post_url, current_category, li_ctx, product_ctx )
 
-										self.process_product_api(product_data)
-										
-										rtn = True
+									self.process_product_api(product_data)
+									
+									rtn = True
 										
 		except Exception as ex:
 			__LOG__.Error(ex)
@@ -704,11 +850,12 @@ class smartstore(Mall) :
 		# </ul>
 		# </div>
 		# </li>
-		# __LOG__.Trace('get_product_data_second' )
+		#__LOG__.Trace('get_product_data_second' )
+		
 		rtn = False	
 		try :
-			ul_ctx = form_ctx.find('ul', class_='lst')
-			if(ul_ctx != None) :
+			ul_list = form_ctx.find_all('ul', class_='lst')
+			for ul_ctx in ul_list :
 				li_list = ul_ctx.find_all('li')
 				for li_ctx in li_list :
 					product_data = None
@@ -726,15 +873,15 @@ class smartstore(Mall) :
 										#__LOG__.Trace( product_ctx.attrs['href'] )
 										crw_post_url = 'https://smartstore.naver.com%s' % product_ctx.attrs['href']
 
-										if( self.PRODUCT_URL_HASH.get( crw_post_url , -1) == -1) : 
-											product_data = ProductData()
-											
-											# 기본 정보
-											self.set_product_data_second( product_data, crw_post_url, current_category, li_ctx, product_ctx )
+										#if( self.PRODUCT_URL_HASH.get( crw_post_url , -1) == -1) : 
+										product_data = ProductData()
+										
+										# 기본 정보
+										self.set_product_data_second( product_data, crw_post_url, current_category, li_ctx, product_ctx )
 
-											self.process_product_api(product_data)
-											
-											rtn = True
+										self.process_product_api(product_data)
+										
+										rtn = True
 										
 		except Exception as ex:
 			__LOG__.Error(ex)
@@ -749,7 +896,9 @@ class smartstore(Mall) :
 		rtn = False	
 		soup = bs4.BeautifulSoup(html, 'lxml')
 		
-		current_category = self.get_current_category(html)
+		current_category = self.get_current_category_web(soup)
+		 
+		if(current_category == '') : current_category = self.get_current_category(html)
 		
 		form_list = soup.find_all('form', class_='_list_form')
 
@@ -1188,8 +1337,13 @@ class smartstore(Mall) :
 				
 					#
 					# https://smartstore.naver.com//smallbatch 처럼 카테고리가 없을때
-					if(len(self.CATEGORY_URL_HASH) == 0 ) : self.CATEGORY_URL_HASH[site_home] = ''
-				
+					if(len(self.CATEGORY_URL_HASH) == 0 ) : 
+						self.CATEGORY_URL_HASH[site_home] = ''
+					else :
+						all_category = '%s/category/ALL?cp=1' % (site_home)
+						if(self.CATEGORY_URL_HASH.get(all_category, -1) == -1) : self.CATEGORY_URL_HASH[all_category] = ''
+						
+						
 				#페이지 URL 갖고 오기
 				self.process_page_list()
 				
@@ -1238,7 +1392,7 @@ class smartstore(Mall) :
 if __name__ == '__main__':
 	
 	LOG_NAME = "%s/%s.log" % (config.LOG_PATH , os.path.basename(sys.argv[0]))
-	Log.Init(Log.CRotatingLog(LOG_NAME, 10000000, 10))
+	Log.Init(Log.CRotatingLog(LOG_NAME, 20000000, 10))
 	
 
 	BRD_ID_HASH = __API__.get_storelist('smartstore.naver.com')

@@ -54,6 +54,7 @@ class shop(GodoMall) :
 		
 		
 		self.C_CATEGORY_VALUE = '#contents > div.side_cont > div > div.header_gnb > div > div.sub_menu_box.layer_type > ul > li > ul > li > a'
+		self.C_CATEGORY_VALUE_2 = '#contents > div.side_cont > div > div.header_gnb > div > div.sub_menu_box.layer_type > ul > li > a'
 		self.C_CATEGORY_IGNORE_STR = []				# 
 		self.C_CATEGORY_STRIP_STR = '..'
 

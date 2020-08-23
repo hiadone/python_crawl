@@ -54,7 +54,8 @@ class shop(GodoMall) :
 		
 		
 		self.C_CATEGORY_VALUE = '#header > div.header_gnb > div.gnb > div.gnb_menu_box > ul > li > ul > li > a'
-		self.C_CATEGORY_IGNORE_STR = ['에덴숑','주소','공지사항','Review','이벤트','구입금액별 선물','Q&A','교환 / 반품','위탁.사입.판매.문의']				# 
+		self.C_CATEGORY_VALUE_2 = '#header > div.header_gnb > div.gnb > div.gnb_menu_box > ul > li > a'
+		self.C_CATEGORY_IGNORE_STR = ['에덴숑','주소','공지사항','Review','이벤트','구입금액별 선물','Q&A','교환 / 반품','위탁.사입.판매.문의', 'ABOUT', '모델견 신청', 'COMMUNITY' ]				# 
 		self.C_CATEGORY_STRIP_STR = '..'
 
 		

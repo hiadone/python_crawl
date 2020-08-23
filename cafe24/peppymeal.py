@@ -39,6 +39,7 @@ class shop(Cafe24) :
 	
 		Cafe24.__init__(self)
 		
+		self.MAIN_CATEGORY_NO = 26
 		
 		self.SITE_HOME = 'http://peppymeal.kr'
 		
@@ -50,8 +51,8 @@ class shop(Cafe24) :
 		self.C_CATEGORY_TYPE = ''
 		
 		
-		#self.C_CATEGORY_VALUE = '#sp-category > div.sp-size__fixed > div > div.cate-pos--left > div > div > ul > li > a'
-		self.C_CATEGORY_IGNORE_STR = ['홈']
+		self.C_CATEGORY_VALUE = '#sp-category > div.sp-size__fixed > div > div.cate-pos--left > div > div > ul > li > a'
+		self.C_CATEGORY_IGNORE_STR = []
 		self.C_CATEGORY_STRIP_STR = ''
 
 		
@@ -64,7 +65,7 @@ class shop(Cafe24) :
 		self.C_PAGE_STRIP_STR = ''
 		
 		self.C_PAGE_IGNORE_STR = ['1']			# 페이지 중에 무시해야 하는 스트링
-		self.C_PAGE_COUNT_PER_DISPLAY = 10	# 화면당 페이지 갯수
+		self.C_PAGE_COUNT_PER_DISPLAY = 5	# 화면당 페이지 갯수
 		
 		
 		self.C_PRODUCT_CASE = __DEFINE__.__C_SELECT__
@@ -117,7 +118,7 @@ class shop(Cafe24) :
 	'''
 	
 	def process_category_list(self):
-		self.process_sub_category_list()
+		self.process_category_list_second()
 		
 	'''
 	######################################################################
@@ -138,7 +139,8 @@ class shop(Cafe24) :
 
 			# 상품 카테고리
 			#
-			self.set_product_category_first(product_data, soup)
+			#self.set_product_category_first(product_data, soup)
+			self.set_product_category_second(page_url, product_data, soup)
 
 
 			# 상품 이미지 확인
@@ -210,23 +212,34 @@ class shop(Cafe24) :
 	def get_product_detail_data(self, product_data, html):
 		rtn = False
 		try :
-			
-			detail_page_txt = []
-			detail_page_img = []
-			
+
 			soup = bs4.BeautifulSoup(html, 'lxml')
-
-			table_list = soup.select('#sp-payment > div.sp-toggle-base > div > div > table')			
-			rtn_dict = self.get_value_in_table(table_list, '', 'td', 'td', 1)
-			if(rtn_dict.get('브랜드' , -1) != -1) :
-				product_data.d_crw_brand1 = rtn_dict['브랜드']
 			
-			# 제품 상세 부분
-			
-			detail_page_txt, detail_page_img = self.get_text_img_in_detail_content_part( soup, '#prdDetail > div.sp-sub-product--additional-detail', 'p', 'ec-data-src' )
-			#detail_page_txt, detail_page_img = self.get_text_img_in_detail_content_part( soup, '#prdDetail > div.sp-sub-product--additional-detail', 'p', 'src' )
+			crw_brand = []
+			'''
+			#
+			# <meta name="keywords" content="[상품검색어],[브랜드],[트렌드],[제조사]">
+			for tag in soup.find_all("meta"):
+				if tag.get("name", None) == 'keywords' :
+					rtn = tag.get('content', None)
+					if(rtn != None) :
+						split_list = rtn.split(',')
+						if( split_list[1].strip() != '' ) : crw_brand.append( split_list[1].strip() )
+			'''
 
-			self.set_detail_page( product_data, detail_page_txt, detail_page_img)
+			table_list = soup.select('#sp-payment > div.sp-toggle-base > div > div > table')
+			
+			rtn_dict = self.get_value_in_table_two_colume( table_list, '기본 정보', 'th', 'td')
+			if(rtn_dict.get('브랜드' , -1) != -1) : crw_brand.append( rtn_dict['브랜드'] )
+			if(rtn_dict.get('제조사' , -1) != -1) : crw_brand.append( rtn_dict['제조사'] )
+			if(rtn_dict.get('원산지' , -1) != -1) : crw_brand.append( rtn_dict['원산지'] )
+
+			
+			self.set_detail_brand( product_data, crw_brand )
+
+			# 제품 상세 부분			
+			self.get_cafe24_text_img_in_detail_content_part( soup, product_data, '#prdDetail > div.sp-sub-product--additional-detail', '' )
+
 
 			
 		except Exception as ex:

@@ -50,8 +50,9 @@ class shop(Cafe24) :
 		self.C_CATEGORY_TYPE = ''
 		
 		
-		#self.C_CATEGORY_VALUE = '#categorymenu > ul > li > a'
-		self.C_CATEGORY_IGNORE_STR = ['베스트&전체상품','개인결제','전체상품']
+		self.C_CATEGORY_VALUE = '#header > div.section3.cboth > div > div.xans-element-.xans-layout.xans-layout-category > div > ul > li.xans-record- > a'
+		#self.C_CATEGORY_IGNORE_STR = ['베스트&전체상품','개인결제','전체상품','커뮤니티']
+		self.C_CATEGORY_IGNORE_STR = []
 		self.C_CATEGORY_STRIP_STR = ''
 
 		
@@ -64,7 +65,7 @@ class shop(Cafe24) :
 		self.C_PAGE_STRIP_STR = ''
 		
 		self.C_PAGE_IGNORE_STR = ['1']			# 페이지 중에 무시해야 하는 스트링
-		self.C_PAGE_COUNT_PER_DISPLAY = 10	# 화면당 페이지 갯수
+		self.C_PAGE_COUNT_PER_DISPLAY = 5	# 화면당 페이지 갯수
 		
 		
 		self.C_PRODUCT_CASE = __DEFINE__.__C_SELECT__
@@ -108,17 +109,7 @@ class shop(Cafe24) :
 		self.C_PRODUCT_SOLDOUT_SELECTOR_CLASSNAME = 'promotion'
 		
 		
-		
-	'''
-	######################################################################
-	#
-	# Mall.py 대체
-	#
-	######################################################################
-	'''
-	
-	def process_category_list(self):
-		self.process_sub_category_list()
+
 		
 	'''
 	######################################################################
@@ -159,7 +150,8 @@ class shop(Cafe24) :
 			###########################
 			
 			crw_post_url = self.set_product_name_url_first( product_data, product_ctx , 'strong', 'name')
-	
+			if(crw_post_url == '') : crw_post_url = self.set_product_name_url_first( product_data, product_ctx , 'p', 'name')
+			
 			self.set_product_price_brand_second(product_data, product_ctx )
 
 			if( crw_post_url != '' ) :
@@ -190,11 +182,6 @@ class shop(Cafe24) :
 		rtn = False
 		try :
 
-			
-			detail_page_txt = []
-			detail_page_img = []
-
-			
 			soup = bs4.BeautifulSoup(html, 'lxml')
 			####################################
 			# 상품 기본 정보에서 브랜드 등을 추출
@@ -219,13 +206,10 @@ class shop(Cafe24) :
 			
 			self.set_detail_brand( product_data, crw_brand )
 			
-			# 제품 상세 부분
-			detail_page_txt, detail_page_img = self.get_text_img_in_detail_content_part( soup, '#prdDetail > div.cont', 'p', 'ec-data-src' )
-
-			#__LOG__.Trace( detail_page_txt )
-			#__LOG__.Trace( detail_page_img )
+			# 제품 상세 부분			
+			self.get_cafe24_text_img_in_detail_content_part( soup, product_data, '#prdDetail > div.cont', '' )
 			
-			self.set_detail_page( product_data, detail_page_txt, detail_page_img)
+
 			
 		except Exception as ex:
 			__LOG__.Error(ex)

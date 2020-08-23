@@ -51,8 +51,8 @@ class shop(Cafe24) :
 		self.C_CATEGORY_TYPE = ''
 		
 		
-		#self.C_CATEGORY_VALUE = '#category > div > ul > li > a'
-		self.C_CATEGORY_IGNORE_STR = ['NEW ARRIVALS','ABOUT']
+		self.C_CATEGORY_VALUE = '#category > div > ul > li.xans-record- > a'
+		self.C_CATEGORY_IGNORE_STR = []
 		self.C_CATEGORY_STRIP_STR = ''
 
 		
@@ -86,7 +86,7 @@ class shop(Cafe24) :
 		
 		
 		self.BASIC_CATEGORY_URL = self.SITE_HOME
-		self.BASIC_PAGE_URL = self.SITE_HOME
+		self.BASIC_PAGE_URL = self.SITE_HOME + '/product/list.html'
 		self.BASIC_PRODUCT_URL = self.SITE_HOME
 		self.BASIC_IMAGE_URL = self.SITE_HOME
 		
@@ -113,7 +113,7 @@ class shop(Cafe24) :
 	######################################################################
 	'''
 	def process_category_list(self):
-		self.process_sub_category_list()
+		self.process_category_list_second()
 
 		
 	'''
@@ -134,8 +134,8 @@ class shop(Cafe24) :
 			
 			# 상품 카테고리
 			#
-			self.set_product_category_first(product_data, soup)
-
+			#self.set_product_category_first(product_data, soup)
+			self.set_product_category_second(page_url, product_data, soup)
 
 			# 상품 이미지 확인
 			self.set_product_image_fourth(product_data, product_ctx )
@@ -175,13 +175,9 @@ class shop(Cafe24) :
 	def get_product_detail_data(self, product_data, html):
 		rtn = False
 		try :
-			
-			
-			detail_page_txt = []
-			detail_page_img = []
 
-			
 			soup = bs4.BeautifulSoup(html, 'lxml')
+			crw_brand = []
 			
 			#
 			# <meta name="keywords" content="[상품검색어],[브랜드],[트렌드],[제조사]">
@@ -190,25 +186,23 @@ class shop(Cafe24) :
 					rtn = tag.get('content', None)
 					if(rtn != None) :
 						split_list = rtn.split(',')
-						if( split_list[1].strip() != '' ) : product_data.d_crw_brand2 = split_list[1].strip()
-						#if( split_list[3].strip() != '' ) : product_data.d_crw_brand2 = split_list[3].strip()
+						if( split_list[1].strip() != '' ) : crw_brand.append( split_list[1].strip() )
 						
 
 			table_list = soup.select('#container > div > div.xans-element-.xans-product.xans-product-detail > div.detailArea > div.infoArea > div.xans-element-.xans-product.xans-product-detaildesign > table')
 			
 			rtn_dict = self.get_value_in_table_two_colume( table_list, '기본 정보', 'th', 'td')
-			if(rtn_dict.get('브랜드' , -1) != -1) :
-				product_data.d_crw_brand1 = rtn_dict['브랜드']
-				
-			# 제품 상세 부분
-			
-			detail_page_txt, detail_page_img = self.get_text_img_in_detail_content_part( soup, '#prdDetail > div.cont', 'p', 'src' )
-						
+			if(rtn_dict.get('브랜드' , -1) != -1) : crw_brand.append( rtn_dict['브랜드'] )
+			if(rtn_dict.get('제조사' , -1) != -1) : crw_brand.append( rtn_dict['제조사'] )
+			if(rtn_dict.get('원산지' , -1) != -1) : crw_brand.append( rtn_dict['원산지'] )
 
-			self.set_detail_page( product_data, detail_page_txt, detail_page_img)
 			
-			__LOG__.Trace( detail_page_txt )
-			__LOG__.Trace( detail_page_img )
+			self.set_detail_brand( product_data, crw_brand )
+			
+				
+			# 제품 상세 부분			
+			self.get_cafe24_text_img_in_detail_content_part( soup, product_data, '#prdDetail > div.cont', '' )
+			
 			
 		except Exception as ex:
 			__LOG__.Error(ex)
@@ -227,10 +221,7 @@ if __name__ == '__main__':
 	app = shop()
 	app.start()
 	
-	#app.set_cookie()
-	#app.set_user_agent()
-	#product_data = ProductData()
-	#app.process_product_detail('http://beatto.kr/product/%EC%86%9C%EC%82%AC%ED%83%95-%EC%8A%AC%EB%A6%AC%EB%B8%8C%EB%A6%AC%EC%8A%A4-%ED%94%BC%EC%B9%98/117/category/50/display/1/', product_data)
+
 	
 	
 	

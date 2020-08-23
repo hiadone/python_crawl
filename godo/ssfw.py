@@ -50,8 +50,10 @@ class shop(GodoMall) :
 		self.C_CATEGORY_CASE = __DEFINE__.__C_SELECT__
 		self.C_CATEGORY_TYPE = ''
 		
-		
-		self.C_CATEGORY_VALUE = '#header > div.header_gnb > div > div.gnb_menu_box > ul > li > a'
+		self.C_CATEGORY_VALUE = '#header > div.header_gnb > div > div.gnb_menu_box > ul > li > ul > li > ul > li > a'
+		self.C_CATEGORY_VALUE_2 = '#header > div.header_gnb > div > div.gnb_menu_box > ul > li > ul > li > a'
+		self.C_CATEGORY_VALUE_3 = '#header > div.header_gnb > div > div.gnb_menu_box > ul > li > a'
+		#self.C_CATEGORY_VALUE = '#header > div.header_gnb > div > div.gnb_menu_box > ul > li > a'
 		self.C_CATEGORY_IGNORE_STR = ['Blog']
 		self.C_CATEGORY_STRIP_STR = '..'
 
@@ -93,7 +95,7 @@ class shop(GodoMall) :
 		'''
 		# 고도몰 추가 설정 부분
 		'''
-		self.SET_PRODUCT_DATA_CATEGORY_CLASS_SELECT_TYPE = False
+		self.SET_PRODUCT_DATA_CATEGORY_CLASS_SELECT_TYPE = True
 
 		self.SET_PRODUCT_DATA_CATEGORY_DIV_SELECTOR = 'div'
 		

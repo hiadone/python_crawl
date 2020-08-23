@@ -49,9 +49,10 @@ class shop(GodoMall) :
 		self.C_CATEGORY_TYPE = ''
 
 		
-		#self.C_CATEGORY_VALUE = '#header > div.header_gnb > div.gnb > div.gnb_menu_box > ul > li > a'
-		self.C_CATEGORY_VALUE = '#header > div.header_gnb > div.gnb > div.gnb_menu_box > ul > li > ul > li > a'
-		self.C_CATEGORY_IGNORE_STR = ['공지사항','상품후기','상품문의','후원간식현황','FAQ']
+		self.C_CATEGORY_VALUE = '#header > div.header_gnb > div.gnb > div.gnb_menu_box > ul > li > ul > li > ul > li > a'
+		self.C_CATEGORY_VALUE_2 = '#header > div.header_gnb > div.gnb > div.gnb_menu_box > ul > li > ul > li > a'
+		
+		self.C_CATEGORY_IGNORE_STR = ['FAQ', '후원간식현황', '상품문의', '상품후기', '공지사항']
 		self.C_CATEGORY_STRIP_STR = '../goods/'
 
 		

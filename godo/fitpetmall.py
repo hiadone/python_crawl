@@ -49,9 +49,15 @@ class shop(GodoMall) :
 		self.C_CATEGORY_CASE = __DEFINE__.__C_SELECT__
 		self.C_CATEGORY_TYPE = ''
 		
+		self.DETAIL_CATEGORY_ACTION = True
+		self.C_DETAIL_CATEGORY_VALUE = '#contents > div > div > div.goods_list_item > div.list_item_category > ul > li > a'
+		self.BASIC_DETAIL_CATEGORY_URL = self.SITE_HOME + '/goods/goods_list.php'
+		self.C_DETAIL_CATEGORY_STRIP_STR = '..'
+		
+		
 		
 		self.C_CATEGORY_VALUE = '#header > div.PJ_head_3 > div > ul > li > a'
-		self.C_CATEGORY_IGNORE_STR = ['핏펫박스 문진 시작','100원이벤트']
+		self.C_CATEGORY_IGNORE_STR = ['핏펫박스 문진 시작']
 		self.C_CATEGORY_STRIP_STR = '..'
 
 		
@@ -73,6 +79,9 @@ class shop(GodoMall) :
 		#self.C_PRODUCT_VALUE = '#contents > div > div > div.goods_list_item > div.goods_list > div > div > ul > li > div > div.PJ_good_table > div > div.item_tit_box > a'
 		self.C_PRODUCT_VALUE = '#contents > div > div > div.goods_list_item > div.goods_list > div > div > ul > li > div'
 		
+		# 100원 이벤트 페이지의 물품리스트
+		self.C_PRODUCT_VALUE_2 = '#banner_01 > div > div > div.goods_list_cont.goods_content_23 > div > ul > li > div'
+		
 		self.C_PRODUCT_STRIP_STR = '..'
 		
 		# self.PAGE_LAST_LINK = True 일때 사용
@@ -86,7 +95,7 @@ class shop(GodoMall) :
 		self.PAGE_LAST_LINK = True		# 페이지에서 맨끝 링크 존재 여부
 
 		
-		
+			
 		self.BASIC_CATEGORY_URL = self.SITE_HOME
 		self.BASIC_PAGE_URL = self.SITE_HOME + '/goods/'
 		self.BASIC_PRODUCT_URL = self.SITE_HOME

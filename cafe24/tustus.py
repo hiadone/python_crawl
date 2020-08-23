@@ -52,7 +52,7 @@ class shop(Cafe24) :
 		
 		
 		self.C_CATEGORY_VALUE = '#topcate > div > ul > li > a'
-		self.C_CATEGORY_IGNORE_STR = ['NEW', 'SALE']
+		self.C_CATEGORY_IGNORE_STR = []
 		self.C_CATEGORY_STRIP_STR = ''
 
 		
@@ -142,6 +142,8 @@ class shop(Cafe24) :
 				# 상품 링크 정보 및 상품명 / 상품코드
 				#
 				name_strong_list = name_div_ctx.find_all('p', class_='name')
+				if(len(name_strong_list) == 0 ) : name_strong_list = name_div_ctx.find_all('strong', class_='name')
+				
 				for name_strong_ctx in name_strong_list :
 					product_link_list = name_strong_ctx.find_all('a')
 					for product_link_ctx in product_link_list :
@@ -188,28 +190,33 @@ class shop(Cafe24) :
 		rtn = False
 		try :
 
-			
-			detail_page_txt = []
-			detail_page_img = []
-
-			
 			soup = bs4.BeautifulSoup(html, 'lxml')
 			
+			crw_brand = []
+			'''
+			#
+			# <meta name="keywords" content="[상품검색어],[브랜드],[트렌드],[제조사]">
+			for tag in soup.find_all("meta"):
+				if tag.get("name", None) == 'keywords' :
+					rtn = tag.get('content', None)
+					if(rtn != None) :
+						split_list = rtn.split(',')
+						if( split_list[1].strip() != '' ) : crw_brand.append( split_list[1].strip() )
+			'''
+
 			table_list = soup.select('#contents > div.xans-element-.xans-product.xans-product-detail > div.detailArea > div.infoArea > div.xans-element-.xans-product.xans-product-detaildesign > table')
 			
 			rtn_dict = self.get_value_in_table_two_colume( table_list, '기본 정보', 'th', 'td')
-			if(rtn_dict.get('브랜드' , -1) != -1) :
-				product_data.d_crw_brand1 = rtn_dict['브랜드']
-				
-			# 제품 상세 부분
-			#prdDetail > div.cont
-			detail_page_txt, detail_page_img = self.get_text_img_in_detail_content_part( soup, '#prdDetail > div.cont', 'p', 'src' )
-			#detail_page_txt, detail_page_img = self.get_text_img_in_detail_content_part( soup, '#product_detail_view', 'p', 'ec-data-src' )
-			#
-		
-			self.set_detail_page( product_data, detail_page_txt, detail_page_img)
+			if(rtn_dict.get('브랜드' , -1) != -1) : crw_brand.append( rtn_dict['브랜드'] )
+			if(rtn_dict.get('제조사' , -1) != -1) : crw_brand.append( rtn_dict['제조사'] )
+			if(rtn_dict.get('원산지' , -1) != -1) : crw_brand.append( rtn_dict['원산지'] )
+
 			
-			#self.print_detail_page_info( product_data )
+			self.set_detail_brand( product_data, crw_brand )
+
+			# 제품 상세 부분			
+			self.get_cafe24_text_img_in_detail_content_part( soup, product_data, '#prdDetail > div.cont', '' )
+
 			
 		except Exception as ex:
 			__LOG__.Error(ex)

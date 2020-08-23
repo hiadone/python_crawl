@@ -54,7 +54,8 @@ class shop(GodoMall) :
 		
 		
 		self.C_CATEGORY_VALUE = '#tcat_area > div > div > div > div.gnb_menu_box > ul > li > ul > li > a'
-		self.C_CATEGORY_IGNORE_STR = []				# 
+		self.C_CATEGORY_VALUE_2 = '#tcat_area > div > div > div > div.gnb_menu_box > ul > li > a'
+		self.C_CATEGORY_IGNORE_STR = ['개인결제']				# 
 		self.C_CATEGORY_STRIP_STR = '..'
 
 		

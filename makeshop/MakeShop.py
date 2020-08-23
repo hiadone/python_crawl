@@ -41,6 +41,7 @@ class MakeShop(Mall) :
 		
 		self.XCODE_HASH = {}
 		self.MCODE_HASH = {}
+		self.SCODE_HASH = {}
 		
 		#
 		# - 물품 리스트
@@ -54,6 +55,8 @@ class MakeShop(Mall) :
 		
 		self.SET_CATEGORY_DATA_X_CODE_SELECTOR = ''
 		self.SET_CATEGORY_DATA_M_CODE_SELECTOR = ''
+		self.SET_CATEGORY_DATA_S_CODE_SELECTOR = ''
+		self.SET_CATEGORY_DATA_S_CODE_SELECTOR_2 = ''
 		
 		#self.SET_PRODUCT_DATA_CATEGORY_CLASS_NAME = ''
 				
@@ -110,15 +113,32 @@ class MakeShop(Mall) :
 		# 출력 : 카테고리명
 		#
 		try :
-
-			xcode_key , mcode_key = self.get_xcode_mcode( crw_post_url )
-			key = '%s-%s' % ( xcode_key, mcode_key )
+			self.reset_product_category(product_data)
 			
-			if(self.MCODE_HASH.get(key, -1) != -1) :
-				product_data.crw_category1  = self.MCODE_HASH[key]
-				if(self.XCODE_HASH.get(xcode_key, -1) != -1) : product_data.crw_category2  = self.XCODE_HASH[xcode_key] 
+			xcode_key , mcode_key, scode_key = self.get_xcode_mcode_scode( crw_post_url )
+			key = '%s-%s' % ( xcode_key, mcode_key )
+			skey = '%s-%s-%s' % ( xcode_key, mcode_key, scode_key  )
+			
+			if(scode_key != '') :
+				if(self.SCODE_HASH.get(skey, -1) != -1) :
+					product_data.crw_category3  = self.SCODE_HASH[skey]
+					if(self.MCODE_HASH.get(key, -1) != -1) :
+						product_data.crw_category2  = self.MCODE_HASH[key]
+						if(self.XCODE_HASH.get(xcode_key, -1) != -1) : product_data.crw_category1  = self.XCODE_HASH[xcode_key] 
+					else :
+						if(self.XCODE_HASH.get(xcode_key, -1) != -1) : product_data.crw_category1  = self.XCODE_HASH[xcode_key]
+				else :
+					if(self.MCODE_HASH.get(key, -1) != -1) :
+						product_data.crw_category2  = self.MCODE_HASH[key]
+						if(self.XCODE_HASH.get(xcode_key, -1) != -1) : product_data.crw_category1  = self.XCODE_HASH[xcode_key] 
+					else :
+						if(self.XCODE_HASH.get(xcode_key, -1) != -1) : product_data.crw_category1  = self.XCODE_HASH[xcode_key]
 			else :
-				if(self.XCODE_HASH.get(xcode_key, -1) != -1) : product_data.crw_category1  = self.XCODE_HASH[xcode_key]
+				if(self.MCODE_HASH.get(key, -1) != -1) :
+					product_data.crw_category2  = self.MCODE_HASH[key]
+					if(self.XCODE_HASH.get(xcode_key, -1) != -1) : product_data.crw_category1  = self.XCODE_HASH[xcode_key] 
+				else :
+					if(self.XCODE_HASH.get(xcode_key, -1) != -1) : product_data.crw_category1  = self.XCODE_HASH[xcode_key]
 			
 		except Exception as ex :
 			__LOG__.Trace(ex)
@@ -147,8 +167,40 @@ class MakeShop(Mall) :
 			pass
 
 		return xcode_key, mcode_key
-		
 	
+
+	
+	def get_xcode_mcode_scode(self, crw_post_url) :
+		#
+		# 물품 URL에서 xcode, mcode 값 추출
+		# 입력 : 물품 URL
+		# 출력 : xcode , mcode 값
+		#
+		xcode_key = ''
+		mcode_key = ''
+		scode_key = ''
+		
+		try :
+			split_list = crw_post_url.split('xcode=')
+						
+			sub_split_list = split_list[1].strip().split('&')
+			xcode_key = sub_split_list[0].strip()
+			
+			second_split_list = split_list[1].split('mcode=')
+			last_split_list = second_split_list[1].split('&')
+			mcode_key = last_split_list[0].strip()
+			
+			second_split_list = crw_post_url.split('&scode=')
+			last_split_list = second_split_list[1].split('&')
+			scode_key = last_split_list[0].strip()
+			
+		except :
+			pass
+
+		return xcode_key, mcode_key , scode_key
+		
+		
+		
 	def set_param_category(self, html) :
 		#
 		# self.XCODE_HASH : 상위 카테고리명 dict , dict key는 xcode 3자리
@@ -191,6 +243,42 @@ class MakeShop(Mall) :
 			pass
 		
 		return True
+		
+		
+	def set_param_page(self, html ) :
+		# self.SCODE_HASH : 최하위 카테고리명 dict dict key는 xcode,mcode 조합 ( xxx-mmm-sss )
+		#
+		try :
+			soup = bs4.BeautifulSoup(html, 'lxml')
+			scode_link_list = []
+			#__LOG__.Trace( self.SET_CATEGORY_DATA_S_CODE_SELECTOR )
+			
+			if( self.SET_CATEGORY_DATA_S_CODE_SELECTOR != '') : 
+				scode_link_list = soup.select( self.SET_CATEGORY_DATA_S_CODE_SELECTOR )
+				if(len(scode_link_list) == 0 ) and ( self.SET_CATEGORY_DATA_S_CODE_SELECTOR_2 != '') : scode_link_list = soup.select( self.SET_CATEGORY_DATA_S_CODE_SELECTOR_2 )
+				#__LOG__.Trace( len( scode_link_list ) )
+				for scode_link_ctx in scode_link_list :
+					#__LOG__.Trace( scode_link_ctx )
+					if('href' in scode_link_ctx.attrs) :
+						link_str = scode_link_ctx.attrs['href']
+						if(0 < link_str.find('&scode=')) :
+
+							xcode_key , mcode_key , scode_key = self.get_xcode_mcode_scode( link_str )
+							if(scode_key != '' ) :
+								split_list = scode_link_ctx.get_text().strip().split('(')
+								scode_name = split_list[0].strip()
+								key = '%s-%s-%s' % ( xcode_key, mcode_key, scode_key  )
+								if(self.SCODE_HASH.get(key, -1) == -1 ) : self.SCODE_HASH[key] = scode_name
+			
+			#for key in self.SCODE_HASH.keys() :
+			#	__LOG__.Trace('S_CODE - %s : %s' % (key, self.SCODE_HASH[key]) )
+			
+		except Exception as ex:
+			__LOG__.Error(ex)
+			pass
+		
+		return True
+
 		
 	'''
 	######################################################################

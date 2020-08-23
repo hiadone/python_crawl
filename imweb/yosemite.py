@@ -53,10 +53,10 @@ class shop(ImWeb) :
 		self.C_CATEGORY_TYPE = ''
 		
 				
-		#self.C_CATEGORY_VALUE = 'body > div > div > div > div.owl-stage-outer > div > div > div > div > div > div > div > h5 > span > a'
-		self.C_CATEGORY_VALUE = 'body > div > main > div.doz_aside._doz_aside > div > div > div > div > div > div > div > ul > li > ul > li > a'	#하위 메뉴용
-		self.C_CATEGORY_VALUE_2 = 'body > div > main > div.doz_aside._doz_aside > div > div > div > div > div > div > div > ul > li > a'				#상위 메뉴중 Home을 추출하기 위해서, Home은 하위 메뉴가 없음.
-		self.C_CATEGORY_IGNORE_STR = ['Activity','Walking','Wear','Food','Toy','Wash']																#상위 메뉴중 Home을 추출하기 위해서 나머지는 무시해야함.
+		self.C_CATEGORY_VALUE = 'body > div > main > div.doz_aside._doz_aside > div > div > div > div > div > div > div > ul > li'
+		#self.C_CATEGORY_VALUE = 'body > div > main > div.doz_aside._doz_aside > div > div > div > div > div > div > div > ul > li > ul > li > a'	#하위 메뉴용
+		#self.C_CATEGORY_VALUE_2 = 'body > div > main > div.doz_aside._doz_aside > div > div > div > div > div > div > div > ul > li > a'				#상위 메뉴중 Home을 추출하기 위해서, Home은 하위 메뉴가 없음.
+		self.C_CATEGORY_IGNORE_STR = []																#상위 메뉴중 Home을 추출하기 위해서 나머지는 무시해야함.
 		self.C_CATEGORY_STRIP_STR = ''
 
 		
@@ -96,7 +96,74 @@ class shop(ImWeb) :
 		self.BASIC_PRODUCT_URL = self.SITE_ORG_HOME
 		self.BASIC_IMAGE_URL = self.SITE_ORG_HOME
 	
+	'''
+	######################################################################
+	#
+	# Mall.py 를 OverWrite 시킴
+	#
+	######################################################################
+	'''
 	
+	def get_category_data(self, html):
+		rtn = False
+		
+		main_category_name = ''
+		self.set_param_category(html)
+		
+		category_link_list = []
+		
+		soup = bs4.BeautifulSoup(html, 'lxml')
+		
+		if( config.__DEBUG__ ) :
+			__LOG__.Trace( self.C_CATEGORY_CASE )
+			__LOG__.Trace( self.C_CATEGORY_VALUE )
+			
+		if( self.C_CATEGORY_CASE == __DEFINE__.__C_SELECT__ ) : 
+			category_link_list = soup.select(self.C_CATEGORY_VALUE)
+
+
+		for category_main_ctx in category_link_list :
+			try :
+				category_ctx = category_main_ctx.find('a')
+				if(category_ctx != None) :
+					if(self.check_ignore_category( category_ctx ) ) :
+						if('href' in category_ctx.attrs ) : 
+							tmp_category_link = category_ctx.attrs['href']
+							if(0 != tmp_category_link.find('http')) : tmp_category_link = '%s%s' % ( self.BASIC_CATEGORY_URL, category_ctx.attrs['href'] )
+							category_link = tmp_category_link
+							if(self.C_CATEGORY_STRIP_STR != '') : category_link = tmp_category_link.replace( self.C_CATEGORY_STRIP_STR,'')
+				
+							main_category_name = category_ctx.get_text().strip()
+							if( self.CATEGORY_URL_HASH.get( category_link , -1) == -1) : 
+								self.CATEGORY_URL_HASH[category_link] = main_category_name
+								if( config.__DEBUG__ ) :
+									__LOG__.Trace('%s : %s' % ( main_category_name, category_link ) )
+
+								rtn = True
+					
+				ul_ctx = category_main_ctx.find('ul')
+				if( ul_ctx != None) :
+					a_link_list = ul_ctx.find_all('a')
+					for sub_link_ctx in a_link_list :
+						if('href' in sub_link_ctx.attrs ) : 
+							tmp_category_link = sub_link_ctx.attrs['href']
+							if(0 != tmp_category_link.find('http')) : tmp_category_link = '%s%s' % ( self.BASIC_CATEGORY_URL, sub_link_ctx.attrs['href'] )
+							category_link = tmp_category_link
+							if(self.C_CATEGORY_STRIP_STR != '') : category_link = tmp_category_link.replace( self.C_CATEGORY_STRIP_STR,'')
+											
+							sub_category_name = sub_link_ctx.get_text().strip()
+							if( self.CATEGORY_URL_HASH.get( category_link , -1) == -1) : 
+								self.CATEGORY_URL_HASH[category_link] = '%s|%s' % ( main_category_name, sub_category_name )
+								if( config.__DEBUG__ ) :
+									__LOG__.Trace('%s|%s : %s' % ( main_category_name, sub_category_name , category_link ) )
+
+			except Exception as ex:
+				__LOG__.Error(ex)
+				pass
+
+		if(config.__DEBUG__) : __LOG__.Trace( '카테고리 수 : %d' % len(self.CATEGORY_URL_HASH))
+		
+		return rtn
 		
 	
 		
@@ -106,7 +173,7 @@ class shop(ImWeb) :
 	# 상품 상세 페이지 : 사이트별 수정해야 함.
 	#
 	######################################################################
-	'''	
+	
 	
 	def get_category_value(self, product_data, page_url, soup ) :
 		#
@@ -134,7 +201,7 @@ class shop(ImWeb) :
 			pass
 			
 		return True
-		
+	'''		
 	
 
 	

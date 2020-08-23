@@ -51,7 +51,7 @@ class shop(Cafe24) :
 		self.C_CATEGORY_TYPE = ''
 		
 		
-		#self.C_CATEGORY_VALUE = '#top_category > div.inner2 > div > li > a'
+		self.C_CATEGORY_VALUE = '#top_category > div.inner2 > div > li > a'
 		self.C_CATEGORY_IGNORE_STR = []
 		self.C_CATEGORY_STRIP_STR = ''
 
@@ -115,7 +115,7 @@ class shop(Cafe24) :
 	'''
 	
 	def process_category_list(self):
-		self.process_sub_category_list()
+		self.process_category_list_second()
 		
 	'''
 	######################################################################
@@ -136,8 +136,8 @@ class shop(Cafe24) :
 			
 			# 상품 카테고리
 			#
-			self.set_product_category_first(product_data, soup)
-
+			#self.set_product_category_first(product_data, soup)
+			self.set_product_category_second(page_url, product_data, soup)
 
 			# 상품 이미지 확인
 			self.set_product_image_fourth(product_data, product_ctx )
@@ -156,6 +156,8 @@ class shop(Cafe24) :
 					# 상품 링크 정보 및 상품명 / 상품코드
 					#
 					name_strong_list = name_div_ctx.find_all('p', class_='name')
+					if(len(name_strong_list) == 0 ) : name_strong_list = name_div_ctx.find_all('strong', class_='name')
+					
 					for name_strong_ctx in name_strong_list :
 						product_link_list = name_strong_ctx.find_all('a')
 						for product_link_ctx in product_link_list :
@@ -220,22 +222,11 @@ class shop(Cafe24) :
 	def get_product_detail_data(self, product_data, html):
 		rtn = False
 		try :
-			
-			detail_page_txt = []
-			detail_page_img = []
-			
-			
+
 			soup = bs4.BeautifulSoup(html, 'lxml')
 			
-						
-			# 제품 상세 부분
-			#prdDetail > div.cont
-			detail_page_txt, detail_page_img = self.get_text_img_in_detail_content_part( soup, '#contents > div.xans-element-.xans-product.xans-product-detail > div.cont.center', 'p', 'src' )
-			#detail_page_txt, detail_page_img = self.get_text_img_in_detail_content_part( soup, '#contents > div.xans-element-.xans-product.xans-product-detail > div.cont.center', 'p', 'ec-data-src' )
-			#
-
-			
-			self.set_detail_page( product_data, detail_page_txt, detail_page_img)
+			# 제품 상세 부분			
+			self.get_cafe24_text_img_in_detail_content_part( soup, product_data, '#contents > div.xans-element-.xans-product.xans-product-detail > div.cont.center', '' )
 
 			
 		except Exception as ex:
@@ -254,12 +245,6 @@ if __name__ == '__main__':
 
 	app = shop()
 	app.start()
-	
-	'''
-	app.set_cookie()
-	app.set_user_agent()
-	product_data = ProductData()
-	app.process_product_detail('http://its-sunnyoutside.com/product/detail.html?product_no=351&cate_no=59&display_group=1', product_data)
-	'''
+
 	
 	

@@ -206,12 +206,11 @@ class shop(MakeShop) :
 				if( 0 < crw_price_sale.strip().find('Out') ) : product_data.crw_is_soldout = 1
 			
 			if( crw_post_url != '' ) :
-				if( self.PRODUCT_URL_HASH.get( crw_post_url , -1) == -1) : 
+				#if( self.PRODUCT_URL_HASH.get( crw_post_url , -1) == -1) : 
 				
-					self.set_product_data_sub( product_data, crw_post_url )
-
-					#self.print_product_page_info( product_data ) 			
-					self.process_product_api(product_data)
+				self.set_product_data_sub( product_data, crw_post_url )
+	
+				self.process_product_api(product_data)
 										
 				rtn = True
 

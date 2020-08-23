@@ -39,6 +39,10 @@ class shop(MakeShop) :
 	
 		MakeShop.__init__(self)
 		
+		self.DETAIL_CATEGORY_ACTION = True
+		self.C_DETAIL_CATEGORY_VALUE = '#prdBrand > div.cate-wrap > div.class-list > ul > li > a'
+		
+		
 		self.EUC_ENCODING = True
 		
 		self.SITE_HOME = 'http://www.oraeorae.com'
@@ -50,8 +54,9 @@ class shop(MakeShop) :
 		self.C_CATEGORY_CASE = __DEFINE__.__C_SELECT__
 		self.C_CATEGORY_TYPE = ''
 		
+		#self.C_CATEGORY_VALUE = '#hdWrap > div.gnb > ul > li > ul > li > a'
 		self.C_CATEGORY_VALUE = '#hdWrap > div.gnb > ul > li > a'
-		self.C_CATEGORY_IGNORE_STR = ['고양이 야옹','공부하는 보호자','브랜드']
+		self.C_CATEGORY_IGNORE_STR = ['고양이 야옹']
 		self.C_CATEGORY_STRIP_STR = ''
 
 		
@@ -91,9 +96,12 @@ class shop(MakeShop) :
 		# MakeShop 추가 설정 부분
 		'''
 		
+		
 		self.SET_CATEGORY_DATA_X_CODE_SELECTOR = '#hdWrap > div.gnb > ul > li > a'
 		self.SET_CATEGORY_DATA_M_CODE_SELECTOR = '#hdWrap > div.gnb > ul > li > ul > li > a'
-		
+		self.SET_CATEGORY_DATA_S_CODE_SELECTOR = '#prdBrand > div.cate-wrap > div.class-list > ul > li > a'
+
+
 		
 		self.SET_PRODUCT_DETAIL_DATA_DIV_SELECTOR = '#productDetail > div.page-body > div.prd-detail'
 		self.SET_PRODUCT_DETAIL_DATA_TEXT_SELECTOR = 'p'
@@ -194,11 +202,11 @@ class shop(MakeShop) :
 					
 			
 			if( crw_post_url != '' ) :
-				if( self.PRODUCT_URL_HASH.get( crw_post_url , -1) == -1) : 
+				#if( self.PRODUCT_URL_HASH.get( crw_post_url , -1) == -1) : 
 				
-					self.set_product_data_sub( product_data, crw_post_url )
-		
-					self.process_product_api(product_data)
+				self.set_product_data_sub( product_data, crw_post_url )
+	
+				self.process_product_api(product_data)
 										
 				rtn = True
 

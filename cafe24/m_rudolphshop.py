@@ -50,7 +50,7 @@ class shop(Cafe24) :
 		self.C_CATEGORY_TYPE = ''
 		
 		
-		#self.C_CATEGORY_VALUE = '#category > div > ul > li > a'
+		#self.C_CATEGORY_VALUE = '#main_center_banner > ul > li > a'
 		self.C_CATEGORY_IGNORE_STR = [ ]
 		self.C_CATEGORY_STRIP_STR = ''
 
@@ -117,8 +117,64 @@ class shop(Cafe24) :
 	######################################################################
 	'''
 	
-	def process_category_list(self):
-		self.process_sub_category_list()
+	def get_category_data(self, html):
+		rtn = False
+		
+		#__LOG__.Trace(html)
+		self.set_param_category(html)
+		
+		category_link_list = []
+		
+		soup = bs4.BeautifulSoup(html, 'lxml')
+			
+		if( self.C_CATEGORY_CASE == __DEFINE__.__C_SELECT__ ) : 
+			category_link_list = soup.select('#screenOverlay > div > div.screen-overlay-content-top')
+			#category_link_list = soup.select('#navPrdList')
+		
+		__LOG__.Trace('----------------------------------------------------------')
+		for m_category_ctx in category_link_list :
+			#__LOG__.Trace(m_category_ctx)
+			try :
+				idx = 0
+				mid_category_list = m_category_ctx.find_all('h2')
+				#__LOG__.Trace(len(mid_category_list))
+				ul_list = m_category_ctx.find_all('ul', class_='overflow-x')
+				for ul_ctx in ul_list :
+					#__LOG__.Trace(ul_ctx)
+					mid_category_name = mid_category_list[idx].get_text().strip()
+					idx += 1
+					li_list = ul_ctx.find_all('li')
+					for li_ctx in li_list :
+						category_ctx = li_ctx.find('a')
+						if( category_ctx != None ) :
+							if(self.check_ignore_category( category_ctx ) ) :
+								if('href' in category_ctx.attrs ) : 
+									tmp_category_link = category_ctx.attrs['href']
+									if(tmp_category_link.find('javascript') < 0 ) :
+										if(0 != tmp_category_link.find('http')) : tmp_category_link = '%s%s' % ( self.BASIC_CATEGORY_URL, category_ctx.attrs['href'] )
+
+										category_link = tmp_category_link
+										
+										if(self.C_CATEGORY_STRIP_STR != '') : category_link = tmp_category_link.replace( self.C_CATEGORY_STRIP_STR,'')
+										
+										category_name = category_ctx.get_text().strip()
+	
+										if( self.CATEGORY_URL_HASH.get( category_link , -1) == -1) : 
+											self.CATEGORY_URL_HASH[category_link] = '%s|%s' % ( mid_category_name, category_name )
+											if( config.__DEBUG__ ) :
+												__LOG__.Trace('%s|%s : %s' % ( mid_category_name, category_name, category_link ) )
+
+											rtn = True
+
+
+			except Exception as ex:
+				__LOG__.Error(ex)
+				pass
+		
+		
+		if(config.__DEBUG__) : __LOG__.Trace( '카테고리 수 : %d' % len(self.CATEGORY_URL_HASH))
+		
+		return rtn
 		
 	'''
 	######################################################################
@@ -138,8 +194,14 @@ class shop(Cafe24) :
 			
 			# 상품 카테고리
 			#
-			self.set_product_category_first(product_data, soup)
-
+			split_list = self.PAGE_URL_HASH[page_url].split('|')
+			idx = 0
+			for split_data in split_list :
+				idx += 1
+				if(idx == 1 ) : product_data.crw_category1 = split_data.strip()
+				elif(idx == 2 ) : product_data.crw_category2 = split_data.strip()
+				elif(idx == 3 ) : product_data.crw_category3 = split_data.strip()
+				
 
 			# 상품 이미지 확인
 			div_list = product_ctx.find_all('div', class_='thumbnail')
@@ -228,7 +290,6 @@ class shop(Cafe24) :
 			detail_page_txt = []
 			detail_page_img = []
 
-			
 			soup = bs4.BeautifulSoup(html, 'lxml')
 						
 			brand_list = soup.find_all('span', {'id':'brand'} )

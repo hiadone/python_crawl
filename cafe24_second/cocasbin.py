@@ -50,8 +50,8 @@ class shop(Cafe24) :
 		self.C_CATEGORY_TYPE = ''
 		
 		
-		self.C_CATEGORY_VALUE = '#category > ul > li > a'
-		self.C_CATEGORY_IGNORE_STR = ['전체상품','개인결제창','리퍼상품','문의게시판','SHOP REVIEW']
+		self.C_CATEGORY_VALUE = '#category > ul > li.xans-record- > a'
+		self.C_CATEGORY_IGNORE_STR = ['개인결제창','문의게시판','SHOP REVIEW']
 		self.C_CATEGORY_STRIP_STR = ''
 
 		
@@ -112,17 +112,6 @@ class shop(Cafe24) :
 	'''
 	######################################################################
 	#
-	# Mall.py 대체
-	#
-	######################################################################
-	'''
-	
-	#def process_category_list(self):
-	#	self.process_sub_category_list()
-		
-	'''
-	######################################################################
-	#
 	# 상품 리스트 페이지 : 사이트별 수정해야 함.
 	#
 	######################################################################
@@ -159,7 +148,8 @@ class shop(Cafe24) :
 			###########################
 			
 			crw_post_url = self.set_product_name_url_first( product_data, product_ctx , 'p', 'name')
-	
+			if(crw_post_url == '') : crw_post_url = self.set_product_name_url_first( product_data, product_ctx , 'strong', 'name')
+			
 			self.set_product_price_brand_first(product_data, product_ctx )
 
 			if( crw_post_url != '' ) :
@@ -190,11 +180,6 @@ class shop(Cafe24) :
 		rtn = False
 		try :
 
-			
-			detail_page_txt = []
-			detail_page_img = []
-
-			
 			soup = bs4.BeautifulSoup(html, 'lxml')
 			####################################
 			# 상품 기본 정보에서 브랜드 등을 추출
@@ -219,13 +204,9 @@ class shop(Cafe24) :
 			
 			self.set_detail_brand( product_data, crw_brand )
 			
-			# 제품 상세 부분
-			detail_page_txt, detail_page_img = self.get_text_img_in_detail_content_part( soup, '#prdDetail > div', 'p', 'src' )
+			# 제품 상세 부분			
+			self.get_cafe24_text_img_in_detail_content_part( soup, product_data, '#prdDetail > div', '' )
 
-			#__LOG__.Trace( detail_page_txt )
-			#__LOG__.Trace( detail_page_img )
-			
-			self.set_detail_page( product_data, detail_page_txt, detail_page_img)
 			
 		except Exception as ex:
 			__LOG__.Error(ex)
@@ -242,7 +223,7 @@ if __name__ == '__main__':
 	Log.Init(Log.CRotatingLog(LOG_NAME, 10000000, 10))
 
 	app = shop()
-	app.start()
+	app.start_test()
 	
 
 	

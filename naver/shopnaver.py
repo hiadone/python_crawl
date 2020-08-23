@@ -44,6 +44,8 @@ class shopnaver(Mall) :
 		self.DISPLAY_LIST_COUNT = 10
 		
 		self.STORE_ID = ''
+		
+		self.NAVERSHOP_CATEGORY_JSON = None
 	
 	def set_store_id(self, site_home ) :
 		'''
@@ -305,6 +307,7 @@ class shopnaver(Mall) :
 				categories_jsondata = a_jsondata['A']
 				if('categories' in categories_jsondata) : 
 					category_list = categories_jsondata['categories']
+					self.NAVERSHOP_CATEGORY_JSON = category_list
 					for category_json in category_list :
 						self.get_json_category( category_json )
 
@@ -368,7 +371,44 @@ class shopnaver(Mall) :
 			rtn = True
 			
 			
-											
+	def search_category_depth(self, current_category_name) :
+		rtn_category_name = ''
+		category_level_1_name = ''
+		category_level_2_name = ''
+		category_level_3_name = ''
+		__LOG__.Trace(self.NAVERSHOP_CATEGORY_JSON  )
+		'''
+		for key in self.NAVERSHOP_CATEGORY_JSON :
+			__LOG__.Trace('%s : %s' % ( key, self.NAVERSHOP_CATEGORY_JSON[key] ) )
+		
+
+			rtn, category_name = self.sub_search_category_depth(1, category_level_1, current_category_name)
+			if(rtn) :
+				rtn_category_name = category_name
+			else :
+				category_level_1_name = category_name
+				if('subShopCategories' in category_level_1 ) : 
+					for category_level_2 in category_level_1['subShopCategories'] :
+						rtn, category_name = self.sub_search_category_depth(2, category_level_2, current_category_name)
+						if(rtn) :
+							rtn_category_name = '%s|%s' % (category_level_1_name, category_name )
+						else :
+							category_level_2_name = category_name
+							if('subShopCategories' in category_level_2 ) : 
+								for category_level_3 in category_level_2['subShopCategories'] :
+									rtn, category_name =  self.sub_search_category_depth(3, category_level_3, current_category_name)
+									if(rtn) : 
+										rtn_category_name = '%s|%s|%s' % (category_level_1_name, category_level_2_name, category_name )
+									else :
+										category_level_3_name = category_name
+										if('subShopCategories' in category_level_3 ) : 
+											for category_level_4 in category_level_3['subShopCategories'] :
+												rtn, category_name = self.sub_search_category_depth(4, category_level_4, current_category_name)
+												if(rtn) : rtn_category_name = '%s|%s|%s|%s' % (category_level_1_name, category_level_2_name, category_level_3_name, category_name )
+		'''
+			
+		return 	rtn_category_name
+		
 	def set_product_data_sub(self, product_data, crw_post_url, product_ctx ) :
 		
 		try :
@@ -392,7 +432,9 @@ class shopnaver(Mall) :
 				if('brand' in product_ctx ) : product_data.crw_brand1 = product_ctx['brand']['name']
 
 				
-				if('naverShoppingCategory' in product_ctx ) : product_data.crw_category1 = product_ctx['naverShoppingCategory']['name']
+				if('naverShoppingCategory' in product_ctx ) : 
+					product_data.crw_category1 = product_ctx['naverShoppingCategory']['name']
+					self.search_category_depth(product_data.crw_category1)
 
 				if('soldout' in product_ctx ) : 
 					if( product_ctx['soldout'] ) : product_data.crw_is_soldout = 1

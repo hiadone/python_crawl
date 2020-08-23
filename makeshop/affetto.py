@@ -52,7 +52,7 @@ class shop(MakeShop) :
 		
 		
 		self.C_CATEGORY_VALUE = '#header > div.headerGnb > div > ul > li > a'
-		self.C_CATEGORY_IGNORE_STR = ['ABOUT US','EVENT','COMMUNITY','BOARD']
+		self.C_CATEGORY_IGNORE_STR = ['ABOUT US','COMMUNITY','BOARD']
 		self.C_CATEGORY_STRIP_STR = ''
 
 		
@@ -197,13 +197,11 @@ class shop(MakeShop) :
 			
 
 			if( crw_post_url != '' ) :
-				if( self.PRODUCT_URL_HASH.get( crw_post_url , -1) == -1) : 
+				#if( self.PRODUCT_URL_HASH.get( crw_post_url , -1) == -1) : 
 				
-					self.set_product_data_sub( product_data, crw_post_url )
+				self.set_product_data_sub( product_data, crw_post_url )	
+				self.process_product_api(product_data)
 
-					#self.print_product_page_info( product_data ) 			
-					self.process_product_api(product_data)
-										
 				rtn = True
 
 

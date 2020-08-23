@@ -53,7 +53,7 @@ class shop(Cafe24) :
 		
 		
 		self.C_CATEGORY_VALUE = '#category > div > ul > li > a'
-		self.C_CATEGORY_IGNORE_STR = ['All ITEM']
+		self.C_CATEGORY_IGNORE_STR = []
 		self.C_CATEGORY_STRIP_STR = ''
 
 		
@@ -144,6 +144,8 @@ class shop(Cafe24) :
 				# 상품 링크 정보 및 상품명 / 상품코드
 				#
 				name_strong_list = name_div_ctx.find_all('p', class_='name')
+				if(len(name_strong_list) == 0 ) : name_strong_list = name_div_ctx.find_all('strong', class_='name')
+				
 				for name_strong_ctx in name_strong_list :
 					product_link_list = name_strong_ctx.find_all('a')
 					for product_link_ctx in product_link_list :
@@ -197,11 +199,8 @@ class shop(Cafe24) :
 			
 			soup = bs4.BeautifulSoup(html, 'lxml')
 			
+			
 			# 제품 상세 부분
-			#prdDetail > div.cont
-			#prdDetail > div > div.-device.-pc._edibotProduct.-edm-style.-v1
-			#prdDetail > div > div.-device.-pc._edibotProduct.-edm-style.-v1
-			#anchor_header > div > div > div > div:nth-child(6)
 			#detail_page_txt, detail_page_img = self.get_text_img_in_detail_content_part( soup, '#prdDetail > div', 'p', 'src' )
 			detail_page_txt, detail_page_img = self.get_text_img_in_detail_content_part( soup, '#prdDetail > div.cont > div', '', 'ec-data-src' )
 			
@@ -209,15 +208,9 @@ class shop(Cafe24) :
 			if(len(detail_page_txt) == 1 ) and ( detail_page_txt[0] == '' ) : 
 				detail_page_txt, dumy_detail_page_img = self.get_text_img_in_detail_content_part( soup, '#anchor_header > div > div > div > div', 'span', 'ec-data-src' )
 			#
-			#
-			#
 
-			
 			self.set_detail_page( product_data, detail_page_txt, detail_page_img)
-			
-			#__LOG__.Trace( product_data.cdt_content )
-			#__LOG__.Trace( product_data.detail_page_img )
-			
+	
 
 			
 		except Exception as ex:
@@ -237,11 +230,6 @@ if __name__ == '__main__':
 	app = shop()
 	app.start()
 	
-	'''
-	app.set_cookie()
-	app.set_user_agent()
-	product_data = ProductData()
-	app.process_product_detail('http://its-sunnyoutside.com/product/detail.html?product_no=351&cate_no=59&display_group=1', product_data)
-	'''
+
 	
 	

@@ -52,7 +52,7 @@ class shop(GodoMall) :
 		
 		
 		self.C_CATEGORY_VALUE = '#header > div.inner > div > div.h_bottom > div.h_bottom_cont > div.header_gnb > div > div.gnb_menu_box > ul > li > a'
-		self.C_CATEGORY_IGNORE_STR = ['EVENT']
+		self.C_CATEGORY_IGNORE_STR = []
 		self.C_CATEGORY_STRIP_STR = '..'
 
 		

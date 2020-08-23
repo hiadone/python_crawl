@@ -155,6 +155,13 @@ class shop(Mall) :
 		
 		soup = bs4.BeautifulSoup(html, 'lxml')
 		
+		category_depth_name_list = []
+		location_ctx_list = soup.select('#container > div > ul.location')
+		for location_ctx  in location_ctx_list :
+			category_depth_list = location_ctx.find_all('button')
+			for category_depth_ctx  in category_depth_list :
+				category_depth_name_list.append(category_depth_ctx.get_text().strip())
+			
 		if( self.C_PAGE_CASE == __DEFINE__.__C_SELECT__ ) : page_link_list = soup.select(self.C_PAGE_VALUE)
 		
 		__LOG__.Trace( category_url )
@@ -168,7 +175,9 @@ class shop(Mall) :
 					page_link = '%s%s%s' % ( category_url, self.PAGE_SPLIT_STR, page_num  )
 					
 					if( self.PAGE_URL_HASH.get( page_link , -1) == -1) : 
-						self.PAGE_URL_HASH[page_link] = self.CATEGORY_URL_HASH[category_url]
+						if(len(category_depth_name_list) == 0 ) : self.PAGE_URL_HASH[page_link] = self.CATEGORY_URL_HASH[category_url]
+						else : self.PAGE_URL_HASH[page_link] = category_depth_name_list
+						
 						if( config.__DEBUG__ ) : __LOG__.Trace('page : %s' % ( page_link ) )
 						rtn = True
 						
@@ -194,7 +203,9 @@ class shop(Mall) :
 				page_link = '%s%s%d' % ( category_url, self.PAGE_SPLIT_STR, page_num  )
 					
 				if( self.PAGE_URL_HASH.get( page_link , -1) == -1) : 
-					self.PAGE_URL_HASH[page_link] = self.CATEGORY_URL_HASH[category_url]
+					if(len(category_depth_name_list) == 0 ) : self.PAGE_URL_HASH[page_link] = self.CATEGORY_URL_HASH[category_url]
+					else : self.PAGE_URL_HASH[page_link] = category_depth_name_list
+					#self.PAGE_URL_HASH[page_link] = self.CATEGORY_URL_HASH[category_url]
 					if( config.__DEBUG__ ) : __LOG__.Trace('page : %s' % ( page_link ) )
 			
 		
@@ -337,8 +348,15 @@ class shop(Mall) :
 	def get_category_value(self, product_data, page_url, soup ) :
 	
 		if(self.PAGE_URL_HASH.get( page_url , -1) != -1) : 
-			split_list = self.PAGE_URL_HASH[page_url].split('(')
-			product_data.crw_category1 = split_list[0].strip()
+			#split_list = self.PAGE_URL_HASH[page_url].split('(')
+			#product_data.crw_category1 = split_list[0].strip()
+			idx = 0
+			for category_name in self.PAGE_URL_HASH[page_url] :
+				idx += 1
+				if(idx == 2) : product_data.crw_category1 = category_name
+				elif(idx == 3) : product_data.crw_category2 = category_name
+				elif(idx == 4) : product_data.crw_category3 = category_name
+				#__LOG__.Trace('%d : %s' % ( idx , category_name ) )
 			
 		
 	def set_product_data(self , page_url, soup, product_ctx ) :
@@ -349,6 +367,7 @@ class shop(Mall) :
 			product_data = ProductData()
 			crw_post_url = ''
 			
+			self.reset_product_category(product_data)
 			
 			self.get_category_value( product_data, page_url, soup )
 	
@@ -447,12 +466,10 @@ class shop(Mall) :
 					
 			
 			if( crw_post_url != '' ) :
-				if( self.PRODUCT_URL_HASH.get( crw_post_url , -1) == -1) : 
+				#if( self.PRODUCT_URL_HASH.get( crw_post_url , -1) == -1) : 
 				
-					self.set_product_data_sub( product_data, crw_post_url )
-
-					#self.print_product_page_info( product_data ) 			
-					self.process_product_api(product_data)
+				self.set_product_data_sub( product_data, crw_post_url )		
+				self.process_product_api(product_data)
 										
 				rtn = True
 

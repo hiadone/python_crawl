@@ -53,8 +53,9 @@ class shop(Mall) :
 		self.C_CATEGORY_TYPE = ''
 		
 
-		self.C_CATEGORY_VALUE = '#layout_topBar > div.wrap_inner.relative > ul > li > div > ul > li > a'
-		self.C_CATEGORY_IGNORE_STR = ['50% 반값 할인!']
+		self.C_CATEGORY_VALUE = '#layout_topBar > div.wrap_inner.relative > ul > li > div > ul > li > div > ul > li > a'
+		self.C_CATEGORY_VALUE_2 = '#layout_topBar > div.wrap_inner.relative > ul > li > div > ul > li > a'
+		self.C_CATEGORY_IGNORE_STR = ['50% 반값 할인!','단종 제품 할인','촬영용/B급상품']
 		self.C_CATEGORY_STRIP_STR = ''
 
 		
@@ -147,8 +148,20 @@ class shop(Mall) :
 			product_data = ProductData()
 			crw_post_url = ''
 			
-			#__LOG__.Trace( product_ctx )
-			product_data.crw_category1 = self.PAGE_URL_HASH[page_url]
+			self.reset_product_category(product_data)
+			
+			category_ctx_list = soup.select('#layout_config_full > div.category_depth.clearbox > ul')			
+			for category_ctx in category_ctx_list :
+				a_ctx_list = category_ctx.get_text().strip().split('>')
+				idx = 0
+				for a_ctx in a_ctx_list :
+					idx += 1
+					category_name = a_ctx.strip()
+					if(idx == 2 ) : product_data.crw_category1 = category_name
+					elif(idx == 3 ) : product_data.crw_category2 = category_name
+					elif(idx == 4 ) : product_data.crw_category3 = category_name
+					
+			#product_data.crw_category1 = self.PAGE_URL_HASH[page_url]
 			
 			
 			####################################				
@@ -217,12 +230,10 @@ class shop(Mall) :
 	
 
 			if( crw_post_url != '' ) :
-				if( self.PRODUCT_URL_HASH.get( crw_post_url , -1) == -1) : 
+				#if( self.PRODUCT_URL_HASH.get( crw_post_url , -1) == -1) : 
 				
-					self.set_product_data_sub( product_data, crw_post_url )
-
-					#self.print_product_page_info( product_data ) 			
-					self.process_product_api(product_data)
+				self.set_product_data_sub( product_data, crw_post_url )		
+				self.process_product_api(product_data)
 										
 				rtn = True
 

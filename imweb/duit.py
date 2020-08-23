@@ -52,8 +52,9 @@ class shop(ImWeb) :
 		self.C_CATEGORY_CASE = __DEFINE__.__C_SELECT__
 		self.C_CATEGORY_TYPE = ''
 		
-
-		self.C_CATEGORY_VALUE = '#pc_slide_menu > ul > div > li > a'	#하위 메뉴용
+		
+		self.C_CATEGORY_VALUE = '#pc_slide_menu > div > div.tse-content > ul > div > li > a'
+		#self.C_CATEGORY_VALUE = '#pc_slide_menu > ul > div > li > a'
 		self.C_CATEGORY_IGNORE_STR = ['about us','promotion','product','community','FAQ']																
 		self.C_CATEGORY_STRIP_STR = ''
 

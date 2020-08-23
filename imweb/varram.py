@@ -56,7 +56,7 @@ class shop(ImWeb) :
 		
 		#self.C_CATEGORY_VALUE = 'body > div > div > div > div.owl-stage-outer > div > div > div > div > div > div > div > h5 > span > a'
 		self.C_CATEGORY_VALUE = 'body > div > main > div > div > div > div > div > div > div > ul > li > a'
-		self.C_CATEGORY_IGNORE_STR = ['전체']
+		self.C_CATEGORY_IGNORE_STR = []
 		self.C_CATEGORY_STRIP_STR = ''
 
 		

@@ -43,18 +43,20 @@ class shop(Mall) :
 	
 		Mall.__init__(self)
 
-		self.SITE_HOME = 'http://www.montraum.com/common/process/shopmain.asp?iniCategory=2&thisCategory=22'
+		#self.SITE_HOME = 'http://www.montraum.com/common/process/shopmain.asp?iniCategory=2&thisCategory=22'
 		
-		self.SITE_ORG_HOME = 'http://www.montraum.com'
+		self.SITE_HOME = 'http://www.montraum.com'
 		
 		self.SEARCH_MODE = __DEFINE__.__CATEGORY_ALL__
 
-		#self.C_CATEGORY_CASE = __DEFINE__.__C_SELECT__
-		#self.C_CATEGORY_TYPE = ''
+		self.C_CATEGORY_CASE = __DEFINE__.__C_SELECT__
+		self.C_CATEGORY_TYPE = ''
 		
-		#self.C_CATEGORY_VALUE = '#gnb > div > ul.gnb > li > a.gnbDep1'
-		#self.C_CATEGORY_IGNORE_STR = ['듀먼 후기','이벤트/혜택','브랜드 스토리']
-		#self.C_CATEGORY_STRIP_STR = ''
+		self.C_CATEGORY_VALUE = '#pc-sub-category > div > ul > li > a'
+		self.C_CATEGORY_VALUE_2 = '#pc-nav > li > a'
+		self.C_CATEGORY_IGNORE_STR = ['듀먼 후기','이벤트/혜택','브랜드 스토리','체험특가체험특가']
+		
+		self.C_CATEGORY_STRIP_STR = ''
 
 		
 		
@@ -85,16 +87,16 @@ class shop(Mall) :
 
 		
 		
-		self.BASIC_CATEGORY_URL = self.SITE_ORG_HOME
-		self.BASIC_PAGE_URL = self.SITE_ORG_HOME
-		self.BASIC_PRODUCT_URL = self.SITE_ORG_HOME
-		self.BASIC_IMAGE_URL = self.SITE_ORG_HOME
+		self.BASIC_CATEGORY_URL = self.SITE_HOME
+		self.BASIC_PAGE_URL = self.SITE_HOME
+		self.BASIC_PRODUCT_URL = self.SITE_HOME
+		self.BASIC_IMAGE_URL = self.SITE_HOME
 		
 	'''
 	#
 	#
 	#
-	'''
+	
 	def process_page_list(self):
 
 		__LOG__.Trace("********** process_page_list ***********")
@@ -111,7 +113,7 @@ class shop(Mall) :
 		
 	def process_category_list(self ) :
 		return True
-		
+	'''	
 	
 	
 		
@@ -164,8 +166,17 @@ class shop(Mall) :
 			product_data = ProductData()
 			crw_post_url = ''
 			
+			self.reset_product_category(product_data)
 			
-			product_data.crw_category1 = self.PAGE_URL_HASH[ page_url ]
+			location_ctx = soup.find('div', {'id':'navigation-bar'})
+			if(location_ctx != None) :
+				span_list = location_ctx.find_all('span')
+				idx = 0
+				for span_ctx in span_list :
+					idx += 1
+					if(idx == 2 ) : product_data.crw_category1 = span_ctx.get_text().strip()
+					elif(idx == 3 ) : product_data.crw_category2 = span_ctx.get_text().strip()
+					elif(idx == 4 ) : product_data.crw_category3 = span_ctx.get_text().strip()
 	
 
 			####################################
@@ -247,12 +258,10 @@ class shop(Mall) :
 					
 			
 			if( crw_post_url != '' ) :
-				if( self.PRODUCT_URL_HASH.get( crw_post_url , -1) == -1) : 
+				#if( self.PRODUCT_URL_HASH.get( crw_post_url , -1) == -1) : 
 				
-					self.set_product_data_sub( product_data, crw_post_url )
-
-					#self.print_product_page_info( product_data ) 			
-					self.process_product_api(product_data)
+				self.set_product_data_sub( product_data, crw_post_url )		
+				self.process_product_api(product_data)
 										
 				rtn = True
 

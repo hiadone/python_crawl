@@ -46,13 +46,24 @@ class ImWeb(Mall) :
 	# 상품 리스트 페이지 : 사이트별 수정해야 함.
 	#
 	######################################################################
-	'''
+
 	
 	def get_category_value(self, product_data, page_url, soup ) :
 	
 		if(self.PAGE_URL_HASH.get( page_url , -1) != -1) : product_data.crw_category1 = self.PAGE_URL_HASH[page_url]
-
+	'''
 	
+	def get_category_value(self, product_data, page_url, soup ) :
+	
+		if(self.PAGE_URL_HASH.get( page_url , -1) != -1) : 
+			split_list = self.PAGE_URL_HASH[page_url].split('|')
+			idx = 0
+			for split_data in split_list :
+				idx += 1
+				if(idx == 1) :product_data.crw_category1 = split_data.strip()
+				elif(idx == 2) :product_data.crw_category2 = split_data.strip()
+				elif(idx == 3) :product_data.crw_category3 = split_data.strip()
+				
 	
 	def set_product_data(self , page_url, soup, product_ctx ) :
 		
@@ -63,6 +74,7 @@ class ImWeb(Mall) :
 			crw_post_url = ''
 			
 			
+			self.reset_product_category(product_data)
 			
 			####################################
 			# 상품 카테고리 추출
@@ -178,11 +190,11 @@ class ImWeb(Mall) :
 
 			
 			if( crw_post_url != '' ) :
-				if( self.PRODUCT_URL_HASH.get( crw_post_url , -1) == -1) : 
+				#if( self.PRODUCT_URL_HASH.get( crw_post_url , -1) == -1) : 
 				
-					self.set_product_data_sub( product_data, crw_post_url )
-	
-					self.process_product_api(product_data)
+				self.set_product_data_sub( product_data, crw_post_url )
+
+				self.process_product_api(product_data)
 										
 				rtn = True
 

@@ -24,6 +24,7 @@ from app import config
 from app import define_mall as __DEFINE__
 from api import hiadone_api as __API__
 from imagejob import img_merge as __IMGJOB__
+from util import Util as __UTIL__
 
 import log as Log;  Log.Init()
 
@@ -71,6 +72,15 @@ class Mall(Browser) :
 		self.EUC_ENCODING = False
 		
 
+		# 화면상에 메뉴 카테고리 값 저장
+		self.WEB_CATEGORY_NAME_HASH = {}
+		
+		
+		self.DETAIL_CATEGORY_ACTION = False
+		
+		# self.CATEGORY_URL_HASH 카테고리 URL 화면상에서 나타나는 메뉴에 보이지 않는 상세 카테고리를 저장 dict
+		self.DETAIL_CATEGORY_URL_HASH = {}
+		
 		# 카테고리 URL 저장 dict
 		self.CATEGORY_URL_HASH = {}
 		
@@ -80,6 +90,8 @@ class Mall(Browser) :
 		# 물품 URL 저장 dict
 		self.PRODUCT_URL_HASH = {}
 		
+		# 카테고리의 depth 명
+		self.CATEGORY_DEPTH_HASH = {}
 		
 		#
 		# 검색된 물품 URL 과 API에서 얻은 기존 물품 URL
@@ -87,8 +99,9 @@ class Mall(Browser) :
 		#
 		self.PRODUCT_AVAIBLE_ITEM_HASH = {}	# 검색된 물품 리스트 dict
 		self.PRODUCT_ITEM_HASH = {}	# API 에 얻은 물품 리스트 dict
+		self.PRODUCT_ITEM_DETAIL_HASH = {} # API 에 얻은 물품 리스트 dict
 		
-		
+		self.PRODUCT_INSERT_HASH = {}
 		
 		
 		self.SITE_HOME = ''		# 처음 접속하는 사이트 URL
@@ -97,10 +110,16 @@ class Mall(Browser) :
 		
 		self.SEARCH_MODE = __DEFINE__.__CATEGORY_ALL__
 		
+		
+		self.C_DETAIL_CATEGORY_VALUE = ''			# self.DETAIL_CATEGORY_URL_HASH 에 값을 넣기 위한 CSS selector 값
+		self.C_DETAIL_CATEGORY_STRIP_STR = ''
+		
+		
 		self.C_CATEGORY_CASE = __DEFINE__.__C_SELECT__
 		self.C_CATEGORY_TYPE = ''
 		self.C_CATEGORY_VALUE = ''
 		self.C_CATEGORY_VALUE_2 = ''
+		self.C_CATEGORY_VALUE_3 = ''
 		
 		self.C_CATEGORY_STRIP_STR = ''			# URL 에서 삭제할 String
 		self.C_CATEGORY_IGNORE_STR = []			# 카테고리 중에 무시해야 하는 카테고리
@@ -112,6 +131,7 @@ class Mall(Browser) :
 		self.C_PAGE_CASE = __DEFINE__.__C_SELECT__
 		self.C_PAGE_TYPE = ''
 		self.C_PAGE_VALUE = ''
+		self.C_PAGE_VALUE_2 = ''
 		
 
 		self.C_PAGE_STRIP_STR = ''			# URL 에서 삭제할 String
@@ -124,6 +144,7 @@ class Mall(Browser) :
 		self.C_PRODUCT_CASE = __DEFINE__.__C_SELECT__
 		self.C_PRODUCT_TYPE = ''
 		self.C_PRODUCT_VALUE = ''
+		self.C_PRODUCT_VALUE_2 = ''
 		
 		self.C_PRODUCT_STRIP_STR = ''		# URL 에서 삭제할 String
 		
@@ -134,6 +155,7 @@ class Mall(Browser) :
 		self.C_LAST_PAGE_CASE = __DEFINE__.__C_SELECT__
 		self.C_LAST_PAGE_TYPE = ''
 		self.C_LAST_PAGE_VALUE = ''
+		self.C_LAST_PAGE_VALUE_2 = ''
 		
 		
 		self.PAGE_FIRST_URL = ''		# 페이지 링크에서 구분자의 앞 URL
@@ -144,7 +166,7 @@ class Mall(Browser) :
 		
 
 
-		
+		self.BASIC_DETAIL_CATEGORY_URL = '' 	# 사이트 카테고리 URL 링크 정보 앞에 추가적으로 붙이는 URL String
 		self.BASIC_CATEGORY_URL = '' 	# 사이트 카테고리 URL 링크 정보 앞에 추가적으로 붙이는 URL String
 		self.BASIC_PAGE_URL = '' 	# 사이트 물품 URL 링크 정보 앞에 추가적으로 붙이는 URL String
 		self.BASIC_PRODUCT_URL = '' 	# 사이트 물품 URL 링크 정보 앞에 추가적으로 붙이는 URL String
@@ -457,7 +479,7 @@ class Mall(Browser) :
 				
 		return rtn
 		
-		
+
 	
 	def get_url_category_list(self) :
 		return self.SITE_HOME
@@ -467,10 +489,13 @@ class Mall(Browser) :
 	def get_category_data(self, html):
 		rtn = False
 		
+		#__LOG__.Trace(html)
 		self.set_param_category(html)
 		
 		category_link_list = []
 		category_link_list_2 = []
+		
+		category_link_list_3 = []
 		
 		soup = bs4.BeautifulSoup(html, 'lxml')
 		
@@ -481,7 +506,9 @@ class Mall(Browser) :
 		if( self.C_CATEGORY_CASE == __DEFINE__.__C_SELECT__ ) : 
 			category_link_list = soup.select(self.C_CATEGORY_VALUE)
 			if(self.C_CATEGORY_VALUE_2.strip() != '') : category_link_list_2 = soup.select(self.C_CATEGORY_VALUE_2)
-
+			if(self.C_CATEGORY_VALUE_3.strip() != '') : category_link_list_3 = soup.select(self.C_CATEGORY_VALUE_3)
+		
+		__LOG__.Trace('----------------------------------------------------------')
 		for category_ctx in category_link_list :
 			try :
 				if(self.check_ignore_category( category_ctx ) ) :
@@ -489,8 +516,7 @@ class Mall(Browser) :
 						tmp_category_link = category_ctx.attrs['href']
 						if(tmp_category_link.find('javascript') < 0 ) :
 							if(0 != tmp_category_link.find('http')) : tmp_category_link = '%s%s' % ( self.BASIC_CATEGORY_URL, category_ctx.attrs['href'] )
-							
-							#category_link = self.get_hangul_url_convert( tmp_category_link )
+
 							category_link = tmp_category_link
 							
 							if(self.C_CATEGORY_STRIP_STR != '') : category_link = tmp_category_link.replace( self.C_CATEGORY_STRIP_STR,'')
@@ -508,6 +534,7 @@ class Mall(Browser) :
 				__LOG__.Error(ex)
 				pass
 		
+		__LOG__.Trace('----------------------------------------------------------')
 		for category_ctx in category_link_list_2 :
 			try :
 				if(self.check_ignore_category( category_ctx ) ) :
@@ -532,6 +559,30 @@ class Mall(Browser) :
 				__LOG__.Error(ex)
 				pass
 
+		__LOG__.Trace('----------------------------------------------------------')
+		for category_ctx in category_link_list_3 :
+			try :
+				if(self.check_ignore_category( category_ctx ) ) :
+					if('href' in category_ctx.attrs ) : 
+						tmp_category_link = category_ctx.attrs['href']
+						if(tmp_category_link.find('javascript') < 0 ) :
+							if(0 != tmp_category_link.find('http')) : tmp_category_link = '%s%s' % ( self.BASIC_CATEGORY_URL, category_ctx.attrs['href'] )
+							
+							category_link = tmp_category_link
+							
+							if(self.C_CATEGORY_STRIP_STR != '') : category_link = tmp_category_link.replace( self.C_CATEGORY_STRIP_STR,'')
+							
+							category_name = category_ctx.get_text().strip()
+							if( self.CATEGORY_URL_HASH.get( category_link , -1) == -1) : 
+								self.CATEGORY_URL_HASH[category_link] = category_name
+								if( config.__DEBUG__ ) :
+									__LOG__.Trace('%s : %s' % ( category_name, category_link ) )
+
+								rtn = True
+
+			except Exception as ex:
+				__LOG__.Error(ex)
+				pass
 		
 		if(config.__DEBUG__) : __LOG__.Trace( '카테고리 수 : %d' % len(self.CATEGORY_URL_HASH))
 		
@@ -576,7 +627,127 @@ class Mall(Browser) :
 		
 		return rtn
 		
+	
+	'''
+	#
+	# Detail 카테고리 얻는 부분
+	#
+	'''
+	
+	
+	
+	def get_detail_category(self, main_category_url,  html):
+		rtn = False
+		
+		if( self.BASIC_DETAIL_CATEGORY_URL == '') :  self.BASIC_DETAIL_CATEGORY_URL = self.BASIC_CATEGORY_URL
+		if( self.C_DETAIL_CATEGORY_STRIP_STR == '') :  self.C_DETAIL_CATEGORY_STRIP_STR = self.C_CATEGORY_STRIP_STR
+		
+		detail_category_link_list = []
 
+		
+		soup = bs4.BeautifulSoup(html, 'lxml')
+
+		if( self.C_PAGE_CASE == __DEFINE__.__C_SELECT__ ) : detail_category_link_list = soup.select(self.C_DETAIL_CATEGORY_VALUE)
+
+
+		__LOG__.Trace('----------------------------------------------------------')
+		for category_ctx in detail_category_link_list :
+			
+			
+			try :
+				if(self.check_ignore_category( category_ctx ) ) :
+					if('href' in category_ctx.attrs ) : 
+						tmp_category_link = category_ctx.attrs['href']
+						if(tmp_category_link.find('javascript') < 0 ) :
+							if(0 != tmp_category_link.find('http')) : tmp_category_link = '%s%s' % ( self.BASIC_DETAIL_CATEGORY_URL, category_ctx.attrs['href'] )
+							
+							category_link = tmp_category_link
+							
+							if(self.C_DETAIL_CATEGORY_STRIP_STR != '') : category_link = tmp_category_link.replace( self.C_DETAIL_CATEGORY_STRIP_STR,'')
+							
+							split_list = category_ctx.get_text().strip().split('(')
+							category_name = split_list[0].strip()
+							
+							if( self.DETAIL_CATEGORY_URL_HASH.get( category_link , -1) == -1) : 
+								main_category_name = self.CATEGORY_URL_HASH[main_category_url]
+								self.DETAIL_CATEGORY_URL_HASH[category_link] = '%s|%s' % (main_category_name, category_name )
+								if( config.__DEBUG__ ) :
+									__LOG__.Trace('%s : %s' % ( category_name, category_link ) )
+
+								rtn = True
+
+			except Exception as ex:
+				__LOG__.Error(ex)
+				pass
+
+		return rtn
+					
+	
+
+
+	
+	def process_detail_category(self, category_url):
+	
+		rtn = False
+		resptext = ''
+		avaible_page_count = 0
+		
+		try :
+			
+			if( config.__DEBUG__ ) :
+				__LOG__.Trace('page : %s' % ( category_url ) )
+				
+			time.sleep(self.WAIT_TIME)
+			URL = category_url
+			header = self.get_header()
+			
+			resp = None
+			resp = requests.get( URL, headers=header, verify=False)
+			
+			if(self.EUC_ENCODING != None) :
+				if(self.EUC_ENCODING) : resp.encoding='euc-kr'  # 한글 EUC-KR인코딩
+			else :
+				resp.encoding=None								# 'ISO-8859-1'일때 인코딩
+				
+			if( resp.status_code != 200 ) :
+				__LOG__.Error(resp.status_code)
+			else :
+				resptext = resp.text
+				rtn = self.get_detail_category( category_url, resptext )
+
+		except Exception as ex:
+			__LOG__.Error( "process_detail_category Error 발생 " )
+			__LOG__.Error( ex )
+			pass
+		
+		return rtn
+		
+		
+		
+	def process_detail_category_list(self):
+
+		__LOG__.Trace("********** process_detail_category_list ***********")
+		
+		rtn = False
+		resptext = ''
+		
+		self.DETAIL_CATEGORY_URL_HASH = None
+		self.DETAIL_CATEGORY_URL_HASH = {}
+		
+		if( config.__DEBUG__ ) :
+			__LOG__.Trace( self.C_CATEGORY_TYPE )
+			__LOG__.Trace( self.C_DETAIL_CATEGORY_VALUE )
+			
+		for category_url in self.CATEGORY_URL_HASH.keys() :
+			if(self.SHUTDOWN) : break
+			self.process_detail_category( category_url )
+		
+		if(config.__DEBUG__) : __LOG__.Trace( 'DETAIL 카테고리 수 : %d' % len(self.DETAIL_CATEGORY_URL_HASH))	
+		__LOG__.Trace("*************************************************")	
+		
+		return rtn
+		
+		
 	'''
 	######################################################################
 	# 카테고리별로 페이지 URL을 얻는 함수
@@ -652,6 +823,7 @@ class Mall(Browser) :
 		# 
 		# last page 값이 있어, page 숫자를 증가시켜 page url을 설정하는 부분
 		#
+		#first_page = self.C_PAGE_COUNT_PER_DISPLAY + 1
 		first_page = self.C_PAGE_COUNT_PER_DISPLAY + 1
 		last_page = self.PAGE_LAST_VALUE + 1
 		
@@ -675,24 +847,32 @@ class Mall(Browser) :
 			if(self.C_PAGE_STRIP_STR != '') : page_link = tmp_page_link.replace( self.C_PAGE_STRIP_STR,'')
 			if( page_link.find('javascript') < 0 ) :
 				if( self.PAGE_URL_HASH.get( page_link , -1) == -1) : 
-					self.PAGE_URL_HASH[page_link] = self.CATEGORY_URL_HASH[category_url]
+					if( self.DETAIL_CATEGORY_ACTION ) : self.PAGE_URL_HASH[page_link] = self.DETAIL_CATEGORY_URL_HASH[category_url]
+					else : self.PAGE_URL_HASH[page_link] = self.CATEGORY_URL_HASH[category_url]
 					if( config.__DEBUG__ ) : __LOG__.Trace('page : %s' % ( page_link ) )
 					
 	
 	
 	
-	def get_page_list_with_request(self, html, category_url):
+	def get_page_list_with_request(self, page, html, category_url):
+		is_next_page = False
 		avaible_page_count = 0
 		page_link_list = []
 		
 		soup = bs4.BeautifulSoup(html, 'lxml')
 		
-		if( self.C_PAGE_CASE == __DEFINE__.__C_SELECT__ ) : page_link_list = soup.select(self.C_PAGE_VALUE)
+		if( self.C_PAGE_CASE == __DEFINE__.__C_SELECT__ ) : 
+			page_link_list = soup.select(self.C_PAGE_VALUE)
+			if(len(page_link_list) == 0) and (self.C_PAGE_VALUE_2 != '') : page_link_list = soup.select(self.C_PAGE_VALUE_2)
+		
 			
-				
 		# 각 페이지 링크에 대한 처리
 		for page_ctx in page_link_list :
 			try :
+				# 페이지가 다음 이동하지 않은 경우 체크
+				check_page_value = int( __UTIL__.get_only_digit( page_ctx.get_text().strip() ))
+				if( page == check_page_value ) : is_next_page = True
+				
 				if(self.check_ignore_page( page_ctx ) ) :
 					if('href' in page_ctx.attrs ) : 
 						avaible_page_count += 1
@@ -705,13 +885,17 @@ class Mall(Browser) :
 						if(self.C_PAGE_STRIP_STR != '') : page_link = tmp_page_link.replace( self.C_PAGE_STRIP_STR,'')
 						if( page_link.find('javascript') < 0 ) :
 							if( self.PAGE_URL_HASH.get( page_link , -1) == -1) : 
-								self.PAGE_URL_HASH[page_link] = self.CATEGORY_URL_HASH[category_url]
+								if( self.DETAIL_CATEGORY_ACTION ) : self.PAGE_URL_HASH[page_link] = self.DETAIL_CATEGORY_URL_HASH[category_url]
+								else : self.PAGE_URL_HASH[page_link] = self.CATEGORY_URL_HASH[category_url]
+								#self.PAGE_URL_HASH[page_link] = self.CATEGORY_URL_HASH[category_url]
 								if( config.__DEBUG__ ) : __LOG__.Trace('page : %s' % ( page_link ) )
 
 			except Exception as ex:
 				__LOG__.Error(ex)
 				pass
-
+		
+		if( is_next_page == False ) : avaible_page_count = 0
+		
 		return avaible_page_count
 		
 	
@@ -728,12 +912,25 @@ class Mall(Browser) :
 				if(self.SHUTDOWN) : break
 				avaible_page_count = 0
 				try :
+					
 					page_url = '%s%s%d%s' % ( self.PAGE_FIRST_URL, self.PAGE_SPLIT_STR , page, self.PAGE_SECOND_URL )
 					self.C_PAGE_IGNORE_STR.append(str(page))
 					
 					time.sleep(self.WAIT_TIME)
 					URL = page_url
 					header = self.get_header()
+					
+					if( self.PAGE_URL_HASH.get( URL , -1) == -1) : 		
+						if( self.DETAIL_CATEGORY_ACTION ) : self.PAGE_URL_HASH[URL] = self.DETAIL_CATEGORY_URL_HASH[category_url]
+						else : self.PAGE_URL_HASH[URL] = self.CATEGORY_URL_HASH[category_url]
+						if( config.__DEBUG__ ) : __LOG__.Trace('page : %s' % ( URL ) )
+			
+					'''
+					__LOG__.Trace('self.PAGE_FIRST_URL : %s' % self.PAGE_FIRST_URL )
+					__LOG__.Trace('self.PAGE_SPLIT_STR : %s' % self.PAGE_SPLIT_STR )
+					__LOG__.Trace('self.PAGE_SECOND_URL : %s' % self.PAGE_SECOND_URL )
+					__LOG__.Trace('URL : %s' % URL )
+					'''
 					
 					resp = None
 					resp = requests.get( URL, headers=header , verify=False)
@@ -742,13 +939,14 @@ class Mall(Browser) :
 						__LOG__.Error(resp.status_code)
 					else :
 						resptext = resp.text
-						avaible_page_count = self.get_page_list_with_request( resptext, category_url )
+						avaible_page_count = self.get_page_list_with_request( page, resptext, category_url )
 									
 				except Exception as ex:
 					__LOG__.Error( "set_page_list_with_request Error 발생 " )
 					__LOG__.Error( ex )
 					pass
-					
+				
+				#__LOG__.Trace('avaible_page_count : %d' % avaible_page_count )
 				if(avaible_page_count == ( self.C_PAGE_COUNT_PER_DISPLAY -1) ) : page += self.C_PAGE_COUNT_PER_DISPLAY
 				else : break
 				
@@ -765,15 +963,26 @@ class Mall(Browser) :
 		
 		soup = bs4.BeautifulSoup(html, 'lxml')
 		
-		if( self.C_PAGE_CASE == __DEFINE__.__C_SELECT__ ) : page_link_list = soup.select(self.C_PAGE_VALUE)
+		if( self.C_PAGE_CASE == __DEFINE__.__C_SELECT__ ) : 
+			page_link_list = soup.select(self.C_PAGE_VALUE)
+			if(len(page_link_list) == 0) and (self.C_PAGE_VALUE_2 != '') : page_link_list = soup.select(self.C_PAGE_VALUE_2)
 
 			
 		if(self.PAGE_LAST_LINK) :
-			if( self.C_LAST_PAGE_CASE == __DEFINE__.__C_SELECT__ ) : last_page_link_list = soup.select(self.C_LAST_PAGE_VALUE)
+			if( self.C_LAST_PAGE_CASE == __DEFINE__.__C_SELECT__ ) : 
+				last_page_link_list = soup.select(self.C_LAST_PAGE_VALUE)
+				
+				if(len(last_page_link_list) == 0 ) and (self.C_LAST_PAGE_VALUE_2 != '') : last_page_link_list = soup.select(self.C_LAST_PAGE_VALUE_2)
 		
 			# 맨끝 페이지 링크에 대한 처리
+			__LOG__.Trace('last_page_link_list : %d ' % len(last_page_link_list) )
+			
+			
 			for last_page_ctx in last_page_link_list :
+				#__LOG__.Trace( '------------------------------------------------------------------------------' )
+				#__LOG__.Trace( last_page_ctx )
 				try :
+					
 					if('href' in last_page_ctx.attrs ) : 
 						page_link = last_page_ctx.attrs['href']
 						if(0 != page_link.find('http')) : page_link = '%s%s' % ( self.BASIC_PAGE_URL, last_page_ctx.attrs['href'] )
@@ -804,7 +1013,9 @@ class Mall(Browser) :
 						if(self.C_PAGE_STRIP_STR != '') : page_link = tmp_page_link.replace( self.C_PAGE_STRIP_STR,'')
 						if( page_link.find('javascript') < 0 ) :
 							if( self.PAGE_URL_HASH.get( page_link , -1) == -1) : 
-								self.PAGE_URL_HASH[page_link] = self.CATEGORY_URL_HASH[category_url]
+								if( self.DETAIL_CATEGORY_ACTION ) : self.PAGE_URL_HASH[page_link] = self.DETAIL_CATEGORY_URL_HASH[category_url]
+								else : self.PAGE_URL_HASH[page_link] = self.CATEGORY_URL_HASH[category_url]
+								#self.PAGE_URL_HASH[page_link] = self.CATEGORY_URL_HASH[category_url]
 								if(self.PAGE_FIRST_URL == '' ) : self.get_page_url_split( page_link , False )
 								rtn = True
 								if( config.__DEBUG__ ) : __LOG__.Trace('page : %s' % ( page_link ) )
@@ -816,7 +1027,10 @@ class Mall(Browser) :
 		
 		
 		return rtn , avaible_page_count
-					
+	
+
+	
+
 		
 	def process_page(self, category_url):
 	
@@ -842,7 +1056,69 @@ class Mall(Browser) :
 			
 			resp = None
 			resp = requests.get( URL, headers=header, verify=False)
+			
+			if(self.EUC_ENCODING != None) :
+				if(self.EUC_ENCODING) : resp.encoding='euc-kr'  # 한글 EUC-KR인코딩
+			else :
+				resp.encoding=None								# 'ISO-8859-1'일때 인코딩
+				
+			if( resp.status_code != 200 ) :
+				__LOG__.Error(resp.status_code)
+			else :
+				resptext = resp.text
+				rtn, avaible_page_count = self.get_page_data( category_url, resptext )
+				
+			#__LOG__.Trace('	avaible_page_count : %d' % (avaible_page_count))
+			# 나머지 페이지 리스트를 얻어옴.
+			if(self.PAGE_LAST_LINK) : 
+				# last page 값이 있어, page 숫자를 증가시켜 page url을 설정하는 부분
+				self.set_page_list_with_last_link(category_url)
+			elif(self.PAGE_LAST_LINK == False) and (avaible_page_count == ( self.C_PAGE_COUNT_PER_DISPLAY -1) ) : 
+				# last page 값이 없을때, 화면당 표시되는 페이지수만큼 건너뛴 페이들을 계속해서, 질의하여 페이지를 얻어오는 부분
+				__LOG__.Trace(category_url)
+				self.set_page_list_with_request(category_url)
+			
+		except Exception as ex:
+			__LOG__.Error( "process_page Error 발생 " )
+			__LOG__.Error( ex )
+			pass
+		
+		return rtn
 
+
+
+
+		
+	def process_page_in_detail_category(self, category_url):
+	
+		rtn = False
+		resptext = ''
+		avaible_page_count = 0
+		
+		try :
+			# 카테고리 URL로 첫 화면에서 페이지 리스트를 얻어옴.
+			# 초기화
+			self.PAGE_FIRST_URL = ''		
+			self.PAGE_SECOND_URL = ''
+			self.PAGE_LAST_VALUE = 0
+			# 첫 페이지를 추가함.
+			self.PAGE_URL_HASH[category_url] = self.DETAIL_CATEGORY_URL_HASH[category_url]
+			
+			if( config.__DEBUG__ ) :
+				__LOG__.Trace('page : %s' % ( category_url ) )
+				
+			time.sleep(self.WAIT_TIME)
+			URL = category_url
+			header = self.get_header()
+			
+			resp = None
+			resp = requests.get( URL, headers=header, verify=False)
+			
+			if(self.EUC_ENCODING != None) :
+				if(self.EUC_ENCODING) : resp.encoding='euc-kr'  # 한글 EUC-KR인코딩
+			else :
+				resp.encoding=None								# 'ISO-8859-1'일때 인코딩
+				
 			if( resp.status_code != 200 ) :
 				__LOG__.Error(resp.status_code)
 			else :
@@ -858,11 +1134,11 @@ class Mall(Browser) :
 				self.set_page_list_with_request(category_url)
 			
 		except Exception as ex:
-			__LOG__.Error( "process_page Error 발생 " )
+			__LOG__.Error( "process_page_in_detail_category Error 발생 " )
 			__LOG__.Error( ex )
 			pass
 		
-		return rtn
+		return rtn	
 		
 		
 		
@@ -879,7 +1155,13 @@ class Mall(Browser) :
 		if( config.__DEBUG__ ) :
 			__LOG__.Trace( self.C_PAGE_CASE )
 			__LOG__.Trace( self.C_PAGE_VALUE )
+		
+		self.DETAIL_CATEGORY_ACTION = True
+		for category_url in self.DETAIL_CATEGORY_URL_HASH.keys() :
+			if(self.SHUTDOWN) : break
+			self.process_page_in_detail_category( category_url )
 			
+		self.DETAIL_CATEGORY_ACTION = False	
 		for category_url in self.CATEGORY_URL_HASH.keys() :
 			if(self.SHUTDOWN) : break
 			self.process_page( category_url )
@@ -952,8 +1234,11 @@ class Mall(Browser) :
 		product_link_list = []
 		
 		soup = bs4.BeautifulSoup(html, 'lxml')
-			
-		if( self.C_PRODUCT_CASE == __DEFINE__.__C_SELECT__ ) : product_link_list = soup.select(self.C_PRODUCT_VALUE)
+		
+		if( self.C_PRODUCT_CASE == __DEFINE__.__C_SELECT__ ) : 
+			product_link_list = soup.select(self.C_PRODUCT_VALUE)
+			if(len(product_link_list) == 0 ) and (self.C_PRODUCT_VALUE_2 != '') : product_link_list = soup.select(self.C_PRODUCT_VALUE_2)
+				
 		__LOG__.Trace('product list : %d' % len(product_link_list) )
 		for product_ctx in product_link_list :
 			self.set_product_data( page_url, soup, product_ctx )
@@ -1279,8 +1564,8 @@ class Mall(Browser) :
 		__LOG__.Trace( '브랜드1   : %s' % product_data.crw_brand1 )
 		__LOG__.Trace( '브랜드2   : %s' % product_data.crw_brand2 )
 		__LOG__.Trace( '브랜드3   : %s' % product_data.crw_brand3 )
-		__LOG__.Trace( '브랜드4   : %s' % product_data.crw_brand4 )
-		__LOG__.Trace( '브랜드5   : %s' % product_data.crw_brand5 )
+		#__LOG__.Trace( '브랜드4   : %s' % product_data.crw_brand4 )
+		#__LOG__.Trace( '브랜드5   : %s' % product_data.crw_brand5 )
 		
 		__LOG__.Trace( '가격     : %d' % product_data.crw_price )
 		__LOG__.Trace( '할인가   : %d' % product_data.crw_price_sale )
@@ -1298,9 +1583,10 @@ class Mall(Browser) :
 		__LOG__.Trace( '브랜드1   : %s' % product_data.d_crw_brand1 )
 		__LOG__.Trace( '브랜드2   : %s' % product_data.d_crw_brand2 )
 		__LOG__.Trace( '브랜드3   : %s' % product_data.d_crw_brand3 )
-		__LOG__.Trace( '브랜드4   : %s' % product_data.d_crw_brand4 )
-		__LOG__.Trace( '브랜드5   : %s' % product_data.d_crw_brand5 )
-		__LOG__.Trace( '텍스트    : %s' % product_data.cdt_content )
+		#__LOG__.Trace( '브랜드4   : %s' % product_data.d_crw_brand4 )
+		#__LOG__.Trace( '브랜드5   : %s' % product_data.d_crw_brand5 )
+		#__LOG__.Trace( '텍스트    : %s' % product_data.cdt_content )
+		__LOG__.Trace( '텍스트 길이 : %d' % len(product_data.cdt_content ))
 		__LOG__.Trace( product_data.detail_page_img )
 	
 	
@@ -1370,9 +1656,9 @@ class Mall(Browser) :
 			product_data = self.PRODUCT_URL_HASH[product_url]
 			
 			# 신규 입력일때만 상세페이지 조회
-			if( product_data.crw_action == __DEFINE__.__INSERT_CRW__ ) : self.process_product_detail( product_url ,product_data )
-			#self.process_product_detail( product_url ,product_data )
-		
+			# if( product_data.crw_action == __DEFINE__.__INSERT_CRW__ ) : self.process_product_detail( product_url ,product_data )
+			if( product_data.crw_id != 0 ) and ( self.PRODUCT_ITEM_DETAIL_HASH.get(product_data.crw_goods_code, -1) == -1 ) : self.process_product_detail( product_url ,product_data )
+					
 		__LOG__.Trace("*************************************************")	
 		
 		return rtn
@@ -1448,8 +1734,15 @@ class Mall(Browser) :
 		
 		# config.__REAL__ = True 일때 실서버 작업
 		if( config.__REAL__ ) :
-		
-			if(product_data.crw_action == __DEFINE__.__INSERT_CRW__ ) :		# INSERT
+			
+			#if(self.PRODUCT_INSERT_HASH.get( product_data.crw_goods_code , -1) != -1) :
+			#	__LOG__.Trace('DUPLICATION ITEM INSERT -----------------------------------------------------')
+			#else :
+			# 여러번 INSERT 및 업데이트 하는 것을 막아주는 부분
+			#self.PRODUCT_INSERT_HASH[product_data.crw_goods_code] = 1
+			
+			#if(product_data.crw_action == __DEFINE__.__INSERT_CRW__ ) :		# INSERT
+			if(self.PRODUCT_ITEM_HASH.get( product_data.crw_goods_code, -1) == -1) :
 				__LOG__.Trace('ITEM INSERT -----------------------------------------------------')
 				if( product_data.product_img == '') :
 					__LOG__.Trace(' 상품 리스트에 이미지가 없습니다' )
@@ -1479,14 +1772,18 @@ class Mall(Browser) :
 		
 		# config.__REAL__ = True 일때 실서버 작업
 		if( config.__REAL__ ) :
-			if(product_data.crw_action == __DEFINE__.__INSERT_CRW__ ) :		# INSERT
-				__LOG__.Trace('ITEMDETAIL INSERT -----------------------------------------------------')
-				#__LOG__.Trace( product_data.detail_page_img )
-				rtn , d_crw_file_1 = __IMGJOB__.get_merge_img(product_data.detail_page_img)
+			#if(product_data.crw_action == __DEFINE__.__INSERT_CRW__ ) :		# INSERT
+			if(product_data.crw_id != 0) : 
+				if(self.PRODUCT_ITEM_DETAIL_HASH.get( product_data.crw_goods_code, -1) == -1) :
 				
-				if(rtn ) : product_data.d_crw_file_1 = d_crw_file_1
-				__API__.insert_itemdetail(product_data)
-				if(rtn ) : __IMGJOB__.remove_img(d_crw_file_1)
+					__LOG__.Trace('ITEMDETAIL INSERT -----------------------------------------------------')
+					#__LOG__.Trace( product_data.detail_page_img )
+					rtn , d_crw_file_1 = __IMGJOB__.get_merge_img(product_data.detail_page_img)
+					
+					if(rtn ) : product_data.d_crw_file_1 = d_crw_file_1
+					if( __API__.insert_itemdetail(product_data) ) : 
+						self.PRODUCT_ITEM_DETAIL_HASH[product_data.crw_goods_code] = product_data.crw_id
+					if(rtn ) : __IMGJOB__.remove_img(d_crw_file_1)
 
 	
 	
@@ -1502,6 +1799,51 @@ class Mall(Browser) :
 				if(self.PRODUCT_AVAIBLE_ITEM_HASH.get(key, -1) == -1) :
 					crw_id = self.PRODUCT_ITEM_HASH[key]
 					__API__.is_delete( crw_id )
+	
+	
+	'''
+	######################################################################
+	#
+	# 카테고리 데이터를 추출하는 함수
+	#
+	######################################################################
+	'''
+	def reset_product_category(self, product_data) :
+		product_data.crw_category1 = ''
+		product_data.crw_category2 = ''
+		product_data.crw_category3 = ''
+		
+		
+	def set_product_category_first(self,  product_data, soup) :
+		self.reset_product_category(product_data)
+		
+		for tag in soup.find_all("meta"):
+			if tag.get("property", None) == 'og:description' :
+				rtn = tag.get('content', None)
+				if(rtn != None) :
+					product_data.crw_category1 = rtn.strip()
+					
+					
+	def set_product_category_third(self,  product_data, soup) :
+		self.reset_product_category(product_data)
+		
+		for tag in soup.find_all("meta"):
+			if tag.get("property", None) == 'og:title' :
+				rtn = tag.get('content', None)
+				if(rtn != None) :
+					if(0 < rtn.find('-') ) :
+						#__LOG__.Trace( rtn )
+						split_list = rtn.split('-')
+						idx = -1
+						for split_data in split_list :
+							if(split_data.strip() != '' ) :
+								idx += 1
+								if(idx == 0 ) : product_data.crw_category1 = split_data.strip()
+								elif(idx == 1 ) : 
+									if( product_data.crw_category1 != split_data.strip()) : product_data.crw_category2 = split_data.strip()
+								elif(idx == 2 ) : 
+									if( product_data.crw_category2 != split_data.strip()) : product_data.crw_category3 = split_data.strip()
+	
 	
 	'''
 	######################################################################
@@ -1520,12 +1862,24 @@ class Mall(Browser) :
 		self.PRODUCT_AVAIBLE_ITEM_HASH = None
 		self.PRODUCT_AVAIBLE_ITEM_HASH = {}
 		
+		self.PRODUCT_INSERT_HASH = None
+		self.PRODUCT_INSERT_HASH = {}
+		
 		self.PRODUCT_ITEM_HASH = None
 		self.PRODUCT_ITEM_HASH = {}
 		self.PRODUCT_ITEM_HASH = __API__.get_itemlist(self.BRD_ID)
 		
+		self.PRODUCT_ITEM_DETAIL_HASH = None
+		self.PRODUCT_ITEM_DETAIL_HASH = {}
+		self.PRODUCT_ITEM_DETAIL_HASH = __API__.get_itemdetail(self.BRD_ID)
+		
+		__LOG__.Trace('------------------ PRODUCT_ITEM_HASH ----------------------')
 		for key in self.PRODUCT_ITEM_HASH.keys() :
 			__LOG__.Trace('%s : %d' % ( key , self.PRODUCT_ITEM_HASH[key] ))
+		
+		__LOG__.Trace('------------------- PRODUCT_ITEM_DETAIL_HASH ---------------------')
+		for key in self.PRODUCT_ITEM_DETAIL_HASH.keys() :
+			__LOG__.Trace('%s : %d' % ( key , self.PRODUCT_ITEM_DETAIL_HASH[key] ))
 		
 		#랜덤 COOKIE 및 USER AGENT 값을 얻어 오기
 		self.set_cookie()
@@ -1547,6 +1901,8 @@ class Mall(Browser) :
 			
 			# 카테고리 리스트 갖고 오기
 			self.process_category_list()
+			
+			if( self.C_DETAIL_CATEGORY_VALUE != '' ) : self.process_detail_category_list()
 			
 			#페이지 URL 갖고 오기
 			self.process_page_list()
@@ -1607,7 +1963,7 @@ class Mall(Browser) :
 		elif(search_web_str.startswith('shop.')) : search_web_str = split_list[2].replace('shop.','')
 		
 		
-		brd_id = 1
+		brd_id = 0
 		app_url = self.SITE_HOME
 
 		self.main(app_url, brd_id)

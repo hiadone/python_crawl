@@ -50,9 +50,9 @@ class shop(Cafe24) :
 		self.C_CATEGORY_CASE = __DEFINE__.__C_SELECT__
 		self.C_CATEGORY_TYPE = ''
 		
-		
+		#category > div.position > ul > li:nth-child(4) > a
 		self.C_CATEGORY_VALUE = '#category > div.position > ul > li > a'
-		self.C_CATEGORY_IGNORE_STR = ['NEW ARRIVALS']
+		self.C_CATEGORY_IGNORE_STR = []
 		self.C_CATEGORY_STRIP_STR = ''
 
 		
@@ -115,7 +115,7 @@ class shop(Cafe24) :
 	'''
 	
 	def process_category_list(self):
-		self.process_sub_category_list()
+		self.process_category_list_second()
 		
 	'''
 	######################################################################
@@ -137,7 +137,8 @@ class shop(Cafe24) :
 			
 			# 상품 카테고리
 			#
-			self.set_product_category_first(product_data, soup)
+			#self.set_product_category_first(product_data, soup)
+			self.set_product_category_second(page_url, product_data, soup)
 
 			# 상품 이미지 확인
 			self.set_product_image_fourth(product_data, product_ctx )
@@ -176,31 +177,27 @@ class shop(Cafe24) :
 	def get_product_detail_data(self, product_data, html):
 		rtn = False
 		try :
-			
-			detail_page_txt = []
-			detail_page_img = []
 
-			
 			soup = bs4.BeautifulSoup(html, 'lxml')
+			crw_brand = []
+			
+
 			#
 			# <meta name="keywords" content="[상품검색어],[브랜드],[트렌드],[제조사]">
-			
 			for tag in soup.find_all("meta"):
 				if tag.get("name", None) == 'keywords' :
 					rtn = tag.get('content', None)
 					if(rtn != None) :
 						split_list = rtn.split(',')
-						if( split_list[1].strip() != '' ) : product_data.d_crw_brand2 = split_list[1].strip()
-						if( split_list[3].strip() != '' ) : product_data.d_crw_brand2 = split_list[3].strip()
-						
-			# 제품 상세 부분
-			#prdDetail > div.cont
-			detail_page_txt, detail_page_img = self.get_text_img_in_detail_content_part( soup, '#prdDetail > div', 'p', 'src' )
-			#detail_page_txt, detail_page_img = self.get_text_img_in_detail_content_part( soup, '#prdDetail > div', 'p', 'ec-data-src' )
-			#
+						if( split_list[1].strip() != '' ) : crw_brand.append( split_list[1].strip() )
+						if( split_list[3].strip() != '' ) : crw_brand.append( split_list[3].strip() )
+
+			self.set_detail_brand( product_data, crw_brand )
 
 			
-			self.set_detail_page( product_data, detail_page_txt, detail_page_img)
+			# 제품 상세 부분			
+			self.get_cafe24_text_img_in_detail_content_part( soup, product_data, '#prdDetail > div', '' )
+
 
 			
 		except Exception as ex:
@@ -219,11 +216,7 @@ if __name__ == '__main__':
 
 	app = shop()
 	app.start()
-	
-	#app.set_cookie()
-	#app.set_user_agent()
-	#product_data = ProductData()
-	#app.process_product_detail('http://www.coteacote.kr/product/detail.html?product_no=493&cate_no=66&display_group=1', product_data)
+
 	
 	
 	

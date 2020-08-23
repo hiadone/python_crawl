@@ -56,7 +56,7 @@ class shop(ImWeb) :
 		
 		#self.C_CATEGORY_VALUE = 'body > div > div > div > div.owl-stage-outer > div > div > div > div > div > div > div > h5 > span > a'
 		self.C_CATEGORY_VALUE = 'body > div > main > div.inside > div > div > div > div > div > div > ul > li > a'	#하위 메뉴용
-		self.C_CATEGORY_IGNORE_STR = ['전체보기']																
+		self.C_CATEGORY_IGNORE_STR = []																
 		self.C_CATEGORY_STRIP_STR = ''
 
 		
@@ -106,7 +106,7 @@ class shop(ImWeb) :
 	# 상품 상세 페이지 : 사이트별 수정해야 함.
 	#
 	######################################################################
-	'''	
+	
 	
 	def get_category_value(self, product_data, page_url, soup ) :
 		#
@@ -135,7 +135,7 @@ class shop(ImWeb) :
 			
 		return True
 		
-	
+	'''	
 
 	
 	

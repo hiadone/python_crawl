@@ -54,7 +54,7 @@ class shop(GodoMall) :
 		
 		
 		self.C_CATEGORY_VALUE = '#head_category > dd > a'
-		self.C_CATEGORY_IGNORE_STR = ['SALE']				# 
+		self.C_CATEGORY_IGNORE_STR = []
 		self.C_CATEGORY_STRIP_STR = '..'
 
 		

@@ -56,7 +56,7 @@ class shop(GodoMall) :
 		
 		
 		self.C_CATEGORY_VALUE = '#t_cate > a'
-		self.C_CATEGORY_IGNORE_STR = ['베스트상품','신상품']				# 
+		self.C_CATEGORY_IGNORE_STR = []	
 		self.C_CATEGORY_STRIP_STR = '..'
 
 		

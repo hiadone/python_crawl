@@ -65,14 +65,21 @@ class shop(MakeShop) :
 		
 		
 		self.C_CATEGORY_VALUE = '#header > div > ul.category.hovermenu > li > a'
-		self.C_CATEGORY_IGNORE_STR = ['#공동구매','NEW','BEST','#프리오더','BRAND','#마스크']
+		self.C_CATEGORY_VALUE_2 = '#header > div > ul.category.hovermenu > li > div > ul > li > a'
+		
+		self.C_CATEGORY_IGNORE_STR = []
 		self.C_CATEGORY_STRIP_STR = ''
 
 		
 		
 		self.C_PAGE_CASE = __DEFINE__.__C_SELECT__
 		self.C_PAGE_TYPE = ''
-		self.C_PAGE_VALUE = '#content > div > div.item-page.ec-base-paginate > ol > li > a'	
+		#self.C_PAGE_VALUE = '#content > div > div.item-page.ec-base-paginate > ol > li > a'	
+		#self.C_PAGE_VALUE_2 = '#content > div.item-page.ec-base-paginate > ol > li > a'
+		
+		#self.C_PAGE_VALUE = 'body > div > div > div > div > div > ol > li > a'	
+		#self.C_PAGE_VALUE_2 = 'body > div > div > div > div > ol > li > a'
+		
 		self.C_PAGE_STRIP_STR = ''
 		
 		self.C_PAGE_IGNORE_STR = ['1']			# 페이지 중에 무시해야 하는 스트링
@@ -84,15 +91,28 @@ class shop(MakeShop) :
 
 		
 		#self.C_PRODUCT_VALUE = '#content > div > div.ec-base-product > ul.prdList.grid4 > li'
+		
+		
 		self.C_PRODUCT_VALUE = '#content > div > div.ec-base-product'
+		self.C_PRODUCT_VALUE_2 = '#content > div.ec-base-product'
 		self.C_PRODUCT_STRIP_STR = ''
 		
 		# self.PAGE_LAST_LINK = True 일때 사용
 		self.C_LAST_PAGE_CASE = __DEFINE__.__C_SELECT__
 		self.C_LAST_PAGE_TYPE = ''
 		
-		self.C_LAST_PAGE_VALUE = '#content > div > div.item-page.ec-base-paginate > a'
 		
+		
+		#self.C_LAST_PAGE_VALUE = '#content > div > div.item-page.ec-base-paginate > a.last'
+		#self.C_LAST_PAGE_VALUE_2 = '#content > div.item-page.ec-base-paginate > a.last'
+		
+		#self.C_LAST_PAGE_VALUE = 'body > div > div > div > div > div > a'
+		#self.C_LAST_PAGE_VALUE_2 = 'body > div > div > div > div > a'
+		
+		#self.C_LAST_PAGE_VALUE = '#content > div > div > a.last'
+		#self.C_LAST_PAGE_VALUE_2 = '#content > div > a.last'
+
+
 		self.PAGE_SPLIT_STR = '&page='		# 페이지 링크에서 page를 구분할수 있는 구분자
 		
 		self.PAGE_LAST_LINK = True		# 페이지에서 맨끝 링크 존재 여부
@@ -111,7 +131,9 @@ class shop(MakeShop) :
 
 		self.SET_CATEGORY_DATA_X_CODE_SELECTOR = '#header > div > ul.category.hovermenu > li > a'
 		self.SET_CATEGORY_DATA_M_CODE_SELECTOR = '#header > div > ul.category.hovermenu > li > div > ul > li > a'
-		
+		#self.SET_CATEGORY_DATA_S_CODE_SELECTOR = '#content > div > div > ul > li > a'
+		self.SET_CATEGORY_DATA_S_CODE_SELECTOR = '#content > div.xans-product-menupackage > ul > li > a'
+		self.SET_CATEGORY_DATA_S_CODE_SELECTOR_2 = '#content > div > div > ul > li > a'
 		
 		self.SET_PRODUCT_DETAIL_DATA_DIV_SELECTOR = '#productDetail > div > div.prd-detail'
 		self.SET_PRODUCT_DETAIL_DATA_TEXT_SELECTOR = 'p'
@@ -124,12 +146,134 @@ class shop(MakeShop) :
 	'''
 	######################################################################
 	#
-	# 상품 리스트 페이지 : 사이트별 수정해야 함.
+	# MakeShop.py 대체
 	#
 	######################################################################
 	'''
 	
-	
+	def set_param_page(self, html ) :
+		# self.SCODE_HASH : 최하위 카테고리명 dict dict key는 xcode,mcode 조합 ( xxx-mmm-sss )
+		#
+		try :
+			soup = bs4.BeautifulSoup(html, 'lxml')
+			scode_link_list = []
+
+			menuCategory_ctx = soup.find('ul', class_='menuCategory' )
+			if( menuCategory_ctx != None ) : scode_link_list = menuCategory_ctx.find_all('a')
+				
+			
+			for scode_link_ctx in scode_link_list :
+				#__LOG__.Trace( scode_link_ctx )
+				if('href' in scode_link_ctx.attrs) :
+					link_str = scode_link_ctx.attrs['href']
+					if(0 < link_str.find('&scode=')) :
+
+						xcode_key , mcode_key , scode_key = self.get_xcode_mcode_scode( link_str )
+						if(scode_key != '' ) :
+							split_list = scode_link_ctx.get_text().strip().split('(')
+							scode_name = split_list[0].strip()
+							key = '%s-%s-%s' % ( xcode_key, mcode_key, scode_key  )
+							if(self.SCODE_HASH.get(key, -1) == -1 ) : self.SCODE_HASH[key] = scode_name
+			
+			#for key in self.SCODE_HASH.keys() :
+			#	__LOG__.Trace('S_CODE - %s : %s' % (key, self.SCODE_HASH[key]) )
+			
+		except Exception as ex:
+			__LOG__.Error(ex)
+			pass
+		
+		return True
+		
+	'''
+	######################################################################
+	#
+	# Mall.py 대체
+	#
+	######################################################################
+	'''	
+	def get_page_data(self, category_url, html):
+		rtn = False
+		
+		self.set_param_page(html)
+		
+		page_link_list = []
+		
+		last_page_link_list = []
+		
+		soup = bs4.BeautifulSoup(html, 'lxml')
+		
+		if( self.C_PAGE_CASE == __DEFINE__.__C_SELECT__ ) : 
+			page_part_ctx = soup.find('div', class_='item-page ec-base-paginate')
+			if(page_part_ctx != None) :
+				page_link_list = page_part_ctx.find_all('li')
+
+		__LOG__.Trace('page_link_list : %d ' % len(page_link_list) )
+		
+		if(self.PAGE_LAST_LINK) :
+			if( self.C_LAST_PAGE_CASE == __DEFINE__.__C_SELECT__ ) : 
+				last_page_link_list = soup.find_all('a', class_='last')
+		
+			# 맨끝 페이지 링크에 대한 처리
+			__LOG__.Trace('last_page_link_list : %d ' % len(last_page_link_list) )
+
+			for last_page_ctx in last_page_link_list :
+				try :
+					
+					if('href' in last_page_ctx.attrs ) : 
+						page_link = last_page_ctx.attrs['href']
+						if(0 != page_link.find('http')) : page_link = '%s%s' % ( self.BASIC_PAGE_URL, last_page_ctx.attrs['href'] )
+						
+						if(0 < page_link.find( self.PAGE_SPLIT_STR )) : self.get_page_url_split( page_link , True )
+
+				except Exception as ex:
+					__LOG__.Error(ex)
+					pass
+		
+		# 각 페이지 링크에 대한 처리
+		avaible_page_count = 0
+		for page_link_ctx in page_link_list :
+			try :
+				page_ctx = page_link_ctx.find('a')
+				if(page_ctx != None) :
+					if(self.check_ignore_page( page_ctx ) ) :
+						if('href' in page_ctx.attrs ) : 
+							avaible_page_count += 1
+							tmp_page_link = page_ctx.attrs['href']
+							if(0 != tmp_page_link.find('http')) : 
+								if( 0 == tmp_page_link.find('?page=') ) :			
+									# 페이지 링크 정보가 '?page=' 로 시작되어 질때, 카테고리 URL을 추가해준다.
+									tmp_page_link = '%s%s' % ( category_url, page_ctx.attrs['href'] )
+								else : 
+									tmp_page_link = '%s%s' % ( self.BASIC_PAGE_URL, page_ctx.attrs['href'] )
+							
+							page_link = tmp_page_link
+
+							if(self.C_PAGE_STRIP_STR != '') : page_link = tmp_page_link.replace( self.C_PAGE_STRIP_STR,'')
+							if( page_link.find('javascript') < 0 ) :
+								if( self.PAGE_URL_HASH.get( page_link , -1) == -1) : 
+									if( self.DETAIL_CATEGORY_ACTION ) : self.PAGE_URL_HASH[page_link] = self.DETAIL_CATEGORY_URL_HASH[category_url]
+									else : self.PAGE_URL_HASH[page_link] = self.CATEGORY_URL_HASH[category_url]
+									#self.PAGE_URL_HASH[page_link] = self.CATEGORY_URL_HASH[category_url]
+									if(self.PAGE_FIRST_URL == '' ) : self.get_page_url_split( page_link , False )
+									rtn = True
+									if( config.__DEBUG__ ) : __LOG__.Trace('page : %s' % ( page_link ) )
+
+			except Exception as ex:
+				__LOG__.Error(ex)
+				pass
+		
+		
+		
+		return rtn , avaible_page_count
+		
+		
+	'''
+	######################################################################
+	#
+	# 상품 리스트 페이지 : 사이트별 수정해야 함.
+	#
+	######################################################################
+	'''
 	def get_product_data(self, page_url, html):
 		rtn = False
 		
@@ -139,7 +283,10 @@ class shop(MakeShop) :
 		
 		soup = bs4.BeautifulSoup(html, 'lxml')
 			
-		if( self.C_PRODUCT_CASE == __DEFINE__.__C_SELECT__ ) : product_link_list = soup.select(self.C_PRODUCT_VALUE)
+		if( self.C_PRODUCT_CASE == __DEFINE__.__C_SELECT__ ) : 
+			product_link_list = soup.select(self.C_PRODUCT_VALUE)
+			if( len(product_link_list) == 0 ) : product_link_list = soup.select(self.C_PRODUCT_VALUE_2)
+			
 		__LOG__.Trace('product list : %d' % len(product_link_list) )
 		for product_ctx in product_link_list :
 			
@@ -238,12 +385,10 @@ class shop(MakeShop) :
 			
 			
 			if( crw_post_url != '' ) :
-				if( self.PRODUCT_URL_HASH.get( crw_post_url , -1) == -1) : 
+				#if( self.PRODUCT_URL_HASH.get( crw_post_url , -1) == -1) : 
 				
-					self.set_product_data_sub( product_data, crw_post_url )
-
-					#self.print_product_page_info( product_data ) 			
-					self.process_product_api(product_data)
+				self.set_product_data_sub( product_data, crw_post_url )	
+				self.process_product_api(product_data)
 										
 				rtn = True
 

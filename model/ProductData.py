@@ -3,6 +3,16 @@
 
 from app import define_mall as __DEFINE__
 
+class CategoryData:
+
+	def __init__(self):
+		
+		self.category_depth = 0	
+		self.parent_category_no = 0
+		self.category_name  = ''
+		self.category_depth_name = []
+		
+		
 class ProductData:
 
 	def __init__(self):

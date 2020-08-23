@@ -47,10 +47,11 @@ class shop(GodoMall) :
 		self.C_CATEGORY_CASE = __DEFINE__.__C_SELECT__
 		self.C_CATEGORY_TYPE = ''
 		
+		
 		self.C_CATEGORY_VALUE = '#mheader > div.section3.cboth > div > div.lnb > ul > li > ul > li > a'
 		self.C_CATEGORY_VALUE_2 = '#mheader > div.section3.cboth > div > div.lnb > ul > li > a'
 		
-		self.C_CATEGORY_IGNORE_STR = ['개인결제창','고양이비누/샴푸','강아지비누/샴푸','펫입욕제','펫그루밍','리빙','FOOD']
+		self.C_CATEGORY_IGNORE_STR = ['개인결제창']
 		self.C_CATEGORY_STRIP_STR = '..'
 
 		self.C_PAGE_CASE = __DEFINE__.__C_SELECT__
@@ -122,7 +123,7 @@ class shop(GodoMall) :
 	# set_product_data을 set_product_data_second으로 사용함.
 	######################################################################
 	'''
-	
+
 	def set_product_data(self , page_url, soup, product_ctx ) :
 		self.set_product_data_second( page_url, soup, product_ctx )
 		

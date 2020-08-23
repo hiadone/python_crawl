@@ -53,8 +53,11 @@ class shop(Mall) :
 		self.C_CATEGORY_TYPE = ''
 		
 		#cate > span > a
+		#header > div > div.hd-menu > div > ul > li > ol > li > a
 		
+
 		self.C_CATEGORY_VALUE = '#header > div > div.hd-menu > div > ul > li > ol > li > a'
+		#self.C_CATEGORY_VALUE_2 = '#header > div > div.hd-menu > div > ul > li > a'
 		self.C_CATEGORY_IGNORE_STR = []
 		self.C_CATEGORY_STRIP_STR = ''
 
@@ -89,7 +92,7 @@ class shop(Mall) :
 		
 		
 		self.BASIC_CATEGORY_URL = self.SITE_ORG_HOME + '/html/shop/'
-		self.BASIC_PAGE_URL = self.SITE_ORG_HOME + '/html/shop/'
+		self.BASIC_PAGE_URL = self.SITE_ORG_HOME + '/html/shop/list.php'
 		self.BASIC_PRODUCT_URL = self.SITE_ORG_HOME + '/html/shop/'
 		self.BASIC_IMAGE_URL = self.SITE_ORG_HOME
 		
@@ -170,8 +173,25 @@ class shop(Mall) :
 			product_data = ProductData()
 			crw_post_url = ''
 			
-			product_data.crw_category1 = self.PAGE_URL_HASH[page_url]
+			self.reset_product_category(product_data)
+			category_ctx_list = soup.select('#menu_inner')			
+			for category_ctx in category_ctx_list :
+				split_list = category_ctx.get_text().strip().split('>')
+				idx = 0
+				for a_ctx in split_list :
+					idx += 1
+					category_name = a_ctx.strip()
+					if(idx == 2 ) : product_data.crw_category1 = category_name
+					elif(idx == 3 ) : product_data.crw_category2 = category_name
+					elif(idx == 4 ) : product_data.crw_category3 = category_name
+					
+			#product_data.crw_category1 = self.PAGE_URL_HASH[page_url]
 			
+			############################
+			# 품절여부
+			############################
+			soldout_ctx = product_ctx.find('span', class_='soldOut')
+			if( soldout_ctx != None) : product_data.crw_is_soldout = 1
 			
 			####################################				
 			# 상품 이미지 확인
@@ -246,12 +266,10 @@ class shop(Mall) :
 	
 
 			if( crw_post_url != '' ) :
-				if( self.PRODUCT_URL_HASH.get( crw_post_url , -1) == -1) : 
+				#if( self.PRODUCT_URL_HASH.get( crw_post_url , -1) == -1) : 
 				
-					self.set_product_data_sub( product_data, crw_post_url )
-
-					#self.print_product_page_info( product_data ) 			
-					self.process_product_api(product_data)
+				self.set_product_data_sub( product_data, crw_post_url )		
+				self.process_product_api(product_data)
 										
 				rtn = True
 

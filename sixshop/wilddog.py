@@ -55,7 +55,7 @@ class shop(SixShop) :
 		
 		#displayCanvas > div > div > section > div > div > div.productListFilterCollection > div.productListFilterCollectionNavi > div.productListFilter-navi
 		self.C_CATEGORY_VALUE = '#displayCanvas > div > div > section > div > div > div.productListFilterCollection > div.productListFilterCollectionNavi > div'
-		self.C_CATEGORY_IGNORE_STR = ['All']
+		self.C_CATEGORY_IGNORE_STR = []
 		self.C_CATEGORY_STRIP_STR = ''
 
 		
@@ -110,7 +110,7 @@ if __name__ == '__main__':
 	Log.Init(Log.CRotatingLog(LOG_NAME, 10000000, 10))
 
 	app = shop()
-	app.start()
+	app.start_test()
 	
 	
 	

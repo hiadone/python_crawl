@@ -55,7 +55,7 @@ class SixShop(Mall) :
 		
 	def get_category_data_default_sixshop(self, html):
 		rtn = False
-		
+
 		self.set_param_category(html)
 		
 		category_link_list = []
@@ -195,7 +195,7 @@ class SixShop(Mall) :
 					pass
 			
 		except Exception as ex:
-			__LOG__.Error( "process_product Error 발생 " )
+			__LOG__.Error( "process_product_default_sixshop Error 발생 " )
 			__LOG__.Error( ex )
 			pass
 		
@@ -250,7 +250,7 @@ class SixShop(Mall) :
 			
 			
 		except Exception as ex:
-			__LOG__.Error( "process_product Error 발생 " )
+			__LOG__.Error( "process_product_second_sixshop Error 발생 " )
 			__LOG__.Error( ex )
 			pass
 		
@@ -299,7 +299,14 @@ class SixShop(Mall) :
 	
 	def get_category_value(self, product_data, category_key, soup ) :
 	
-		if(self.CATEGORY_URL_HASH.get( category_key , -1) != -1) : product_data.crw_category1 = self.CATEGORY_URL_HASH[category_key]
+		if(self.CATEGORY_URL_HASH.get( category_key , -1) != -1) : 
+			split_list = self.CATEGORY_URL_HASH[category_key].split('|')
+			idx = 0
+			for split_data in split_list :
+				idx += 1
+				if(idx == 1) :product_data.crw_category1 = split_data.strip()
+				elif(idx == 2) :product_data.crw_category2 = split_data.strip()
+				elif(idx == 3) :product_data.crw_category3 = split_data.strip()
 
 	
 	
@@ -311,6 +318,7 @@ class SixShop(Mall) :
 			crw_post_url = ''
 			
 			
+			self.reset_product_category(product_data)
 			
 			####################################
 			# 상품 카테고리 추출
@@ -400,11 +408,11 @@ class SixShop(Mall) :
 
 			
 			if( crw_post_url != '' ) :
-				if( self.PRODUCT_URL_HASH.get( crw_post_url , -1) == -1) : 
+				#if( self.PRODUCT_URL_HASH.get( crw_post_url , -1) == -1) : 
 				
-					self.set_product_data_sub( product_data, crw_post_url )
-			
-					self.process_product_api(product_data)
+				self.set_product_data_sub( product_data, crw_post_url )
+		
+				self.process_product_api(product_data)
 										
 				rtn = True
 

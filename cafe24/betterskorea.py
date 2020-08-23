@@ -48,8 +48,10 @@ class shop(Cafe24) :
 		self.C_CATEGORY_CASE = __DEFINE__.__C_SELECT__
 		self.C_CATEGORY_TYPE = ''
 		
-		#self.C_CATEGORY_VALUE = '#-category > div > ul > li > div > ul > div.-category-all.gnb-category > div > ul > li.-categorylist-cover.xans-record- > a'
-		self.C_CATEGORY_IGNORE_STR = ['신상품','새벽배송','목욕 기획전','1','26']
+		
+		self.C_CATEGORY_VALUE = '#-category > div > ul > li > div > ul > div.-category-all.gnb-category > div > ul > li.-categorylist-cover.xans-record- > a'
+		
+		self.C_CATEGORY_IGNORE_STR = []
 		self.C_CATEGORY_STRIP_STR = ''
 
 		
@@ -115,7 +117,7 @@ class shop(Cafe24) :
 	'''
 	
 	def process_category_list(self):
-		self.process_sub_category_list()
+		self.process_category_list_second()
 		
 	'''
 	######################################################################
@@ -135,8 +137,8 @@ class shop(Cafe24) :
 			
 			# 상품 카테고리
 			#
-			self.set_product_category_first(product_data, soup)
-
+			self.set_product_category_second(page_url, product_data, soup)
+			#self.set_product_category_third(product_data, soup)
 
 			# 상품 이미지 확인
 			img_link_list = product_ctx.find_all('a')

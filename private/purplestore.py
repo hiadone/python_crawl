@@ -58,7 +58,8 @@ class shop(Mall) :
 		self.C_CATEGORY_TYPE = ''
 		
 
-		self.C_CATEGORY_VALUE = '#allCategoryContainer > div > ul > li > button'
+		self.C_CATEGORY_VALUE = '#allCategoryContainer > div'
+		#self.C_CATEGORY_VALUE = '#allCategoryContainer > div > ul > li > button'
 		self.C_CATEGORY_IGNORE_STR = ['주식 전체','간식 전체','용품 전체']
 		self.C_CATEGORY_STRIP_STR = '..'
 
@@ -105,7 +106,7 @@ class shop(Mall) :
 	# 상품 상세 페이지 : 사이트별 수정해야 함.
 	#
 	######################################################################
-	'''
+
 	
 	def get_category_data(self, html):
 		rtn = False
@@ -147,6 +148,57 @@ class shop(Mall) :
 		if(config.__DEBUG__) : __LOG__.Trace( '카테고리 수 : %d' % len(self.CATEGORY_URL_HASH))
 		
 		return rtn
+	'''
+		
+		
+	def get_category_data(self, URL , html):
+		rtn = False
+		
+		main_category = '개'
+		second_category = ''
+		
+		if(0 < URL.find('CAT')) : main_category = '고양이'
+		
+		self.set_param_category(html)
+		
+		category_link_list = []
+		
+		soup = bs4.BeautifulSoup(html, 'lxml')
+		
+		if( config.__DEBUG__ ) :
+			__LOG__.Trace( self.C_CATEGORY_CASE )
+			__LOG__.Trace( self.C_CATEGORY_VALUE )
+			
+		if( self.C_CATEGORY_CASE == __DEFINE__.__C_SELECT__ ) : 
+			category_link_list = soup.select(self.C_CATEGORY_VALUE)
+
+
+		for category_p_ctx in category_link_list :
+			sub_category_ctx = category_p_ctx.find('em')
+			if( sub_category_ctx != None ) : second_category = sub_category_ctx.get_text().strip()
+			
+			category_list = category_p_ctx.find_all('button')
+			for category_ctx in category_list :
+				try :
+					if(self.check_ignore_category( category_ctx ) ) :
+						if('data-category-id' in category_ctx.attrs ) : 
+							category_link = category_ctx.attrs['data-category-id']
+							
+							category_name = category_ctx.get_text().strip()
+							if( self.CATEGORY_URL_HASH.get( category_link , -1) == -1) : 
+								self.CATEGORY_URL_HASH[category_link] = '%s|%s|%s' % ( main_category, second_category, category_name )
+								if( config.__DEBUG__ ) :
+									__LOG__.Trace('%s : %s' % ( category_name, category_link ) )
+
+								rtn = True
+
+				except Exception as ex:
+					__LOG__.Error(ex)
+					pass
+
+		if(config.__DEBUG__) : __LOG__.Trace( '카테고리 수 : %d' % len(self.CATEGORY_URL_HASH))
+		
+		return rtn
 
 		
 	def process_category_list(self):
@@ -179,7 +231,7 @@ class shop(Mall) :
 					__LOG__.Error(resp.status_code)
 				else :
 					resptext = resp.text
-					rtn = self.get_category_data( resptext )
+					rtn = self.get_category_data( URL , resptext )
 			
 		except Exception as ex:
 			__LOG__.Error( "process_category_list Error 발생 " )
@@ -369,8 +421,19 @@ class shop(Mall) :
 		try :
 			product_data = ProductData()
 			crw_post_url = ''
-
-			product_data.crw_category1 = self.CATEGORY_URL_HASH[category_num]
+			
+			self.reset_product_category(product_data)
+			
+			split_list = self.CATEGORY_URL_HASH[category_num].split('|')
+			idx = 0
+			for category_name in split_list :
+				idx += 1
+				if(idx == 1 ) : product_data.crw_category1 = category_name
+				elif(idx == 2 ) : product_data.crw_category2 = category_name
+				elif(idx == 3 ) : product_data.crw_category3 = category_name
+					
+					
+			#product_data.crw_category1 = self.CATEGORY_URL_HASH[category_num]
 			
 			
 			####################################				
@@ -459,12 +522,9 @@ class shop(Mall) :
 	
 
 			if( crw_post_url != '' ) :
-				if( self.PRODUCT_URL_HASH.get( crw_post_url , -1) == -1) : 
-				
-					self.set_product_data_sub( product_data, crw_post_url )
-
-					#self.print_product_page_info( product_data ) 			
-					self.process_product_api(product_data)
+				#if( self.PRODUCT_URL_HASH.get( crw_post_url , -1) == -1) : 
+				self.set_product_data_sub( product_data, crw_post_url )
+				self.process_product_api(product_data)
 
 
 		except Exception as ex:

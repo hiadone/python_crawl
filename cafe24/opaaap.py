@@ -41,7 +41,9 @@ class shop(Cafe24) :
 		
 		self.EUC_ENCODING = False
 		
-		self.SITE_HOME = 'http://opaaap.com'
+		self.SITE_HOME = 'http://opaaap.com/product/list.html?cate_no=42'
+		
+		self.ORG_SITE_HOME = 'http://opaaap.com'
 		
 		self.SEARCH_MODE = __DEFINE__.__CATEGORY_ALL__
 
@@ -50,9 +52,14 @@ class shop(Cafe24) :
 		self.C_CATEGORY_CASE = __DEFINE__.__C_SELECT__
 		self.C_CATEGORY_TYPE = ''
 		
+		self.DETAIL_CATEGORY_ACTION = True
+		self.C_DETAIL_CATEGORY_VALUE = '#contents1 > div > div.xans-element-.xans-product.xans-product-menupackage > div.menuCategory > ul > li > span > a'
+		self.BASIC_DETAIL_CATEGORY_URL = self.ORG_SITE_HOME
+		self.C_DETAIL_CATEGORY_STRIP_STR = ''
+		
 		
 		self.C_CATEGORY_VALUE = '#menubar > nav > div > ul > li > ul > li > a'
-		self.C_CATEGORY_IGNORE_STR = ['NEW','NOTICE', 'Q&A','REVIEW','PHOTO REVIEW','LOGIN','JOIN US','ORDER','MY PAGE','DELIVERY']
+		self.C_CATEGORY_IGNORE_STR = ['NOTICE', 'Q&A','REVIEW','PHOTO REVIEW','LOGIN','JOIN US','ORDER','MY PAGE','DELIVERY']
 		self.C_CATEGORY_STRIP_STR = ''
 
 		
@@ -84,10 +91,10 @@ class shop(Cafe24) :
 
 		
 		
-		self.BASIC_CATEGORY_URL = self.SITE_HOME
-		self.BASIC_PAGE_URL = self.SITE_HOME + '/product/list.html'
-		self.BASIC_PRODUCT_URL = self.SITE_HOME
-		self.BASIC_IMAGE_URL = self.SITE_HOME
+		self.BASIC_CATEGORY_URL = self.ORG_SITE_HOME
+		self.BASIC_PAGE_URL = self.ORG_SITE_HOME + '/product/list.html'
+		self.BASIC_PRODUCT_URL = self.ORG_SITE_HOME
+		self.BASIC_IMAGE_URL = self.ORG_SITE_HOME
 		
 		
 		'''
@@ -124,8 +131,16 @@ class shop(Cafe24) :
 			
 			# 상품 카테고리
 			#
-			self.set_product_category_first(product_data, soup)
-
+			#self.set_product_category_first(product_data, soup)
+			split_list = self.PAGE_URL_HASH[page_url].split('|')
+			idx = 0
+			for split_data in split_list :
+				idx += 1
+				if(idx == 1) : product_data.crw_category1 = split_data
+				elif(idx == 2) : product_data.crw_category2 = split_data
+				elif(idx == 3) : product_data.crw_category3 = split_data
+				
+				
 			# 상품 이미지 확인
 			self.set_product_image_third(product_data, product_ctx )
 	
@@ -200,25 +215,10 @@ class shop(Cafe24) :
 		rtn = False
 		try :
 
-			
-			detail_page_txt = []
-			detail_page_img = []
-
-			
 			soup = bs4.BeautifulSoup(html, 'lxml')
+			# 제품 상세 부분			
+			self.get_cafe24_text_img_in_detail_content_part( soup, product_data, '#prdDetail > div.cont', '' )
 			
-						
-			# 제품 상세 부분
-			
-			#detail_page_txt, detail_page_img = self.get_text_img_in_detail_content_part( soup, '#prdDetail > div.cont', 'p', 'src' )
-			detail_page_txt, detail_page_img = self.get_text_img_in_detail_content_part( soup, '#prdDetail > div.cont', 'p', 'ec-data-src' )
-			#
-
-
-			
-			self.set_detail_page( product_data, detail_page_txt, detail_page_img)
-			
-			#self.print_detail_page_info( product_data )
 			
 		except Exception as ex:
 			__LOG__.Error(ex)

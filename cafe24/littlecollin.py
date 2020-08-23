@@ -50,9 +50,11 @@ class shop(Cafe24) :
 		self.C_CATEGORY_CASE = __DEFINE__.__C_SELECT__
 		self.C_CATEGORY_TYPE = ''
 		
+		self.C_DETAIL_CATEGORY_VALUE = '#contents > div.xans-element-.xans-product.xans-product-menupackage > ul > li > a'
 		
 		self.C_CATEGORY_VALUE = '#topmenu > ul > li > div > ul > li > a'
-		self.C_CATEGORY_IGNORE_STR = ['LOOK BOOK','MEDIA','NOTICE','BEST REVIEW','REVIEW','Q&A']
+
+		self.C_CATEGORY_IGNORE_STR = ['LOOK BOOK','MEDIA','NOTICE','BEST REVIEW','REVIEW','Q&A' , '개인결제창 ()']
 		self.C_CATEGORY_STRIP_STR = ''
 
 		
@@ -124,7 +126,7 @@ class shop(Cafe24) :
 			
 			# 상품 카테고리
 			#
-			self.set_product_category_first(product_data, soup)
+			self.set_product_category_third(product_data, soup)
 
 
 			# 상품 이미지 확인
@@ -143,6 +145,8 @@ class shop(Cafe24) :
 				# 상품 링크 정보 및 상품명 / 상품코드
 				#
 				name_strong_list = name_div_ctx.find_all('p', class_='name')
+				if(len(name_strong_list) == 0 ) : name_strong_list = name_div_ctx.find_all('strong', class_='name')
+				
 				for name_strong_ctx in name_strong_list :
 					product_link_list = name_strong_ctx.find_all('a')
 					for product_link_ctx in product_link_list :
@@ -188,24 +192,35 @@ class shop(Cafe24) :
 	def get_product_detail_data(self, product_data, html):
 		rtn = False
 		try :
-			
-			detail_page_txt = []
-			detail_page_img = []
 
-			
 			soup = bs4.BeautifulSoup(html, 'lxml')
 			
+			crw_brand = []
+			
+
+			#
+			# <meta name="keywords" content="[상품검색어],[브랜드],[트렌드],[제조사]">
 			for tag in soup.find_all("meta"):
 				if tag.get("name", None) == 'keywords' :
 					rtn = tag.get('content', None)
 					if(rtn != None) :
 						split_list = rtn.split(',')
-						if( split_list[1].strip() != '' ) : product_data.d_crw_brand1 = split_list[1].strip()
-						
-			# 제품 상세 부분			
-			detail_page_txt, detail_page_img = self.get_text_img_in_detail_content_part( soup, '#prdDetail > div.cont', 'p', 'src' )
+						if( split_list[1].strip() != '' ) : crw_brand.append( split_list[1].strip() )
 
-			self.set_detail_page( product_data, detail_page_txt, detail_page_img)
+			'''
+			table_list = soup.select('#df-product-detail > div.detailArea > div.infoArea-wrap > div > div > div.scroll-wrapper.df-detail-fixed-scroll.scrollbar-macosx > div.df-detail-fixed-scroll.scrollbar-macosx.scroll-content > div.xans-element-.xans-product.xans-product-detaildesign > table')
+			
+			rtn_dict = self.get_value_in_table_two_colume( table_list, '기본 정보', 'th', 'td')
+			if(rtn_dict.get('브랜드' , -1) != -1) : crw_brand.append( rtn_dict['브랜드'] )
+			if(rtn_dict.get('제조사' , -1) != -1) : crw_brand.append( rtn_dict['제조사'] )
+			if(rtn_dict.get('원산지' , -1) != -1) : crw_brand.append( rtn_dict['원산지'] )
+			'''
+			
+			self.set_detail_brand( product_data, crw_brand )
+
+			# 제품 상세 부분			
+			self.get_cafe24_text_img_in_detail_content_part( soup, product_data, '#prdDetail > div.cont', '' )
+
 			
 
 			

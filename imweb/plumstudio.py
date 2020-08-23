@@ -50,10 +50,9 @@ class shop(ImWeb) :
 		self.C_CATEGORY_CASE = __DEFINE__.__C_SELECT__
 		self.C_CATEGORY_TYPE = ''
 		
-		#doz_header > div > div > div.inline-inside._inline-inside > div > div.inline-col-group.inline-col-group-left > div> div > div > ul > div.viewport-nav.desktop._main_menu > li > ul > li > a
+		self.C_CATEGORY_VALUE = '#inline_header_normal > div > div.inline-inside._inline-inside > div > div.inline-col-group.inline-col-group-left > div > div > div > ul > div.viewport-nav.desktop._main_menu > li'
+		#self.C_CATEGORY_VALUE = '#inline_header_normal > div > div.inline-inside._inline-inside > div > div.inline-col-group.inline-col-group-left > div > div > div > ul > div.viewport-nav.desktop._main_menu > li > a'
 		
-		#inline_header_normal > div > div.inline-inside._inline-inside > div > div.inline-col-group.inline-col-group-left > div > div > div > ul > div.viewport-nav.desktop._main_menu > li > a
-		self.C_CATEGORY_VALUE = '#inline_header_normal > div > div.inline-inside._inline-inside > div > div.inline-col-group.inline-col-group-left > div > div > div > ul > div.viewport-nav.desktop._main_menu > li > a'
 		self.C_CATEGORY_IGNORE_STR = ['Inside PLUM','PLUM STORIES','COMMUNITY']
 		self.C_CATEGORY_STRIP_STR = ''
 
@@ -94,7 +93,94 @@ class shop(ImWeb) :
 		self.BASIC_IMAGE_URL = self.SITE_HOME
 	
 	
+	'''
+	######################################################################
+	#
+	# Mall.py 를 OverWrite 시킴
+	#
+	######################################################################
+	'''
+	
+	def get_category_data(self, html):
+		rtn = False
 		
+		main_category_name = ''
+		self.set_param_category(html)
+		
+		category_link_list = []
+		
+		soup = bs4.BeautifulSoup(html, 'lxml')
+		
+		if( config.__DEBUG__ ) :
+			__LOG__.Trace( self.C_CATEGORY_CASE )
+			__LOG__.Trace( self.C_CATEGORY_VALUE )
+			
+		if( self.C_CATEGORY_CASE == __DEFINE__.__C_SELECT__ ) : 
+			category_link_list = soup.select(self.C_CATEGORY_VALUE)
+
+
+		for category_main_ctx in category_link_list :
+			try :
+				category_ctx = category_main_ctx.find('a')
+				if(category_ctx != None) :
+					if(self.check_ignore_category( category_ctx ) ) :
+						if('href' in category_ctx.attrs ) : 
+							tmp_category_link = category_ctx.attrs['href']
+							if(0 != tmp_category_link.find('http')) : tmp_category_link = '%s%s' % ( self.BASIC_CATEGORY_URL, category_ctx.attrs['href'] )
+							category_link = tmp_category_link
+							if(self.C_CATEGORY_STRIP_STR != '') : category_link = tmp_category_link.replace( self.C_CATEGORY_STRIP_STR,'')
+				
+							main_category_name = category_ctx.get_text().strip()
+							if( self.CATEGORY_URL_HASH.get( category_link , -1) == -1) : 
+								self.CATEGORY_URL_HASH[category_link] = main_category_name
+								if( config.__DEBUG__ ) :
+									__LOG__.Trace('%s : %s' % ( main_category_name, category_link ) )
+
+								rtn = True
+					
+							ul_ctx = category_main_ctx.find('ul')
+							if( ul_ctx != None) :
+								li_list = ul_ctx.find_all('li')
+								for sub_category_ctx in li_list :
+									sub_category_name = ''
+									sub_link_ctx = sub_category_ctx.find('a')
+									if( sub_link_ctx != None ) :
+										if('href' in sub_link_ctx.attrs ) : 
+											tmp_category_link = sub_link_ctx.attrs['href']
+											if(0 != tmp_category_link.find('http')) : tmp_category_link = '%s%s' % ( self.BASIC_CATEGORY_URL, sub_link_ctx.attrs['href'] )
+											category_link = tmp_category_link
+											if(self.C_CATEGORY_STRIP_STR != '') : category_link = tmp_category_link.replace( self.C_CATEGORY_STRIP_STR,'')
+															
+											sub_category_name = sub_link_ctx.get_text().strip()
+											if( self.CATEGORY_URL_HASH.get( category_link , -1) == -1) : 
+												self.CATEGORY_URL_HASH[category_link] = '%s|%s' % ( main_category_name, sub_category_name )
+												if( config.__DEBUG__ ) :
+													__LOG__.Trace('%s|%s : %s' % ( main_category_name, sub_category_name , category_link ) )
+													
+										detail_ul_ctx = sub_category_ctx.find('ul')
+										if( detail_ul_ctx != None) :
+											detail_a_list = detail_ul_ctx.find_all('a')
+											for detail_link_ctx in detail_a_list :
+												if('href' in detail_link_ctx.attrs ) : 
+													tmp_category_link = detail_link_ctx.attrs['href']
+													if(0 != tmp_category_link.find('http')) : tmp_category_link = '%s%s' % ( self.BASIC_CATEGORY_URL, detail_link_ctx.attrs['href'] )
+													category_link = tmp_category_link
+													if(self.C_CATEGORY_STRIP_STR != '') : category_link = tmp_category_link.replace( self.C_CATEGORY_STRIP_STR,'')
+																	
+													detail_category_name = detail_link_ctx.get_text().strip()
+													if( self.CATEGORY_URL_HASH.get( category_link , -1) == -1) : 
+														self.CATEGORY_URL_HASH[category_link] = '%s|%s|%s' % ( main_category_name, sub_category_name, detail_category_name )
+														if( config.__DEBUG__ ) :
+															__LOG__.Trace('%s|%s|%s : %s' % ( main_category_name, sub_category_name, detail_category_name , category_link ) )				
+										
+
+			except Exception as ex:
+				__LOG__.Error(ex)
+				pass
+
+		if(config.__DEBUG__) : __LOG__.Trace( '카테고리 수 : %d' % len(self.CATEGORY_URL_HASH))
+		
+		return rtn	
 	
 
 	

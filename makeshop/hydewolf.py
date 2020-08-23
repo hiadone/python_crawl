@@ -52,7 +52,7 @@ class shop(MakeShop) :
 		
 		
 		self.C_CATEGORY_VALUE = '#hd_menu > div.hd_left.-mov > ul > li > a'
-		self.C_CATEGORY_IGNORE_STR = ['NEWS']
+		self.C_CATEGORY_IGNORE_STR = []
 		self.C_CATEGORY_STRIP_STR = ''
 
 		
@@ -208,11 +208,11 @@ class shop(MakeShop) :
 
 			
 			if( crw_post_url != '' ) :
-				if( self.PRODUCT_URL_HASH.get( crw_post_url , -1) == -1) : 
+				#if( self.PRODUCT_URL_HASH.get( crw_post_url , -1) == -1) : 
 				
-					self.set_product_data_sub( product_data, crw_post_url )
-		
-					self.process_product_api(product_data)
+				self.set_product_data_sub( product_data, crw_post_url )
+	
+				self.process_product_api(product_data)
 										
 				rtn = True
 

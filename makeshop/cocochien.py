@@ -113,7 +113,7 @@ class shop(MakeShop) :
 	#
 	######################################################################
 	'''
-	
+
 	def set_product_data(self , page_url, soup, product_ctx ) :
 		
 		# 
@@ -213,12 +213,10 @@ class shop(MakeShop) :
 
 			
 			if( crw_post_url != '' ) :
-				if( self.PRODUCT_URL_HASH.get( crw_post_url , -1) == -1) : 
+				#if( self.PRODUCT_URL_HASH.get( crw_post_url , -1) == -1) : 
 				
-					self.set_product_data_sub( product_data, crw_post_url )
-
-					#self.print_product_page_info( product_data ) 			
-					self.process_product_api(product_data)
+				self.set_product_data_sub( product_data, crw_post_url )		
+				self.process_product_api(product_data)
 										
 				rtn = True
 

@@ -55,9 +55,11 @@ class shop(Mall) :
 		self.C_CATEGORY_TYPE = ''
 		
 		#cate > span > a
-		
-		self.C_CATEGORY_VALUE = '#header_wrap > div.box3 > div > div > div > div > div > ul > li.title > a'
-		self.C_CATEGORY_IGNORE_STR = []
+		#header_wrap > div.box3 > div > div > div > div > div > ul > li > a
+		#self.C_CATEGORY_VALUE = '#header_wrap > div.box3 > div > div > div > div > div > ul > li.title > a'
+		#header_wrap > div.box3 > div > div > div > div > div > ul > li > a
+		self.C_CATEGORY_VALUE = '#header_wrap > div.box3 > div > div > div > div > div > ul > li.item > a'
+		self.C_CATEGORY_IGNORE_STR = ['이달의 한정할인']
 		self.C_CATEGORY_STRIP_STR = ''
 
 		
@@ -93,7 +95,7 @@ class shop(Mall) :
 		
 		self.BASIC_CATEGORY_URL = self.SITE_ORG_HOME
 		self.BASIC_PAGE_URL = self.SITE_ORG_HOME
-		self.BASIC_PRODUCT_URL = self.SITE_ORG_HOME + '/shop/'
+		self.BASIC_PRODUCT_URL = self.SITE_ORG_HOME
 		self.BASIC_IMAGE_URL = self.SITE_ORG_HOME
 		
 
@@ -181,8 +183,22 @@ class shop(Mall) :
 			product_data = ProductData()
 			crw_post_url = ''
 			
-			split_list = self.PAGE_URL_HASH[page_url].split('(')
-			product_data.crw_category1 = split_list[0].replace('BEST','').strip()
+			self.reset_product_category(product_data)
+			
+			category_ctx_list = soup.select('body > div.body_wrap > div.content_wrap > div.section_tit > div.close')
+			
+			for category_ctx in category_ctx_list :
+				split_list = category_ctx.get_text().strip().split('>')
+				idx = 0
+				for split_data in split_list :
+					idx += 1
+					category_name = split_data.strip()
+					if(idx == 2 ) : product_data.crw_category1 = category_name
+					elif(idx == 3 ) : product_data.crw_category2 = category_name
+					elif(idx == 4 ) : product_data.crw_category3 = category_name
+				
+			#split_list = self.PAGE_URL_HASH[page_url].split('(')
+			#product_data.crw_category1 = split_list[0].replace('BEST','').strip()
 			
 
 			####################################
@@ -212,10 +228,13 @@ class shop(Mall) :
 					if('href' in product_link_ctx.attrs ) : 
 						tmp_product_link = product_link_ctx.attrs['href'].strip()
 						if(0 != tmp_product_link.find('http')) : tmp_product_link = '%s%s' % ( self.BASIC_PRODUCT_URL, product_link_ctx.attrs['href'].strip() )
-						crw_post_url = tmp_product_link
-
+						
 						if(self.C_PRODUCT_STRIP_STR != '') : crw_post_url = tmp_product_link.replace( self.C_PRODUCT_STRIP_STR,'')
-					
+						
+						split_list = crw_post_url.split('&event_type=')
+						crw_post_url = split_list[0].strip()
+						
+						
 						split_list = crw_post_url.split('?pd_code=')
 						sub_split_list = split_list[1].strip().split('&')
 						product_data.crw_goods_code = sub_split_list[0]
@@ -243,7 +262,13 @@ class shop(Mall) :
 			name_div_list = product_ctx.find_all('div', class_='name')
 			for name_div_ctx in name_div_list :
 				span_ctx = name_div_ctx.find('a')
-				if(span_ctx != None) : product_data.crw_name = span_ctx.get_text().strip()
+				if(span_ctx != None) : 
+					crw_name = span_ctx.get_text().strip()
+					product_data.crw_name = crw_name
+					if(0 < crw_name.find('[품절]') ) :
+						product_data.crw_is_soldout = 1
+						product_data.crw_name = crw_name.replace('[품절]','').strip()
+ 
 	
 	
 
@@ -277,12 +302,10 @@ class shop(Mall) :
 
 			
 			if( crw_post_url != '' ) :
-				if( self.PRODUCT_URL_HASH.get( crw_post_url , -1) == -1) : 
+				#if( self.PRODUCT_URL_HASH.get( crw_post_url , -1) == -1) : 
 				
-					self.set_product_data_sub( product_data, crw_post_url )
-
-					#self.print_product_page_info( product_data ) 			
-					self.process_product_api(product_data)
+				self.set_product_data_sub( product_data, crw_post_url )		
+				self.process_product_api(product_data)
 										
 				rtn = True
 

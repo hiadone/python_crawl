@@ -56,7 +56,7 @@ class shop(SixShop) :
 		
 		#displayCanvas > div > div > section > div > div > div.productListFilterCollection > div.productListFilterCollectionNavi > div.productListFilter-navi
 		self.C_CATEGORY_VALUE = '#displayCanvas > div > div > section > div > div > div.productListFilterCollection > div.productListFilterCollectionNavi > div'
-		self.C_CATEGORY_IGNORE_STR = ['All']
+		self.C_CATEGORY_IGNORE_STR = []
 		self.C_CATEGORY_STRIP_STR = ''
 
 		

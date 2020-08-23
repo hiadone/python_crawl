@@ -132,8 +132,32 @@ class GodoMall(Mall) :
 	# - petesthe : http://www.petesthe.co.kr
 	#
 	######################################################################
-	'''
+
+	def set_godo_category_data_second(self, soup , product_data ) :
+		####################################
+		# 상품 카테고리 추출
+		####################################
+		div_list = soup.find_all("div" , class_='cg-main')
+		for div_ctx in div_list :
+			category_list = div_ctx.find_all('h2')
+			for category_ctx in category_list :
+				product_data.crw_category1 = category_ctx.get_text().strip()
+	'''		
 	
+	def set_godo_category_data_second(self, soup , product_data ) :
+		####################################
+		# 상품 카테고리 추출
+		####################################
+
+		idx = 0
+		category_list = soup.select('#content > div > div > div.location > div.navi > div > a')
+		for category_ctx in category_list :
+			idx += 1
+			if(idx == 1 ) : product_data.crw_category1 = category_ctx.get_text().strip()
+			elif(idx == 2 ) : product_data.crw_category2 = category_ctx.get_text().strip()
+			elif(idx == 3 ) : product_data.crw_category3 = category_ctx.get_text().strip()
+
+			
 	def set_product_data_second(self , page_url, soup, product_ctx ) :
 		
 		# 
@@ -143,16 +167,23 @@ class GodoMall(Mall) :
 			crw_post_url = ''
 			
 			
+			self.reset_product_category(product_data)
 			
 			####################################
 			# 상품 카테고리 추출
 			####################################
+			self.set_godo_category_data_second( soup , product_data )
+			
+			'''
 			div_list = soup.find_all("div" , class_='cg-main')
 			for div_ctx in div_list :
 				category_list = div_ctx.find_all('h2')
 				for category_ctx in category_list :
 					product_data.crw_category1 = category_ctx.get_text().strip()
-		
+			'''
+			
+			
+			
 			'''
 			# 브랜드 확인		
 			brand_div_list = product_ctx.find_all('span', class_='item_brand')
@@ -212,7 +243,8 @@ class GodoMall(Mall) :
 						if(self.C_PRODUCT_STRIP_STR != '') : crw_post_url = tmp_product_link.replace( self.C_PRODUCT_STRIP_STR,'')
 					
 						split_list = crw_post_url.split('?goodsNo=')
-						product_data.crw_goods_code = split_list[1].strip()
+						sub_split_list = split_list[1].split('&')
+						product_data.crw_goods_code = sub_split_list[0].strip()
 					
 			####################################
 			# 가격 / 품절여부
@@ -274,6 +306,47 @@ class GodoMall(Mall) :
 	######################################################################
 	'''
 	
+	def set_godo_category_data(self, soup , product_data ) :
+		####################################
+		# 상품 카테고리 추출
+		####################################
+		if(self.SET_PRODUCT_DATA_CATEGORY_CLASS_SELECT_TYPE == True) :
+			# 
+			# SELECT 타입으로 - DIV CLASS : 'location_tit' 에 카테고리 값이 있음.
+			div_list = soup.find_all("div" , class_='location_tit' )
+			category_list = []
+			for div_ctx in div_list :
+				category_list.append( div_ctx.get_text().strip() )
+			
+			y = 0
+			for idx in range(len(category_list)) :
+				if(y == 0 ) : product_data.crw_category1 = category_list[idx]
+				elif(y == 1 ) : product_data.crw_category2 = category_list[idx]
+				elif(y == 2 ) : product_data.crw_category3 = category_list[idx]
+				y += 1
+			
+
+		else :
+			# 
+			# H1 / H2 / H3 타입으로 
+			div_list = soup.find_all( self.SET_PRODUCT_DATA_CATEGORY_DIV_SELECTOR , class_=self.SET_PRODUCT_DATA_CATEGORY_CLASS_NAME )
+			for div_ctx in div_list :				
+				if( self.SET_PRODUCT_DATA_CATEGORY_TEXT_SELECTOR == '' ) : 
+					product_data.crw_category1 = div_ctx.get_text().strip()
+				else :
+					category_list = div_ctx.find_all( self.SET_PRODUCT_DATA_CATEGORY_TEXT_SELECTOR )
+					for category_ctx in category_list :
+						product_data.crw_category1 = category_ctx.get_text().strip()
+						
+						
+						
+	def get_category_url_godo(self, page_url) :
+		split_list = page_url.split('?')
+		cate_split_list = page_url.split('cateCd=')
+		category_url = '%s?cateCd=%s' % (split_list[0].strip(), cate_split_list[1].strip() )
+		return category_url
+
+		
 	def set_product_data(self , page_url, soup, product_ctx ) :
 		
 		# 
@@ -282,40 +355,25 @@ class GodoMall(Mall) :
 			product_data = ProductData()
 			crw_post_url = ''
 			
+			self.reset_product_category(product_data)
 			
-			####################################
-			# 상품 카테고리 추출
-			####################################
-			if(self.SET_PRODUCT_DATA_CATEGORY_CLASS_SELECT_TYPE == True) :
-				# 
-				# SELECT 타입으로 - DIV CLASS : 'location_tit' 에 카테고리 값이 있음.
-				div_list = soup.find_all("div" , class_='location_tit' )
-				category_list = []
-				for div_ctx in div_list :
-					category_list.append( div_ctx.get_text().strip() )
-				
-				y = 0
-				for idx in range(len(category_list) -1, -1, -1) :
-					if(y == 0 ) : product_data.crw_category1 = category_list[idx]
-					elif(y == 1 ) : product_data.crw_category2 = category_list[idx]
-					elif(y == 2 ) : product_data.crw_category3 = category_list[idx]
-					y += 1
-				
-
+			#__LOG__.Trace( page_url )
+			#__LOG__.Trace( self.PAGE_URL_HASH[page_url])
+			
+			if(self.C_DETAIL_CATEGORY_VALUE.strip() != '') :
+				split_list = self.PAGE_URL_HASH[page_url].split('|')
+				idx = 0
+				for split_data in split_list :
+					idx += 1
+					if(idx == 1) : product_data.crw_category1 = split_data
+					elif(idx == 2) : product_data.crw_category2 = split_data
+					elif(idx == 3) : product_data.crw_category3 = split_data
 			else :
-				# 
-				# H1 / H2 / H3 타입으로 
-				div_list = soup.find_all( self.SET_PRODUCT_DATA_CATEGORY_DIV_SELECTOR , class_=self.SET_PRODUCT_DATA_CATEGORY_CLASS_NAME )
-				for div_ctx in div_list :				
-					if( self.SET_PRODUCT_DATA_CATEGORY_TEXT_SELECTOR == '' ) : 
-						product_data.crw_category1 = div_ctx.get_text().strip()
-					else :
-						category_list = div_ctx.find_all( self.SET_PRODUCT_DATA_CATEGORY_TEXT_SELECTOR )
-						for category_ctx in category_list :
-							product_data.crw_category1 = category_ctx.get_text().strip()
-							
-							
-					
+				self.set_godo_category_data( soup , product_data )
+			
+			
+
+
 			####################################
 			# 브랜드 추출	
 			#
@@ -442,12 +500,10 @@ class GodoMall(Mall) :
 					
 			
 			if( crw_post_url != '' ) :
-				if( self.PRODUCT_URL_HASH.get( crw_post_url , -1) == -1) : 
+				#if( self.PRODUCT_URL_HASH.get( crw_post_url , -1) == -1) : 
 				
-					self.set_product_data_sub( product_data, crw_post_url )
-
-					#self.print_product_page_info( product_data ) 			
-					self.process_product_api(product_data)
+				self.set_product_data_sub( product_data, crw_post_url )		
+				self.process_product_api(product_data)
 										
 				rtn = True
 
