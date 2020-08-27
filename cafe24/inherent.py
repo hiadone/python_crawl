@@ -229,7 +229,7 @@ class shop(Cafe24) :
 if __name__ == '__main__':
 	
 	LOG_NAME = "%s/%s.log" % (config.LOG_PATH , os.path.basename(sys.argv[0]))
-	Log.Init(Log.CRotatingLog(LOG_NAME, 10000000, 10))
+	Log.Init(Log.CRotatingLog(LOG_NAME, 10000000, 5))
 
 	app = shop()
 	app.start()

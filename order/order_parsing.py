@@ -531,7 +531,7 @@ if __name__ == '__main__':
 	action_type = __ORDER__
 	
 	LOG_NAME = "%s/ORDER/%s.%s.log" % (config.LOG_PATH , os.path.basename(sys.argv[0]), action_type )
-	Log.Init(Log.CRotatingLog(LOG_NAME, 10000000, 10))
+	Log.Init(Log.CRotatingLog(LOG_NAME, 10000000, 5))
 
 	
 	#brd_id_list = [ '21', '61', '63' ,'81', '89', '129', '159', '165', '215', '315']	# OTHER -- 테스트 완료 (0706)
@@ -639,7 +639,7 @@ if __name__ == '__main__':
 		else :
 		
 			LOG_NAME = "%s/ORDER/%s.%s%s.log" % (config.LOG_PATH , os.path.basename(sys.argv[0]), sys.argv[1], sys.argv[2] )
-			Log.Init(Log.CRotatingLog(LOG_NAME, 10000000, 10))
+			Log.Init(Log.CRotatingLog(LOG_NAME, 10000000, 5))
 	
 			__LOG__.Trace("***********************************************************")
 			__LOG__.Trace("Start ")

@@ -274,7 +274,18 @@ class smartstore(Mall) :
 					display_count = int( option_ctx.attrs['value'] )
 					#__LOG__.Trace( 'DISPLAY COUNT : %d ' % display_count )
 					break
-				
+		
+		productSortType_str = 'RECENT'
+		productDisplayType_str = 'IMAGE'
+		
+		productSortType_ctx = soup.find('input', {'name':'productSortType'})
+		if(productSortType_ctx != None) : 
+			if('value' in productSortType_ctx.attrs) : productSortType_str = productSortType_ctx.attrs['value']
+			
+		productDisplayType_ctx = soup.find('input', {'name':'productDisplayType'})
+		if(productDisplayType_ctx != None) : 
+			if('value' in productDisplayType_ctx.attrs) : productDisplayType_str = productDisplayType_ctx.attrs['value']
+		
 		split_data = category_url.split('?cp=')
 		first_url = split_data[0]
 		
@@ -283,7 +294,7 @@ class smartstore(Mall) :
 		while(True) :
 			
 			page_url = '%s?cp=1' % (first_url )
-			if(page != 1) : page_url = '%s?page=%d&st=RECENT&dt=IMAGE&size=%d&free=false&cp=1' % (first_url , page , display_count )
+			if(page != 1) : page_url = '%s?page=%d&st=%s&dt=%s&size=%d&free=false&cp=1' % (first_url , page , productSortType_str, productDisplayType_str, display_count )
 
 			if(self.PAGE_URL_HASH.get(page_url , -1) == -1) : 
 				self.PAGE_URL_HASH[page_url] = 1
@@ -1392,7 +1403,7 @@ class smartstore(Mall) :
 if __name__ == '__main__':
 	
 	LOG_NAME = "%s/%s.log" % (config.LOG_PATH , os.path.basename(sys.argv[0]))
-	Log.Init(Log.CRotatingLog(LOG_NAME, 20000000, 10))
+	Log.Init(Log.CRotatingLog(LOG_NAME, 10000000, 5))
 	
 
 	BRD_ID_HASH = __API__.get_storelist('smartstore.naver.com')

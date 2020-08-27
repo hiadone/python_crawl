@@ -41,7 +41,7 @@ if not sys.warnoptions:
 if __name__ == '__main__':
 	
 	LOG_NAME = "%s/%s.log" % (config.LOG_PATH , os.path.basename(sys.argv[0]))
-	Log.Init(Log.CRotatingLog(LOG_NAME, 10000000, 10))
+	Log.Init(Log.CRotatingLog(LOG_NAME, 10000000, 5))
 		
 
 	#BRD_ID_LIST = ['140','141','161','126','190', '281','288','294','297','302','225','229','257','258','266','269','247','314','331']

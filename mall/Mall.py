@@ -511,6 +511,7 @@ class Mall(Browser) :
 		__LOG__.Trace('----------------------------------------------------------')
 		for category_ctx in category_link_list :
 			try :
+				#__LOG__.Trace( category_ctx )
 				if(self.check_ignore_category( category_ctx ) ) :
 					if('href' in category_ctx.attrs ) : 
 						tmp_category_link = category_ctx.attrs['href']
@@ -1569,7 +1570,6 @@ class Mall(Browser) :
 		
 		__LOG__.Trace( '가격     : %d' % product_data.crw_price )
 		__LOG__.Trace( '할인가   : %d' % product_data.crw_price_sale )
-		#__LOG__.Trace( product_data.cdt_content)
 		__LOG__.Trace( '이미지   : %s' % product_data.product_img )
 			
 	
