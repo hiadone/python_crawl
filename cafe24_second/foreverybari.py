@@ -39,7 +39,7 @@ class shop(Cafe24) :
 	
 		Cafe24.__init__(self)
 
-		self.REFERER_SUB_CATEGORY_STR = 'https://www.foreverybari.com/product/list.html?cate_no=32'
+		#self.REFERER_SUB_CATEGORY_STR = 'https://www.foreverybari.com/product/list.html?cate_no=32'
 		self.SITE_HOME = 'https://www.foreverybari.com'
 		
 		self.SEARCH_MODE = __DEFINE__.__CATEGORY_ALL__
@@ -48,8 +48,11 @@ class shop(Cafe24) :
 		self.C_CATEGORY_CASE = __DEFINE__.__C_SELECT__
 		self.C_CATEGORY_TYPE = ''
 		
-		self.C_CATEGORY_VALUE = '#menu_v > ul > li > ul > li.text.xans-record- > a'
-
+		#self.C_CATEGORY_VALUE = '#menu_v > ul > li > ul > li.text.xans-record- > a'
+		self.C_CATEGORY_VALUE = '#header_wrap > div > ul > li > ul > li.xans-record- > a'
+		
+		self.TOP_CATEGORY_NAME = {}		# foreverybari 에서만 사용
+		
 		self.C_CATEGORY_IGNORE_STR = []
 		self.C_CATEGORY_STRIP_STR = ''
 
@@ -109,7 +112,29 @@ class shop(Cafe24) :
 	#
 	######################################################################
 	'''
+	def set_param_category(self, html) :
+		
+		soup = bs4.BeautifulSoup(html, 'lxml')
+			
+		top_category_link_list = soup.select('#header_wrap > div > ul > li')
+		
+		for top_category_ctx in top_category_link_list :
+			top_link_ctx = top_category_ctx.find('a')
+			if(top_link_ctx != None) :
+				top_category_name = top_link_ctx.get_text().strip()
+				ul_ctx = top_category_ctx.find('ul', class_='cate_subCate')
+				if(ul_ctx != None) :
+					category_link_list = ul_ctx.find_all('a')
+					for category_ctx in category_link_list :
+						try :
+							sub_category_name = category_ctx.get_text().strip()
+							self.TOP_CATEGORY_NAME[sub_category_name] = top_category_name
+						except Exception as ex:
+							__LOG__.Error(ex)
+							pass
 
+		
+		
 	def process_category_list(self):
 		self.process_category_list_second()		
 
@@ -133,8 +158,14 @@ class shop(Cafe24) :
 			# 상품 카테고리
 			#
 			#product_data.crw_category1 = self.PAGE_URL_HASH[page_url]
-			self.set_product_category_third(product_data, soup)
-			#self.set_product_category_second(page_url, product_data, soup)
+			#self.set_product_category_third(product_data, soup)
+			self.set_product_category_second(page_url, product_data, soup)
+			sub_cate = product_data.crw_category1
+			if(self.TOP_CATEGORY_NAME.get(sub_cate, -1) != -1) :
+				product_data.crw_category3 = product_data.crw_category2
+				product_data.crw_category2 = product_data.crw_category1
+				product_data.crw_category1 = self.TOP_CATEGORY_NAME[sub_cate]
+
 
 			###########################
 			# 상품 이미지 확인
