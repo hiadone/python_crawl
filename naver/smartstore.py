@@ -50,6 +50,10 @@ class smartstore(Mall) :
 		self.SMARTSTORE_CATEGORY_JSON = None
 		
 		self.SMARTSTORE_PRODUCT_CATEGORY_HASH = {}
+		
+		# ALL 카테고리에서 2페이지 내용들이 정상적으로 표시가 되지 않는 쇼핑몰인 경우 False로 변경하여
+		# 3페이지 이후를 검색을 진행하지 않게 하기 위한 변수 
+		self.SMARTSTORE_ALL_URL = True
 	
 	'''
 	######################################################
@@ -1024,8 +1028,7 @@ class smartstore(Mall) :
 		
 		try :
 		
-			if( config.__DEBUG__ ) :
-				__LOG__.Trace('page : %s' % ( page_url ) )
+			if( config.__DEBUG__ ) : __LOG__.Trace('page : %s' % ( page_url ) )
 				
 			time.sleep(self.WAIT_TIME)
 			URL = page_url
@@ -1037,6 +1040,9 @@ class smartstore(Mall) :
 			if( resp.status_code != 200 ) :
 				__LOG__.Error(resp.status_code)
 			else :
+				if( config.__DEBUG__ ) : __LOG__.Trace('REDIRECT URL : %s' % resp.url)
+				if(0 < URL.find('/ALL?')) and (0 < resp.url.find('?nClickPageType=smartstore.category')) : self.SMARTSTORE_ALL_URL = False
+					
 				resptext = resp.text
 				rtn = self.get_product_data( resptext )
 			
@@ -1061,7 +1067,8 @@ class smartstore(Mall) :
 			
 		for page_url in self.PAGE_URL_HASH.keys() :
 			if(self.SHUTDOWN) : break
-			self.process_product( page_url )
+			if(0 < page_url.find('/ALL?')) and (self.SMARTSTORE_ALL_URL) : self.process_product( page_url )
+			else : self.process_product( page_url )
 		
 		if(config.__DEBUG__) : __LOG__.Trace( '총 물품 수 : %d' % len(self.PRODUCT_URL_HASH))	
 		__LOG__.Trace("*************************************************")	
