@@ -282,14 +282,39 @@ class shop(Cafe24) :
 	#
 	######################################################################
 	'''
+	def process_product_detail_page(self):
+		
+		# 모바일 UA 상태에서만 id='prdDetailContent' 에 상세 이미지 나옴.
+		# self.USER_AGENT 를 바꾸어줌.
+		self.USER_AGENT = 'Mozilla/5.0 (iPad; CPU OS 11_0 like Mac OS X) AppleWebKit/604.1.34 (KHTML, like Gecko) Version/11.0 Mobile/15A5341f Safari/604.1'
+		
+		__LOG__.Trace("********** process_product_detail_page ***********")
+		
+		rtn = False
+		resptext = ''
 
+		for product_url in self.PRODUCT_URL_HASH.keys() :
+			if(self.SHUTDOWN) : break
+			product_data = self.PRODUCT_URL_HASH[product_url]
+			
+			# 신규 입력일때만 상세페이지 조회
+			# if( product_data.crw_action == __DEFINE__.__INSERT_CRW__ ) : self.process_product_detail( product_url ,product_data )
+			if( product_data.crw_id != 0 ) and ( self.PRODUCT_ITEM_DETAIL_HASH.get(product_data.crw_goods_code, -1) == -1 ) : self.process_product_detail( product_url ,product_data )
+					
+		__LOG__.Trace("*************************************************")	
+		
+		return rtn
+		
+		
 	def get_product_detail_data(self, product_data, html):
 		rtn = False
 		try :
 			
 			detail_page_txt = []
 			detail_page_img = []
-
+			detail_page_img_a = []
+			detail_page_img_b = []
+			
 			soup = bs4.BeautifulSoup(html, 'lxml')
 						
 			brand_list = soup.find_all('span', {'id':'brand'} )
@@ -297,9 +322,21 @@ class shop(Cafe24) :
 				a_link_ctx = brand_ctx.find('a')
 				if('alt' in a_link_ctx.attrs) : product_data.d_crw_brand1 = a_link_ctx.attrs['alt'].strip()
 				
+			'''
+			detail_div_list = soup.select('#prdDetailContent')
+			__LOG__.Trace( html )
+			for detail_div in detail_div_list :
+				__LOG__.Trace(detail_div)
+			'''
 			
-			detail_page_txt, detail_page_img = self.get_text_img_in_detail_content_part( soup, '#prdDetailContentLazy', 'p', 'src' )
-			if( len(detail_page_img) == 0 ) : detail_page_txt, detail_page_img = self.get_text_img_in_detail_content_part( soup, '#prdDetailContentLazy', 'p', 'ec-data-src' )
+			detail_page_txt, detail_page_img_a = self.get_text_img_in_detail_content_part( soup, '#prdDetailContent', 'p', 'src' )
+			detail_page_txt, detail_page_img_b = self.get_text_img_in_detail_content_part( soup, '#prdDetailContent', 'p', 'ec-data-src' )
+			
+			for img_str in detail_page_img_a :
+				detail_page_img.append(img_str)
+				
+			for img_str in detail_page_img_b :
+				detail_page_img.append(img_str)
 			
 			self.set_detail_page( product_data, detail_page_txt, detail_page_img)
 			
