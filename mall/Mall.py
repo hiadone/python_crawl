@@ -1656,9 +1656,11 @@ class Mall(Browser) :
 			product_data = self.PRODUCT_URL_HASH[product_url]
 			
 			# 신규 입력일때만 상세페이지 조회
-			# if( product_data.crw_action == __DEFINE__.__INSERT_CRW__ ) : self.process_product_detail( product_url ,product_data )
-			if( product_data.crw_id != 0 ) and ( self.PRODUCT_ITEM_DETAIL_HASH.get(product_data.crw_goods_code, -1) == -1 ) : self.process_product_detail( product_url ,product_data )
-					
+			if config.__REAL__ :
+				if( product_data.crw_id != 0 ) and ( self.PRODUCT_ITEM_DETAIL_HASH.get(product_data.crw_goods_code, -1) == -1 ) : self.process_product_detail( product_url ,product_data )
+			else :
+				if( product_data.crw_id != 0 ) : self.process_product_detail( product_url ,product_data )
+			
 		__LOG__.Trace("*************************************************")	
 		
 		return rtn
@@ -1784,8 +1786,15 @@ class Mall(Browser) :
 					if( __API__.insert_itemdetail(product_data) ) : 
 						self.PRODUCT_ITEM_DETAIL_HASH[product_data.crw_goods_code] = product_data.crw_id
 					if(rtn ) : __IMGJOB__.remove_img(d_crw_file_1)
-
-	
+		
+		else :
+			if(product_data.crw_id != 0) : 
+				__LOG__.Trace('ITEMDETAIL INSERT -----------------------------------------------------')
+				#__LOG__.Trace( product_data.detail_page_img )
+				rtn , d_crw_file_1 = __IMGJOB__.get_merge_img(product_data.detail_page_img)
+				
+				if(rtn ) : product_data.d_crw_file_1 = d_crw_file_1
+				if(rtn ) : __IMGJOB__.remove_img(d_crw_file_1)
 	
 	
 	def process_product_delete_api(self) :
