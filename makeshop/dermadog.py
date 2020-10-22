@@ -41,7 +41,8 @@ class shop(MakeShop) :
 		
 		self.EUC_ENCODING = True
 		
-		self.SITE_HOME = 'http://www.dermadog.co.kr/shop/shopbrand.html?type=X&xcode=001'
+		self.SITE_HOME = 'http://www.dermadog.co.kr'
+		# self.SITE_HOME = 'http://www.dermadog.co.kr/shop/shopbrand.html?type=X&xcode=001'
 		
 		self.ORG_SITE_HOME = 'http://www.dermadog.co.kr'
 		
