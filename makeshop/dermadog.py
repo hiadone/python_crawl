@@ -43,7 +43,6 @@ class shop(MakeShop) :
 		
 		self.SITE_HOME = 'http://www.dermadog.co.kr'
 		# self.SITE_HOME = 'http://www.dermadog.co.kr/shop/shopbrand.html?type=X&xcode=001'
-		
 		self.ORG_SITE_HOME = 'http://www.dermadog.co.kr'
 		
 		self.SEARCH_MODE = __DEFINE__.__CATEGORY_ALL__
@@ -53,8 +52,8 @@ class shop(MakeShop) :
 		self.C_CATEGORY_CASE = __DEFINE__.__C_SELECT__
 		self.C_CATEGORY_TYPE = ''
 		
-		self.C_CATEGORY_VALUE = '#prdBrand > div.cate-wrap > div.class-list > ul > li > a'
-		#self.C_CATEGORY_VALUE = '#lnbWrap > ul > li > a'
+		# self.C_CATEGORY_VALUE = '#prdBrand > div.cate-wrap > div.class-list > ul > li > a'
+		self.C_CATEGORY_VALUE = '#lnbWrap > ul > li > a'
 		self.C_CATEGORY_IGNORE_STR = ['ABOUT US','EVENT','COMMUNITY','BOARD']
 		self.C_CATEGORY_STRIP_STR = ''
 
