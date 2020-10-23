@@ -223,7 +223,7 @@ if __name__ == '__main__':
 	Log.Init(Log.CRotatingLog(LOG_NAME, 10000000, 5))
 
 	app = shop()
-	app.start_test()
+	app.start()
 	
 
 	

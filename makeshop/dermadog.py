@@ -41,7 +41,9 @@ class shop(MakeShop) :
 		
 		self.EUC_ENCODING = True
 		
-		self.SITE_HOME = 'http://www.dermadog.co.kr/shop/shopbrand.html?type=X&xcode=001'
+		#self.SITE_HOME = 'http://www.dermadog.co.kr/shop/shopbrand.html?type=X&xcode=001'
+		
+		self.SITE_HOME = 'http://www.dermadog.co.kr'
 		
 		self.ORG_SITE_HOME = 'http://www.dermadog.co.kr'
 		
@@ -52,7 +54,9 @@ class shop(MakeShop) :
 		self.C_CATEGORY_CASE = __DEFINE__.__C_SELECT__
 		self.C_CATEGORY_TYPE = ''
 		
-		self.C_CATEGORY_VALUE = '#prdBrand > div.cate-wrap > div.class-list > ul > li > a'
+
+		self.C_CATEGORY_VALUE = '#lnbWrap > ul > li > div > div > ul > li > a'
+		#self.C_CATEGORY_VALUE = '#prdBrand > div.cate-wrap > div.class-list > ul > li > a'
 		#self.C_CATEGORY_VALUE = '#lnbWrap > ul > li > a'
 		self.C_CATEGORY_IGNORE_STR = ['ABOUT US','EVENT','COMMUNITY','BOARD']
 		self.C_CATEGORY_STRIP_STR = ''
@@ -70,7 +74,7 @@ class shop(MakeShop) :
 		
 		self.C_PRODUCT_CASE = __DEFINE__.__C_SELECT__
 		self.C_PRODUCT_TYPE = ''
-
+		
 		self.C_PRODUCT_VALUE = '#prdBrand > div.item-wrap > div > dl'
 		self.C_PRODUCT_STRIP_STR = ''
 		
@@ -86,10 +90,10 @@ class shop(MakeShop) :
 
 		
 		
-		self.BASIC_CATEGORY_URL = self.ORG_SITE_HOME
-		self.BASIC_PAGE_URL = self.ORG_SITE_HOME
-		self.BASIC_PRODUCT_URL = self.ORG_SITE_HOME
-		self.BASIC_IMAGE_URL = self.ORG_SITE_HOME
+		self.BASIC_CATEGORY_URL = self.SITE_HOME
+		self.BASIC_PAGE_URL = self.SITE_HOME
+		self.BASIC_PRODUCT_URL = self.SITE_HOME
+		self.BASIC_IMAGE_URL = self.SITE_HOME
 		
 		
 		'''
@@ -98,9 +102,12 @@ class shop(MakeShop) :
 
 		self.SET_CATEGORY_DATA_X_CODE_SELECTOR = '#lnbWrap > ul > li > a'
 		#self.SET_CATEGORY_DATA_M_CODE_SELECTOR = '#lnbWrap > ul > li > div > div > ul > li > a'
-		self.SET_CATEGORY_DATA_M_CODE_SELECTOR = '#prdBrand > div.cate-wrap > div.class-list > ul > li > a'
-		self.SET_CATEGORY_DATA_S_CODE_SELECTOR = '#prdBrand > div.cate-wrap > div.class-list > ul > li > ul > li > a'
-
+		#self.SET_CATEGORY_DATA_M_CODE_SELECTOR = '#prdBrand > div.cate-wrap > div.class-list > ul > li > a'
+		#self.SET_CATEGORY_DATA_S_CODE_SELECTOR = '#prdBrand > div.cate-wrap > div.class-list > ul > li > ul > li > a'
+		
+		self.SET_CATEGORY_DATA_M_CODE_SELECTOR = '#lnbWrap > ul > li > div > div > ul > li > a'
+		self.SET_CATEGORY_DATA_S_CODE_SELECTOR = '#prdBrand > div.cate-wrap > div.class-list > ul > li > a'
+		
 		
 		self.SET_PRODUCT_DETAIL_DATA_DIV_SELECTOR = '#productDetail > div > div.prd-detail > center > div'
 		self.SET_PRODUCT_DETAIL_DATA_DIV_SELECTOR_SECOND = '#productDetail > div > div'
