@@ -40,7 +40,9 @@ class shop(Cafe24) :
 		Cafe24.__init__(self)
 		
 		
-		self.SITE_HOME = 'http://bymona.co.kr'
+		self.SITE_HOME = 'http://bymona.co.kr/product/list.html?cate_no=135'
+		
+		self.ORG_SITE_HOME = 'http://bymona.co.kr'
 		
 		self.SEARCH_MODE = __DEFINE__.__CATEGORY_ALL__
 
@@ -49,8 +51,7 @@ class shop(Cafe24) :
 		self.C_CATEGORY_CASE = __DEFINE__.__C_SELECT__
 		self.C_CATEGORY_TYPE = ''
 		
-		
-		self.C_CATEGORY_VALUE = '#categoryArea > div > div > div > div > div > a'
+		self.C_CATEGORY_VALUE = '#contents > ul > li > a'
 		self.C_CATEGORY_IGNORE_STR = []
 		self.C_CATEGORY_STRIP_STR = ''
 
@@ -60,7 +61,7 @@ class shop(Cafe24) :
 		self.C_PAGE_TYPE = ''
 		
 		
-		self.C_PAGE_VALUE = '#contents > div > div.xans-element-.xans-product.xans-product-normalpaging.ec-base-paginate > ol > li > a'
+		self.C_PAGE_VALUE = '#contents > div.xans-element-.xans-product.xans-product-normalpaging.ec-base-paginate > ol > li > a'
 		self.C_PAGE_STRIP_STR = ''
 		
 		self.C_PAGE_IGNORE_STR = ['1']			# 페이지 중에 무시해야 하는 스트링
@@ -69,8 +70,8 @@ class shop(Cafe24) :
 		
 		self.C_PRODUCT_CASE = __DEFINE__.__C_SELECT__
 		self.C_PRODUCT_TYPE = ''
-
-		self.C_PRODUCT_VALUE = '#contents > div > div.xans-element-.xans-product.xans-product-normalpackage > div > ul > li > div'
+			
+		self.C_PRODUCT_VALUE = '#contents > div.xans-element-.xans-product.xans-product-normalpackage > div.xans-element-.xans-product.xans-product-listnormal.ec-base-product > ul > li'
 		
 		self.C_PRODUCT_STRIP_STR = ''
 		
@@ -78,7 +79,7 @@ class shop(Cafe24) :
 		self.C_LAST_PAGE_CASE = __DEFINE__.__C_SELECT__
 		self.C_LAST_PAGE_TYPE = ''
 		
-		self.C_LAST_PAGE_VALUE = '#contents > div > div.xans-element-.xans-product.xans-product-normalpaging.ec-base-paginate > a.last'
+		self.C_LAST_PAGE_VALUE = '#contents > div.xans-element-.xans-product.xans-product-normalpaging.ec-base-paginate > a.last'
 		
 		self.PAGE_SPLIT_STR = '&page='		# 페이지 링크에서 page를 구분할수 있는 구분자
 		
@@ -86,10 +87,10 @@ class shop(Cafe24) :
 
 		
 		
-		self.BASIC_CATEGORY_URL = self.SITE_HOME
-		self.BASIC_PAGE_URL = self.SITE_HOME + '/product/list.html'
-		self.BASIC_PRODUCT_URL = self.SITE_HOME
-		self.BASIC_IMAGE_URL = self.SITE_HOME
+		self.BASIC_CATEGORY_URL = self.ORG_SITE_HOME
+		self.BASIC_PAGE_URL = self.ORG_SITE_HOME + '/product/list.html'
+		self.BASIC_PRODUCT_URL = self.ORG_SITE_HOME
+		self.BASIC_IMAGE_URL = self.ORG_SITE_HOME
 		
 		'''
 		# Cafe24 전용 
@@ -98,7 +99,7 @@ class shop(Cafe24) :
 		
 		# 물품 이미지 CSS selector 정의
 		self.C_PRODUCT_IMG_SELECTOR = 'div'
-		self.C_PRODUCT_IMG_SELECTOR_CLASSNAME = 'prdImg_thumb'
+		self.C_PRODUCT_IMG_SELECTOR_CLASSNAME = 'prdImg'
 		
 		
 		# 물품 SOLDOUT CSS selector 정의
@@ -143,7 +144,9 @@ class shop(Cafe24) :
 			###########################
 			# 상품 이미지 확인
 			#
-			# <img src="//ai-doggi.com/web/product/medium/20191220/a8ebb002293a954628763cf4a9ab6c38.jpg" alt="" class="thumb">
+			# <div class="prdImg">
+            # <a href="/product/chicken-terrine/304/category/137/display/1/" name="anchorBoxName_304"><img src="//bymona.co.kr/web/product/medium/202008/35319c8b46eba6ca86653a26193b993d.jpg" id="eListPrdImage304_1" alt="chicken terrine"></a>
+            # </div>
 			###########################
 			self.set_product_image_fourth( product_data, product_ctx )
 
@@ -152,12 +155,10 @@ class shop(Cafe24) :
 
 			###########################
 			#
-			# <p class="name">
-			# <a href="/product/detail.html?product_no=286&amp;cate_no=43&amp;display_group=1"><strong class="title displaynone"><span style="font-size:12px;color:#555555;">상품명</span> :</strong> <span style="font-size:12px;color:#555555;">Frill Neck Sleeve Blouse Lavender [20%SALE]</span></a>
-			# </p>
+			# <strong class="name"><a href="/product/chicken-terrine/304/category/137/display/1/" class=""><span class="title displaynone"><span style="font-size:12px;color:#555555;">상품명</span> :</span> <span style="font-size:12px;color:#555555;">chicken terrine</span></a></strong>
 			###########################
 			
-			crw_post_url = self.set_product_name_url_second( product_data, product_ctx , 'div', 'item_name')
+			crw_post_url = self.set_product_name_url_second( product_data, product_ctx , 'strong', 'name')
 			
 			############################
 			#
@@ -218,8 +219,8 @@ class shop(Cafe24) :
 						split_list = rtn.split(',')
 						if( split_list[1].strip() != '' ) : crw_brand.append( split_list[1].strip() )
 			'''
-
-			table_list = soup.select('#itemArea > div > div.infoArea > div > div.xans-element-.xans-product.xans-product-detaildesign > table')
+			
+			table_list = soup.select('#contents > div > div.detailArea > div.infoArea > div > table.infoArea_table')
 			
 			rtn_dict = self.get_value_in_table_two_colume( table_list, '기본 정보', 'th', 'td')
 			if(rtn_dict.get('브랜드' , -1) != -1) : crw_brand.append( rtn_dict['브랜드'] )
@@ -229,7 +230,7 @@ class shop(Cafe24) :
 			self.set_detail_brand( product_data, crw_brand )
 			
 			# 제품 상세 부분			
-			self.get_cafe24_text_img_in_detail_content_part( soup, product_data, '#prdDetail > div', '' )
+			self.get_cafe24_text_img_in_detail_content_part( soup, product_data, '#prdDetail > div.cont', '' )
 				
 
 			
