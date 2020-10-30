@@ -48,16 +48,24 @@ class shop(Cafe24) :
 		self.C_CATEGORY_CASE = __DEFINE__.__C_SELECT__
 		self.C_CATEGORY_TYPE = ''
 		
-		self.C_CATEGORY_VALUE = '#category > ul > li > a'
+		
+		#
+		self.DETAIL_CATEGORY_ACTION = True
+		self.C_DETAIL_CATEGORY_VALUE = '#contents > div.xans-element-.xans-product.xans-product-menupackage > ul > li > a'
+		self.BASIC_DETAIL_CATEGORY_URL = self.ORG_SITE_HOME
+		self.C_DETAIL_CATEGORY_STRIP_STR = ''
 
-		self.C_CATEGORY_IGNORE_STR = []
+		self.C_CATEGORY_VALUE = '#category-basic > div.position > ul.ct01-wrap > li#cate_tip_wrap > a'
+		
+		
+		self.C_CATEGORY_IGNORE_STR = ['브랜드','면역기획전','이벤트','고객센터','WHOLESALE']
 		self.C_CATEGORY_STRIP_STR = ''
 
 		
-		
+		#all_category > div.position > ul > li:nth-child(1) > dl > dd:nth-child(1)
 		self.C_PAGE_CASE = __DEFINE__.__C_SELECT__
 		self.C_PAGE_TYPE = ''
-		self.C_PAGE_VALUE = '#contents > div > ol > li > a'
+		self.C_PAGE_VALUE = '#contents > div.xans-element-.xans-product.xans-product-normalpaging.ec-base-paginate > ol > li > a'
 		self.C_PAGE_STRIP_STR = ''
 		
 		self.C_PAGE_IGNORE_STR = ['1']			# 페이지 중에 무시해야 하는 스트링
@@ -68,7 +76,7 @@ class shop(Cafe24) :
 		self.C_PRODUCT_TYPE = ''
 
 
-		self.C_PRODUCT_VALUE = '#contents > div.xans-element-.xans-product.xans-product-normalpackage.cateNormPrd > div.xans-element-.xans-product.xans-product-listnormal.ec-base-product > ul > li'
+		self.C_PRODUCT_VALUE = 'ul.prdList > li'
 		self.C_PRODUCT_STRIP_STR = ''
 		
 		# self.PAGE_LAST_LINK = True 일때 사용
@@ -121,14 +129,23 @@ class shop(Cafe24) :
 			
 			# 상품 카테고리
 			#
-			product_data.crw_category1 = self.PAGE_URL_HASH[page_url]
-			#self.set_product_category_third(product_data, soup)
-			#self.set_product_category_second(page_url, product_data, soup)
+			split_list = self.PAGE_URL_HASH[page_url].split('|')
+			idx = 0
+			for split_data in split_list :
+				idx += 1
+				if(idx == 1) : product_data.crw_category1 = split_data
+				elif(idx == 2) : product_data.crw_category2 = split_data
+				elif(idx == 3) : product_data.crw_category3 = split_data
+
+			
+			# self.set_product_category_third(product_data, soup)
+			# self.set_product_category_second(page_url, product_data, soup)
 
 			###########################
 			# 상품 이미지 확인
 			###########################
 			
+
 			self.set_product_image_fourth( product_data, product_ctx )
 			
 		
@@ -138,7 +155,8 @@ class shop(Cafe24) :
 			###########################
 			# 상품명/URL
 			###########################
-			crw_post_url = self.set_product_name_url_second( product_data, product_ctx , 'div', 'name')
+			crw_post_url = self.set_product_name_url_second( product_data, product_ctx , 'strong', 'name')
+
 
 			##############################
 			# 가격

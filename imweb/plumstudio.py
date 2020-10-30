@@ -49,13 +49,16 @@ class shop(ImWeb) :
 		
 		self.C_CATEGORY_CASE = __DEFINE__.__C_SELECT__
 		self.C_CATEGORY_TYPE = ''
-		
-		self.C_CATEGORY_VALUE = '#inline_header_normal > div > div.inline-inside._inline-inside > div > div.inline-col-group.inline-col-group-left > div > div > div > ul > div.viewport-nav.desktop._main_menu > li'
-		#self.C_CATEGORY_VALUE = '#inline_header_normal > div > div.inline-inside._inline-inside > div > div.inline-col-group.inline-col-group-left > div > div > div > ul > div.viewport-nav.desktop._main_menu > li > a'
-		
-		self.C_CATEGORY_IGNORE_STR = ['Inside PLUM','PLUM STORIES','COMMUNITY']
-		self.C_CATEGORY_STRIP_STR = ''
 
+ 
+		self.C_CATEGORY_VALUE = 'div#w20201020c9b583dbf58c3 > div > ul > div.viewport-nav.desktop._main_menu > li'
+		# self.C_CATEGORY_VALUE = '#w20201020c9b583dbf58c3 > div > ul > div.viewport-nav.desktop._main_menu > li > a'
+
+		# self.C_CATEGORY_VALUE = '#inline_header_normal > div > div.inline-inside._inline-inside > div > div.inline-col-group.inline-col-group-left > div > div > div > ul > div.viewport-nav.desktop._main_menu > li > a'
+		
+		self.C_CATEGORY_IGNORE_STR = ['BRAND','STORIES','REVIEW']
+		self.C_CATEGORY_STRIP_STR = ''
+		
 		
 		
 		self.C_PAGE_CASE = __DEFINE__.__C_SELECT__
@@ -118,10 +121,11 @@ class shop(ImWeb) :
 		if( self.C_CATEGORY_CASE == __DEFINE__.__C_SELECT__ ) : 
 			category_link_list = soup.select(self.C_CATEGORY_VALUE)
 
-
+		
 		for category_main_ctx in category_link_list :
 			try :
 				category_ctx = category_main_ctx.find('a')
+				
 				if(category_ctx != None) :
 					if(self.check_ignore_category( category_ctx ) ) :
 						if('href' in category_ctx.attrs ) : 
@@ -149,6 +153,7 @@ class shop(ImWeb) :
 											tmp_category_link = sub_link_ctx.attrs['href']
 											if(0 != tmp_category_link.find('http')) : tmp_category_link = '%s%s' % ( self.BASIC_CATEGORY_URL, sub_link_ctx.attrs['href'] )
 											category_link = tmp_category_link
+											
 											if(self.C_CATEGORY_STRIP_STR != '') : category_link = tmp_category_link.replace( self.C_CATEGORY_STRIP_STR,'')
 															
 											sub_category_name = sub_link_ctx.get_text().strip()
@@ -156,7 +161,7 @@ class shop(ImWeb) :
 												self.CATEGORY_URL_HASH[category_link] = '%s|%s' % ( main_category_name, sub_category_name )
 												if( config.__DEBUG__ ) :
 													__LOG__.Trace('%s|%s : %s' % ( main_category_name, sub_category_name , category_link ) )
-													
+											
 										detail_ul_ctx = sub_category_ctx.find('ul')
 										if( detail_ul_ctx != None) :
 											detail_a_list = detail_ul_ctx.find_all('a')
@@ -177,7 +182,7 @@ class shop(ImWeb) :
 			except Exception as ex:
 				__LOG__.Error(ex)
 				pass
-
+		
 		if(config.__DEBUG__) : __LOG__.Trace( '카테고리 수 : %d' % len(self.CATEGORY_URL_HASH))
 		
 		return rtn	
