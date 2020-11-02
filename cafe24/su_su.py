@@ -226,7 +226,7 @@ class shop(Cafe24) :
 			self.set_detail_brand( product_data, crw_brand )
 
 			# 제품 상세 부분			
-			self.get_cafe24_text_img_in_detail_content_part( soup, product_data, '#prdDetail-1 > div.cont', '' )
+			self.get_cafe24_text_img_in_detail_content_part( soup, product_data, '#prdDetail-3 > div > div ', '#prdDetail-1 > div.cont' )
 
 		except Exception as ex:
 			__LOG__.Error(ex)
@@ -235,6 +235,55 @@ class shop(Cafe24) :
 		return rtn
 	
 	
+
+	def get_text_img_in_detail_content_part(self, soup, content_selector, text_sub_selector, img_attr, img_selector='img' ) :
+		#
+		# 상품 상세 페이지에서 텍스트와 이미지 리스트를 얻어오는 함수
+		#
+		# content_selector : 상세페이지 부분의 selector 표시
+		# text_sub_selector : content_selector 안에 텍스트가 들어가 있는 서브 selector
+		# text_sub_selector = '' 일때 content_selector 으로 텍스트를 얻어옴.
+		# img_attr : 이미지의 url이 들어가 있는 attrs 를 지정하는 값을 ( 보통 : 'src' 에 있으나, 'ec-data-src' 에 있는 경우도 있음)
+		# img_selector : img tag가 아닌 것을 위해서 추가함.
+		#
+		detail_page_txt = []
+		detail_page_img = []
+		
+		try :
+			# 제품 상세 부분
+			
+			detail_content_list = soup.select(content_selector)
+			__LOG__.Trace(len(detail_content_list))
+			for detail_content_ctx in detail_content_list :				
+						
+
+				# 제품 상세 이미지
+				image_link_list = detail_content_ctx.find_all(img_selector)
+				for img_ctx in image_link_list :
+					#__LOG__.Trace( img_ctx )
+					if(img_attr in img_ctx.attrs ) : 
+						img_src = img_ctx.attrs[img_attr].strip()
+						if( img_src != '' ) and (img_src.startswith('data:') == False) :
+							img_link = self.set_img_url( self.BASIC_IMAGE_URL, img_src )
+							detail_page_img.append( self.get_hangul_url_convert( img_link ) )
+							
+			detail_content_list = soup.select(text_sub_selector)
+			__LOG__.Trace(len(detail_content_list))
+			for detail_content_ctx in detail_content_list :
+				# 제품 상세 텍스트				
+				
+				sub_content_list = detail_content_ctx				
+				content_text = sub_content_list.get_text().strip()
+				
+				if( 0 < len(content_text) ) :
+					rtn_str = self.get_detail_text_with_strip( content_text )					
+					detail_page_txt.append( rtn_str )
+
+		except Exception as ex:
+			__LOG__.Error(ex)
+			pass
+		
+		return detail_page_txt, detail_page_img
 
 	
 if __name__ == '__main__':
