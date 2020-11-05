@@ -51,7 +51,7 @@ class shop(Cafe24) :
 		self.C_CATEGORY_TYPE = ''
 		
 		#self.C_CATEGORY_VALUE = '#category > div > ul > li > a'
-		self.C_CATEGORY_VALUE = '#category > div > div > div > dl > div > dt > a'
+		self.C_CATEGORY_VALUE = '#category > div > ul > li > a'
 		self.C_CATEGORY_IGNORE_STR = []
 		self.C_CATEGORY_STRIP_STR = ''
 
