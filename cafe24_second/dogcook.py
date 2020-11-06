@@ -53,9 +53,11 @@ class shop(Cafe24) :
 		self.C_CATEGORY_TYPE = ''
 		
 
-		self.C_CATEGORY_VALUE = '#category > div.position > ul > li > a'
+		self.C_CATEGORY_VALUE = '#topCate > ul > li:nth-child(2) > div > div > ul > li > a'
+		# self.C_CATEGORY_VALUE_2 = '#contents > div.xans-element-.xans-product.xans-product-menupackage > ul > li > a'
 		self.C_CATEGORY_IGNORE_STR = []
 		self.C_CATEGORY_STRIP_STR = ''
+
 
 		
 		
@@ -83,7 +85,7 @@ class shop(Cafe24) :
 		self.C_LAST_PAGE_TYPE = ''
 
 
-		self.C_LAST_PAGE_VALUE = '#contents > div.xans-element-.xans-product.xans-product-normalpaging > p.last > a'
+		self.C_LAST_PAGE_VALUE = '#contents > div.xans-element-.xans-product.xans-product-normalpaging > a.last'
 		
 		self.PAGE_SPLIT_STR = '&page='		# 페이지 링크에서 page를 구분할수 있는 구분자
 		
@@ -103,7 +105,7 @@ class shop(Cafe24) :
 		
 		# 물품 이미지 CSS selector 정의
 		self.C_PRODUCT_IMG_SELECTOR = 'div'
-		self.C_PRODUCT_IMG_SELECTOR_CLASSNAME = 'thumbnail'
+		self.C_PRODUCT_IMG_SELECTOR_CLASSNAME = 'prdImg'
 		
 		
 		# 물품 SOLDOUT CSS selector 정의
@@ -160,6 +162,8 @@ class shop(Cafe24) :
 			
 			crw_post_url = self.set_product_name_url_second( product_data, product_ctx , 'span', 'name')
 			if(crw_post_url == '') : crw_post_url = self.set_product_name_url_second( product_data, product_ctx , 'p', 'name')
+			if(crw_post_url == '') : crw_post_url = self.set_product_name_url_second( product_data, product_ctx , 'strong', 'name')
+			
 			
 			##############################
 			# 가격
