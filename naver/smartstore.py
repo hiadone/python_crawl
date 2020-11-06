@@ -121,8 +121,8 @@ class smartstore(Mall) :
 		
 		if('name' in json_data ) : shopCategoryName = json_data['name']
 		if('id' in json_data ) : standardCategoryId = json_data['id'] 
+		if('categoryId' in json_data ) : CategoryId = json_data['categoryId'] 
 		if('type' in json_data ) : displayCategoryType = json_data['type']
-		CategoryId = standardCategoryId
 
 		if('subCategories' in json_data ) : subShopCategories_len = len(json_data['subCategories'] )
 		if('parentStoreCategoryId' in json_data ) : parentShopCategoryId = json_data['parentStoreCategoryId'] 
@@ -132,7 +132,8 @@ class smartstore(Mall) :
 		if( config.__DEBUG__ ) :
 			__LOG__.Trace('-----------------------------------------------------------')
 			__LOG__.Trace('카테고리명 : %s' % shopCategoryName )
-			__LOG__.Trace('카테고리 Std ID : %s ' %  str(CategoryId ))
+			__LOG__.Trace('카테고리 ID : %s ' %  str(standardCategoryId ))
+			__LOG__.Trace('카테고리 CategoryId : %s ' %  str(CategoryId ))
 			__LOG__.Trace('카테고리 TYPE : %s ' % str(displayCategoryType ))
 			__LOG__.Trace('하위카테고리 수 : %d ' % subShopCategories_len )
 			__LOG__.Trace('상위카테고리 ID : %s ' % parentShopCategoryId )
@@ -140,23 +141,34 @@ class smartstore(Mall) :
 		
 		
 		category_url = ''
-		if(displayCategoryType == 'DISPLAY_CATEGORY') :
+		category_str = str(standardCategoryId)
+		
+		#
+		# 2020.11.06
+		# DISPLAY_CATEGORY 에서는 standardCategoryId 값을 사용하고, 
+		# STANDARD_CATEGORY 에서는 categoryId 를 사용하여 카테고리 리스트를 생성함.
+		#
+		#
+		if(displayCategoryType == 'DISPLAY_CATEGORY') or (displayCategoryType == 'STANDARD_CATEGORY') :
+			
+			if(displayCategoryType == 'STANDARD_CATEGORY') : category_str = str(CategoryId)
+			
 			if(self.SPECIAL_CATEGORY != '' ) :
 				# 특정 카데고리에 대해서 찾을 때 사용.
 				#
-				if( CategoryId == self.SPECIAL_CATEGORY) or ( parentShopCategoryId == self.SPECIAL_CATEGORY) : category_url = '%s/category/%s' % ( self.SITE_HOME, str(CategoryId) )
+				if( category_str == self.SPECIAL_CATEGORY) or ( parentShopCategoryId == self.SPECIAL_CATEGORY) : category_url = '%s/category/%s' % ( self.SITE_HOME, category_str )
 
 			else :
 				# 전체 카데고리에 대해서 찾을 때 사용.
 				#
-				if(CategoryId != '') : category_url = '%s/category/%s' % ( self.SITE_HOME, str(CategoryId) )
+				if(category_str != '') : category_url = '%s/category/%s' % ( self.SITE_HOME, category_str )
 		
 		if( category_url != '' ) :
 			if(self.CATEGORY_URL_HASH.get(category_url , -1) == -1) and ( self.check_ignore_category_text(shopCategoryName) ) : 
 				self.CATEGORY_URL_HASH[category_url] = shopCategoryName
 				__LOG__.Trace('-----------------------------------------------------------')
 				__LOG__.Trace('카테고리명 : %s' % shopCategoryName )
-				__LOG__.Trace('카테고리 Sel ID : %s ' % str(CategoryId ))
+				__LOG__.Trace('카테고리 Sel ID : %s ' % category_str)
 					
 
 	
@@ -167,14 +179,14 @@ class smartstore(Mall) :
 		category_data = self.get_strip_string( html, 'window.__PRELOADED_STATE__=', '</script' , [] )
 		
 		jsondata = json.loads(category_data)
-		'''
+		
 		for key in jsondata.keys() :
 			if( key == 'categoryTree') :
 				#__LOG__.Trace('%s : %s' % (key, jsondata['categoryTree']))
 				sub_jsondata = jsondata['categoryTree']['A']
 				for sub_key in sub_jsondata.keys() :
 					__LOG__.Trace('%s : %s' % (sub_key, sub_jsondata[sub_key]))
-		'''
+		
 
 		if('categoryTree' in jsondata) : 
 			self.SMARTSTORE_CATEGORY_JSON = jsondata['categoryTree']['A']['subCategories']
@@ -268,11 +280,11 @@ class smartstore(Mall) :
 							strong_ctx = a_link_ctx.find('strong')
 							if(strong_ctx != None) :
 								product_count = int( __UTIL__.get_only_digit( strong_ctx.get_text().strip() ) )
-								#__LOG__.Trace( 'TOTAL COUNT : %d ' % product_count )
+								__LOG__.Trace( 'TOTAL COUNT : %d ' % product_count )
 								break
 		
 			if( product_count == 0) :
-				# 조회 물품수
+				# 조회 물품수 2번째 경우
 				count_div_list = count_div_ctx.find_all('span', class_='last_depth')
 				for div_ctx in count_div_list :
 					split_list = div_ctx.get_text().strip().split('(')
@@ -281,7 +293,7 @@ class smartstore(Mall) :
 					for strong_ctx in strong_list :
 						strong_str = strong_ctx.get_text().strip()
 						product_count = int( __UTIL__.get_only_digit(strong_str ))
-						#__LOG__.Trace( '%s - TOTAL COUNT : %d ' % (cate_str, product_count ) )
+						__LOG__.Trace( '%s - TOTAL COUNT : %d ' % (cate_str, product_count ) )
 			
 
 		# 페이지 URL 생성
@@ -313,7 +325,7 @@ class smartstore(Mall) :
 			#self.PAGE_SECOND_URL = ''
 			#self.PAGE_LAST_VALUE = 0
 			
-			#if( config.__DEBUG__ ) : __LOG__.Trace('page : %s' % ( category_url ) )
+			if( config.__DEBUG__ ) : __LOG__.Trace('category_url : %s' % ( category_url ) )
 				
 			time.sleep(self.WAIT_TIME)
 			URL = category_url
@@ -414,6 +426,7 @@ class smartstore(Mall) :
 												
 		return 	rtn_category_name						
 									
+
 
 	def get_current_category(self, html ) :	
 		#
@@ -560,77 +573,7 @@ class smartstore(Mall) :
 			__LOG__.Error(ex)
 			pass
 	
-	
-	def set_product_data_second(self, product_data, crw_post_url, current_category, li_ctx, product_ctx ) :
-		
-		try :
-			
-			####################################
-			# 상품코드 추출
-			####################################
-			crw_goods_code_list = crw_post_url.split('/products/')
-			crw_goods_code = crw_goods_code_list[1].strip()
 
-			
-			
-			# 기존 상품정보가 입력되어 있을때 UPDATE Action 으로 변경.
-			if(self.PRODUCT_ITEM_HASH.get(crw_goods_code, -1) != -1) : 
-				product_data.crw_action = __DEFINE__.__UPDATE_CRW__
-				product_data.crw_id = self.PRODUCT_ITEM_HASH[crw_goods_code]
-				__LOG__.Trace( '%s - %s' % (crw_goods_code , product_data.crw_action ) )
-			
-			####################################
-			# 상품명 추출
-			####################################
-
-			self.set_product_name_second( product_data , product_ctx )
-			
-			####################################
-			# 상품가격 추출
-			####################################
-			
-			self.set_product_price_second(product_data, li_ctx )
-
-			
-			if( product_data.crw_price == 0 ) : product_data.crw_price = product_data.crw_price_sale
-			if( product_data.crw_price_sale == 0 ) : product_data.crw_price_sale = product_data.crw_price
-			
-			####################################
-			# 품절여부 추출
-			####################################
-			
-			self.set_product_soldout_second( product_data, li_ctx )
-
-			
-			####################################				
-			# 상품 이미지 확인
-			####################################
-			div_list = li_ctx.find_all('a', class_='N=a:lst.img')
-			for div_ctx in div_list :
-				# 이미지 추출
-				product_img_ctx = div_ctx.find('img')
-				if( product_img_ctx != None ) : 							
-					if('src' in product_img_ctx.attrs ) :
-						img_src_list = product_img_ctx.attrs['src'].split('?')
-						product_data.product_img = img_src_list[0].strip()
-						break
-
-				
-			product_data.brd_id = self.BRD_ID
-			
-			self.set_current_category( product_data, current_category)
-			
-			#product_data.crw_category1  = current_category
-			product_data.crw_post_url = crw_post_url
-			product_data.crw_goods_code  = crw_goods_code
-			
-			self.PRODUCT_URL_HASH[crw_post_url] = product_data
-			self.PRODUCT_AVAIBLE_ITEM_HASH[product_data.crw_goods_code] = product_data.crw_id
-			
-		except Exception as ex:
-			__LOG__.Error(ex)
-			pass
-	
 	
 	
 	def set_product_name(self, product_data, ctx ) :
@@ -654,17 +597,6 @@ class smartstore(Mall) :
 			pass
 			
 			
-	def set_product_name_second(self, product_data, ctx ) :
-		
-		try :
-			
-			if(product_data.crw_name == '') :
-				# 상품명
-				if('title' in ctx.attrs ) : product_data.crw_name = ctx.attrs['title'].strip()
-		
-		except Exception as ex:
-			__LOG__.Error(ex)
-			pass
 			
 	
 	
@@ -694,23 +626,6 @@ class smartstore(Mall) :
 
 
 			
-	def set_product_price_second(self, product_data, ctx ) :
-		
-		try :
-			
-			div_list = ctx.find_all('dd' , class_='price')
-			for div_ctx in div_list :
-				# 가격 추출
-				product_price_list = div_ctx.find_all('span', class_='thm')
-				for product_price_ctx in product_price_list :
-					value_str = product_price_ctx.get_text().strip()
-					if(0 <= value_str.find('판매가')) : product_data.crw_price = int( __UTIL__.get_only_digit( value_str ) )
-					elif(0 <= value_str.find('할인가')) : product_data.crw_price_sale = int( __UTIL__.get_only_digit( value_str ) )
-
-		
-		except Exception as ex:
-			__LOG__.Error(ex)
-			pass
 			
 	
 	
@@ -728,18 +643,7 @@ class smartstore(Mall) :
 			pass
 			
 			
-	def set_product_soldout_second(self, product_data, ctx ) :
-		
-		try :
-			
-			div_list = ctx.find_all('em', class_='soldout')
-			for div_ctx in div_list :
-				product_data.crw_is_soldout = 1
-				
-		
-		except Exception as ex:
-			__LOG__.Error(ex)
-			pass
+
 	
 	
 		
@@ -775,84 +679,7 @@ class smartstore(Mall) :
 			pass
 			
 		return rtn
-			
-	def get_product_data_second(self, current_category, form_ctx ) :
-		# <li>
-		# <div class="_mouseover(nmp.front.sellershop.showOverMenu()) _mouseout(nmp.front.sellershop.hideOverMenu()) thmb">
-		# <div class="img_center"><a href="/barbichon/products/4501017106" class="N=a:lst.img"><img src="https://shop-phinf.pstatic.net/20190511_171/barbichonshop_1557551002749ANPth_JPEG/80858182392127711_1240488994.jpg?type=m120" alt="바비숑 티피하우스 엣지아이보리" onerror="this.onerror=null;this.src='https://img-shop.pstatic.net/storefarm/front/common/noimg/no_img_120x120.jpg'"></a></div>				<div class="ico_goods">
-		# </div>
-		# <span class="_over_menu over_menu" _item_key="89148101" style="display: none;">
-		# <a href="#" class="_click(nmp.front.sellershop.openSimpleProduct(barbichon,4501017106,NORMAL)) _stopDefault frst
- 		# N=a:lst.simple" title="간략보기">간략보기</a>
-		# <a href="/barbichon/products/4501017106" class="N=a:lst.new" target="_blank" title="새창보기">새창보기</a>
-		# </span>
-		# </div>
-		# <dl class="info">
-		# <dt><a href="/barbichon/products/4501017106" title="바비숑 티피하우스 엣지아이보리" class="N=a:lst.title">바비숑 티피하우스 엣지아이보리</a>
-		# <a href="#" role="button" data-scrap-item-id="4501017106" class="_responsive_scrap_button _click(nmp.front.sellershop.toggleKeep(4501017106)) _stopDefault scrap N=a:lst.mylist" title="찜하기">
-		# 찜하기
-		# </a>
-		# </dt>
-		# <dd class="prm"></dd>
-		# <dd class="cate">			<a href="/barbichon/category/fecdd543d8d243d7ba9c65dec77e42ac">하우스</a>
-		# </dd>
-		# <dd class="price">		<strong><span class="thm"><span class="blind">판매가 </span>77,000</span>원</strong>
-		# <span class="ico_goods2">	<em title="일시품절" class="soldout"><span class="png24">일시품절</span></em>
-		# </span></dd>
-		# </dl>
-		# <div class="side_area">
-		# <div class="addit_info">
-		# <p>	<a href="#" class="info_item _sellershop_product_review_count _stopDefault">리뷰
-		# <span class="fc_point thm">3</span>
-		# </a>
-		# <span class="info_item">평점<span class="fc_point thm">4.7</span><span class="slash">/</span><span class="fc_point thm">5</span></span>
-		# </p>
-		# <p></p>
-		# </div>
-		# <ul class="benefit">
-		# <li title="">무료배송</li>
-		# <li title="포인트 최대 150원">포인트</li>
-		# </ul>
-		# </div>
-		# </li>
-		#__LOG__.Trace('get_product_data_second' )
-		
-		rtn = False	
-		try :
-			ul_list = form_ctx.find_all('ul', class_='lst')
-			for ul_ctx in ul_list :
-				li_list = ul_ctx.find_all('li')
-				for li_ctx in li_list :
-					product_data = None
-					product_link_list = li_ctx.find_all('a')
-					for product_ctx in product_link_list :
-						if('class' in product_ctx.attrs ) : 
-							class_name_list = product_ctx.attrs['class']
-							#__LOG__.Trace(class_name_list)
-							if(0 == class_name_list[0].find('N=a:lst.title') ) :
-								
-								if('href' in product_ctx.attrs ) : 
-									href_str = product_ctx.attrs['href']
-									if(10 < len(href_str) ) :
-										# 상품 URL
-										#__LOG__.Trace( product_ctx.attrs['href'] )
-										crw_post_url = 'https://smartstore.naver.com%s' % product_ctx.attrs['href']
 
-										#if( self.PRODUCT_URL_HASH.get( crw_post_url , -1) == -1) : 
-										product_data = ProductData()
-										
-										# 기본 정보
-										self.set_product_data_second( product_data, crw_post_url, current_category, li_ctx, product_ctx )
-
-										self.process_product_api(product_data)
-										
-										rtn = True
-										
-		except Exception as ex:
-			__LOG__.Error(ex)
-			pass
-			
-		return rtn
 		
 		
 	def get_product_data(self, html):
@@ -875,8 +702,7 @@ class smartstore(Mall) :
 					if( 0 < len(a_link_list)) : 
 						try :
 							rtn = self.get_product_data_first(current_category, li_ctx )
-							#if(rtn == False ) :
-							#	rtn = self.get_product_data_second(current_category, li_ctx )
+
 
 						except Exception as ex:
 							__LOG__.Error(ex)
@@ -1166,79 +992,6 @@ class smartstore(Mall) :
 
 
 
-	def get_detail_img_text_data(self, product_data, html):
-		#
-		#
-		# 상세페이지 부분에서 텍스트 와 이미지 갖고 오기
-		#
-		#nmp.registerModule(nmp.front.sellershop.product.show.detail_info, {
-		#	sAuthenticationType : "NORMAL",
-		#	bSeOne : true,
-		#	pcHtml : "<div id=\"SEDOC-1567414677093--1045529342\" class=\"se_doc_viewer se_body_wrap se_theme_transparent \" data-docversion=\"1.0\">\n<div class=\"se_doc_header_start\" id=\"SEDOC-1567414677093--1045529342_se_doc_header_start\"><\/div>\n\x3C!-- SE_DOC_HEADER_START --\>\n<div id=\"SEDOC-1567414677093--1045529342_viewer_head\" class=\"se_viewer_head\"><\/div>\n<div class=\"se_component_wrap\">\n<\/div>\n\n\x3C!-- SE_DOC_HEADER_END --\>\n<div class=\"se_doc_header_end\" id=\"SEDOC-1567414677093--1045529342_se_doc_header_end\"><\/div>\n<div class=\"se_doc_contents_start\" id=\"SEDOC-1567414677093--1045529342_se_doc_contents_start\"><\/div>\n\x3C!-- SE_DOC_CONTENTS_START --\>\n<div class=\"se_component_wrap sect_dsc __se_component_area\">\n    \n\n\n\n\n\n\n\n\n\n\n\n<div class=\"se_component se_sectionTitle \">\n    <div class=\"se_sectionArea se_align-center\">\n        <div class=\"se_editArea\">\n            <div class=\"se_viewArea se_ff_nanumgothic se_fs_H3 se_fw_bold\" style=\"color: #272727;\n                        text-decoration: inherit;\n                        font-style: inherit;\n                        \">\n                <div class=\"se_editView\">\n                    <div class=\"se_textView\">\n                        <h6 class=\"se_textarea\">\x3C!-- SE3-TEXT { --\>\x3C!-- } SE3-TEXT --\><\/h6>\n                    <\/div>\n                <\/div>\n            <\/div>\n        <\/div>\n    <\/div>\n<\/div>\n\n\n\n\n\n\n\n\n\n\n    \n\n\n\n\n\n\n\n\n<div class=\"se_component se_paragraph default\">\n    <div class=\"se_sectionArea\">\n        <div class=\"se_editArea\">\n            <div class=\"se_viewArea se_ff_nanumgothic se_fs_T3 se_align-center\">\n                <div class=\"se_editView\">\n                    <div class=\"se_textView\">\n                        <p class=\"se_textarea\">\x3C!-- SE3-TEXT { --\><br><span><\/span><br><span><\/span><br><span><\/span>\x3C!-- } SE3-TEXT --\><\/p>\n                    <\/div>\n                <\/div>\n            <\/div>\n        <\/div>\n    <\/div>\n<\/div>\n\n\n\n\n\n\n\n\n\n\n\n\n\n    \n\n\n\t\t<div class=\"se_component se_image default\">\n\t\t\t<div class=\"se_sectionArea se_align-center\">\n\t\t\t\t<div class=\"se_editArea\">\n\t\t\t\t\t<div class=\"se_viewArea\" style=\"max-width:808px\">\n        <a onclick=\"return false;\" class=\"se_mediaArea __se_image_link __se_link\" data-linktype=\"img\" data-linkdata=\"{&quot;imgId&quot;:&quot;SEDOC-1567414677093--1045529342_image_0_img&quot;,&quot;src&quot;:&quot;http://bshop.phinf.naver.net/20190902_109/15674146715070nGl7_JPEG/%BA%A3%B8%AE%C6%CE%B0%A1%B5%F0%B0%C7-%B1%D7%B8%B0_%BB%F3%BC%BC%C6%E4%C0%CC%C1%F6.jpg&quot;,&quot;linkUse&quot;:&quot;false&quot;,&quot;link&quot;:&quot;&quot;}\">\n                            <img id=\"SEDOC-1567414677093--1045529342_image_0_img\" class=\"se_mediaImage __se_img_el\" src=\"https://shop-phinf.pstatic.net/20190902_109/15674146715070nGl7_JPEG/%BA%A3%B8%AE%C6%CE%B0%A1%B5%F0%B0%C7-%B1%D7%B8%B0_%BB%F3%BC%BC%C6%E4%C0%CC%C1%F6.jpg\" width=\"808\" height=\"14500\" data-attachment-id=\"Ip65Z4qze2b-E0dhIlTZ2ir4y5fo\" alt=\"\">\n        \n        <\/a>\n\t\t\t\t\t<\/div>\n\t\t\t\t<\/div>\n\t\t\t<\/div>\n\t\t<\/div>\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n    \n\n\n\n\n\n\n\n\n<div class=\"se_component se_paragraph default\">\n    <div class=\"se_sectionArea\">\n        <div class=\"se_editArea\">\n            <div class=\"se_viewArea se_ff_nanumgothic se_fs_T3 se_align-center\">\n                <div class=\"se_editView\">\n                    <div class=\"se_textView\">\n                        <p class=\"se_textarea\">\x3C!-- SE3-TEXT { --\><span><\/span><span><br><\/span><span><br><\/span><span><br><\/span><span><br><\/span><span><br><\/span><span><br><\/span><span><br><\/span><span><br><\/span><span><br><\/span><span class=\"se_fs_T2\"><br><\/span><span><br><\/span><span><\/span><br><span><br><\/span><span><br><\/span><span><br><\/span><span><\/span>\x3C!-- } SE3-TEXT --\><\/p>\n                    <\/div>\n                <\/div>\n            <\/div>\n        <\/div>\n    <\/div>\n<\/div>\n\n\n\n\n\n\n\n\n\n\n\n\n\n<\/div>\n\x3C!-- SE_DOC_CONTENTS_END --\>\n<div class=\"__se_doc_title_end\" id=\"se_doc_contents_end\"><\/div>\n<div id=\"SEDOC-1567414677093--1045529342_se_doc_footer\" class=\"se_doc_footer\"><\/div>\n<\/div>\n"
-		#});
-		#
-		
-		ignore_str = 'nmp.registerModule(nmp.front.sellershop.product.show.detail_info,'
-		del_pos = html.find(ignore_str)
-		
-		if(0 < del_pos):
-			ignore_pos = html.find(ignore_str) + len( ignore_str )
-			last_pos = html[ignore_pos:].find('});')
-			
-			category_data = html[ignore_pos:ignore_pos+last_pos].strip() 
-
-			text_list = category_data.split('pcHtml : "')
-
-			if(len(text_list) == 2) : 
-				
-				#inner_html = text_list[1].replace('\\n"','' ).replace('\\n','\n' ).replace('\\"','"' ).replace('\\/','/' ).replace('\\t','\t' ).replace('&quot;',' ' ).replace('\\x3C!','<!').replace('\\>','>').strip()
-				#inner_html = text_list[1].replace('\\n"','' ).replace('\\n','' ).replace('\\"','"' ).replace('\\/','/' ).replace('\\t','\t' ).replace('&quot;',' ' ).replace('\\x3C!','<!').replace('\\>','>').strip()
-				inner_html = text_list[1].replace('\\n"','' ).replace('\\n','\n' ).replace('\\"','"' ).replace('\\/','/' ).replace('\\t','' ).replace('&quot;',' ' ).replace('\\xa0!',' ').replace('\\x3C!','<!').replace('\\>','>').strip()
-				
-				html = '''<html lang="ko"><head><meta name="ROBOTS" content="NOINDEX, NOFOLLOW"><meta http-equiv="Content-Type" content="text/html; charset=utf-8"></head>
-						<body>''' + inner_html + '''</body></html>'''
-						
-
-				soup = bs4.BeautifulSoup(html, 'lxml')
-				detail_content_list = soup.select('html > body > div')
-				if(len(detail_content_list) == 0 ) : detail_content_list = soup.select('html > body')
-				detail_page_txt = []
-				detail_page_img = []
-				
-				for detail_content_ctx in detail_content_list :
-					content_text = detail_content_ctx.get_text().strip()
-					
-					if( 0 < len(content_text) ) :
-						rtn_str = self.get_detail_text_with_strip( content_text )
-						detail_page_txt.append( rtn_str )
-					
-					
-					# 순수한 이미지 요소 추출
-					img_list = detail_content_ctx.find_all('img')
-					for img_ctx in img_list :
-						if('src' in img_ctx.attrs) : 
-							img_src = img_ctx.attrs['src']
-							img_link = self.set_img_url( self.BASIC_IMAGE_URL, img_src )
-							#if(0 != img_link.find('https://proxy.smartstore.naver.com/') ) : detail_page_img.append( self.get_hangul_url_convert( img_link )  )
-							detail_page_img.append( self.get_hangul_url_convert( img_link )  )
-							
-					# 링크와 같이 있는 이미지 요소 추출
-					img_list = detail_content_ctx.find_all('a', {'data-linktype':'img'})
-					for img_ctx in img_list :
-						if('data-linkdata' in img_ctx.attrs) : 
-							img_text = img_ctx.attrs['data-linkdata']
-							img_text_list = img_text.split(', src :')
-							if(len(img_text_list) == 2) :
-								tmp_img_list = img_text_list[1].strip().split(',')
-								img_src = tmp_img_list[0].strip()
-								img_link = self.set_img_url( self.BASIC_IMAGE_URL, img_src )
-								#if(0 != img_link.find('https://proxy.smartstore.naver.com/') ) : detail_page_img.append( self.get_hangul_url_convert( img_link )  )
-								detail_page_img.append( self.get_hangul_url_convert( img_link )  )
-
-
-				self.set_detail_page( product_data, detail_page_txt, detail_page_img)
-				
-				
 	'''
 	######################################################################
 	# 메인 함수
