@@ -49,7 +49,8 @@ class shop(Cafe24) :
 		self.C_CATEGORY_CASE = __DEFINE__.__C_SELECT__
 		self.C_CATEGORY_TYPE = ''
 		
-		self.C_CATEGORY_VALUE = '#top_category > div > div > ul > div > ul > li.list.xans-record- > a'
+		# self.C_CATEGORY_VALUE = '#top_category > div > div > ul > div > ul > li.list.xans-record- > a'
+		self.C_CATEGORY_VALUE = '#category > div > ul > li > a'
 
 		self.C_CATEGORY_IGNORE_STR = ['FOR U']
 		self.C_CATEGORY_STRIP_STR = ''
@@ -69,7 +70,7 @@ class shop(Cafe24) :
 		self.C_PRODUCT_TYPE = ''
 
 
-		self.C_PRODUCT_VALUE = '#container > div.xans-element-.xans-product.xans-product-normalpackage > div > ul > li > div'
+		self.C_PRODUCT_VALUE = '#contents > div.xans-element-.xans-product.xans-product-normalpackage > div > ul > li'
 		self.C_PRODUCT_STRIP_STR = ''
 		
 		# self.PAGE_LAST_LINK = True 일때 사용
@@ -94,8 +95,9 @@ class shop(Cafe24) :
 		'''
 		
 		# 물품 이미지 CSS selector 정의
-		self.C_PRODUCT_IMG_SELECTOR = 'img'
-		self.C_PRODUCT_IMG_SELECTOR_CLASSNAME = 'thumb_Img'
+		self.C_PRODUCT_IMG_SELECTOR = 'div'
+		# self.C_PRODUCT_IMG_SELECTOR_CLASSNAME = 'thumb_Img'
+		self.C_PRODUCT_IMG_SELECTOR_CLASSNAME = 'thumbnail'
 		
 		
 		# 물품 SOLDOUT CSS selector 정의
@@ -138,7 +140,7 @@ class shop(Cafe24) :
 			# 상품 이미지 확인
 			###########################
 			
-			self.set_product_image_second( product_data, product_ctx )
+			self.set_product_image_third( product_data, product_ctx )
 			
 		
 			# 품절여부 확인
@@ -148,8 +150,9 @@ class shop(Cafe24) :
 			# 상품명/URL
 			###########################
 			crw_post_url = self.set_product_name_url_fifth( product_data, product_ctx , 'strong', 'name')
+
 			if(crw_post_url == '') : crw_post_url = self.set_product_name_url_fifth( product_data, product_ctx , 'p', 'name')
-			
+			if(crw_post_url == '') : crw_post_url = self.set_product_name_url_second( product_data, product_ctx , 'span', 'name')
 			
 			##############################
 			# 가격

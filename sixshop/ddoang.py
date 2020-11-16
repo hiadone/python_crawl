@@ -44,7 +44,7 @@ class shop(SixShop) :
 		
 		self.EUC_ENCODING = False
 		
-		self.SITE_HOME = 'https://www.ddoang.com/shop'
+		self.SITE_HOME = 'https://www.ddoang.com/store'
 		
 		self.SITE_ORG_HOME = 'https://www.ddoang.com'
 		
