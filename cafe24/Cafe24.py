@@ -531,7 +531,7 @@ class Cafe24(Mall) :
 				category_no = 0
 				category_parent_cate_no = ''
 				for key in category_ctx :
-                                        if(key == 'name') : category_name = re.sub('(<([^>]+)>)', '',category_ctx[key].strip())
+                    if(key == 'name') : category_name = re.sub('(<([^>]+)>)', '',category_ctx[key].strip())
 					elif(key == 'param') : category_param = category_ctx[key]
 					elif(key == 'cate_no') : category_no = int(category_ctx[key])
 					elif(key == 'parent_cate_no') : category_parent_cate_no = str(category_ctx[key])
