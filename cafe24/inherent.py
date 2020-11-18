@@ -53,7 +53,7 @@ class shop(Cafe24) :
 		self.C_CATEGORY_TYPE = ''
 		
 		
-		self.C_CATEGORY_VALUE = '#cnb > div > ul > li > a'
+		self.C_CATEGORY_VALUE = '#cnb > div > ul > li > a '
 		self.C_CATEGORY_IGNORE_STR = ['Personal']
 		self.C_CATEGORY_STRIP_STR = ''
 
@@ -106,7 +106,7 @@ class shop(Cafe24) :
 		
 		# 물품 SOLDOUT CSS selector 정의
 		self.C_PRODUCT_SOLDOUT_SELECTOR = 'div'
-		self.C_PRODUCT_SOLDOUT_SELECTOR_CLASSNAME = 'promotion'
+		self.C_PRODUCT_SOLDOUT_SELECTOR_CLASSNAME = 'icon'
 		
 	'''
 	######################################################################

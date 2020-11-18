@@ -54,7 +54,8 @@ class shop(Cafe24) :
 		self.C_CATEGORY_TYPE = ''
 		
 
-		self.C_CATEGORY_VALUE = '#-header > div.-top-logobox.-box > div > ul > li > div.xans-element-.xans-layout.xans-layout-category > ul > li > a'
+		# self.C_CATEGORY_VALUE = '#-header > div.-top-logobox.-box > div > ul > li > div.xans-element-.xans-layout.xans-layout-category > ul > li > a'
+		self.C_CATEGORY_VALUE = '#sp-category > div.sp-size__fixed > div > div.cate-pos--left > div > div > ul > li > a'
 		self.C_CATEGORY_IGNORE_STR = []
 		self.C_CATEGORY_STRIP_STR = ''
 
@@ -64,7 +65,7 @@ class shop(Cafe24) :
 		self.C_PAGE_TYPE = ''
 		
 		
-		self.C_PAGE_VALUE = '#-content > div.xans-element-.xans-product.xans-product-normalpaging.-pagenation > ul > ul > li > a'
+		self.C_PAGE_VALUE = '#sp-content > div.xans-element-.xans-product.xans-product-normalpaging.sp-pagenation > ul.sp-pagenation--page > li > a'
 		self.C_PAGE_STRIP_STR = ''
 		
 		self.C_PAGE_IGNORE_STR = ['1']			# 페이지 중에 무시해야 하는 스트링
@@ -74,7 +75,7 @@ class shop(Cafe24) :
 		self.C_PRODUCT_CASE = __DEFINE__.__C_SELECT__
 		self.C_PRODUCT_TYPE = ''
 
-		self.C_PRODUCT_VALUE = '#-content > div.xans-element-.xans-product.xans-product-listnormal.-product.center > div.-items.-clear > div'
+		self.C_PRODUCT_VALUE = '#sp-content > div.xans-element-.xans-product.xans-product-listnormal.sp-product > div > div > div'
 		
 		self.C_PRODUCT_STRIP_STR = ''
 		
@@ -82,7 +83,8 @@ class shop(Cafe24) :
 		self.C_LAST_PAGE_CASE = __DEFINE__.__C_SELECT__
 		self.C_LAST_PAGE_TYPE = ''
 
-		self.C_LAST_PAGE_VALUE = '#-content > div.xans-element-.xans-product.xans-product-normalpaging.-pagenation > ul > li > a'
+		# self.C_LAST_PAGE_VALUE = '#-content > div.xans-element-.xans-product.xans-product-normalpaging.-pagenation > ul > li > a'
+		self.C_LAST_PAGE_VALUE = '#sp-content > div.xans-element-.xans-product.xans-product-normalpaging.sp-pagenation > ul:nth-child(3) > li:nth-child(2) > a'
 		
 		self.PAGE_SPLIT_STR = '&page='		# 페이지 링크에서 page를 구분할수 있는 구분자
 		
@@ -101,15 +103,15 @@ class shop(Cafe24) :
 		'''
 		
 		# 물품 이미지 CSS selector 정의
-		self.C_PRODUCT_IMG_SELECTOR = 'div'
-		self.C_PRODUCT_IMG_SELECTOR_CLASSNAME = '-thumb'
+		self.C_PRODUCT_IMG_SELECTOR = 'p'
+		self.C_PRODUCT_IMG_SELECTOR_CLASSNAME = 'sp-product__thumb-origin'
 		
 		
 		# 물품 SOLDOUT CSS selector 정의
 		# <div class="icon"><img src="//img.echosting.cafe24.com/design/skin/admin/ko_KR/ico_product_soldout.gif" class="icon_img" alt="품절"> <img src="//img.echosting.cafe24.com/design/skin/admin/ko_KR/ico_product_recommended.gif" class="icon_img" alt="추천">  </div>
 		#
 		self.C_PRODUCT_SOLDOUT_SELECTOR = 'div'
-		self.C_PRODUCT_SOLDOUT_SELECTOR_CLASSNAME = '-icons'
+		self.C_PRODUCT_SOLDOUT_SELECTOR_CLASSNAME = 'sp-product__icon'
 		
 		
 		
@@ -150,7 +152,7 @@ class shop(Cafe24) :
 			# 상품 이미지 확인
 			#
 			###########################
-			self.set_product_image_fourth( product_data, product_ctx )
+			self.set_product_image_first( product_data, product_ctx )
 
 			# 품절여부 확인
 			self.set_product_soldout_first(product_data, product_ctx ) 
@@ -159,7 +161,7 @@ class shop(Cafe24) :
 			# 상품명/URL
 			###########################
 			
-			crw_post_url = self.set_product_name_url_second( product_data, product_ctx , 'div', '-name')
+			crw_post_url = self.set_product_name_url_second( product_data, product_ctx , 'div', 'sp-product__title')
 			
 			
 			##############################
