@@ -167,19 +167,20 @@ class shop(Cafe24) :
 			##############################
 			# 가격
 			#
-			# <div class="xans-element- xans-product xans-product-listitem -description"><div rel="판매가" class=" xans-record-">
-			# <span class="title displaynone"><span style="font-size:12px;color:#333333;font-weight:bold;">판매가</span> :</span> <span style="font-size:12px;color:#333333;font-weight:bold;">11,000원</span><span id="span_product_tax_type_text" style=""> </span></div>
-			# </div>
+			# <div class="xans-element- xans-product xans-product-listitem sp-product__listitem"><div rel="판매가" class="sp-product__listitem-opt product_price  xans-record-">
+                    # <span class="sp-product__subs displaynone"><span style="font-size:12px;color:#333333;font-weight:bold;">판매가</span></span><span style="font-size:12px;color:#333333;font-weight:bold;">25,000원</span><span id="span_product_tax_type_text" style=""> </span>             </div>
 			##############################
-			price_ctx = product_ctx.find('div', class_='xans-element- xans-product xans-product-listitem -description')
+			price_ctx = product_ctx.find('div', class_='xans-element- xans-product xans-product-listitem sp-product__listitem')
+
 			if(price_ctx != None) :
 				div_list = price_ctx.find_all('div')
 				for div_ctx in div_list :
 					value_str = div_ctx.get_text().strip()
-					split_list = value_str.split(':')
-					if( 0 == value_str.find( '브랜드')) and ( 0 <= value_str.find( ':')) : product_data.crw_brand1 = split_list[1].strip()
-					elif( 0 == value_str.find( '판매가')) and ( 0 <= value_str.find( ':')) : product_data.crw_price = int( __UTIL__.get_only_digit( split_list[1].strip() ) )
-					elif( 0 == value_str.find( '할인판매가')) and ( 0 <= value_str.find( ':')) : product_data.crw_price_sale = int( __UTIL__.get_only_digit( split_list[1].strip() ))
+					# split_list = value_str.split(':')
+					# print(split_list)
+					if( 0 == value_str.find( '브랜드'))  : product_data.crw_brand1 = value_str.strip()
+					elif( 0 == value_str.find( '판매가')) : product_data.crw_price = int( __UTIL__.get_only_digit( value_str.strip() ) )
+					elif( 0 == value_str.find( '할인판매가')) : product_data.crw_price_sale = int( __UTIL__.get_only_digit( value_str.strip() ))
 			
 			
 			if( crw_post_url != '' ) :

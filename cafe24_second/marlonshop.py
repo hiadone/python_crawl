@@ -65,7 +65,7 @@ class shop(Cafe24) :
 		self.C_PAGE_TYPE = ''
 		
 		
-		self.C_PAGE_VALUE = '#contents > div.inner > div.xans-element-.xans-product.xans-product-normalpaging.ec-base-paginate > ol > li > a'
+		self.C_PAGE_VALUE = '#contents > div.xans-element-.xans-product.xans-product-normalpaging > ol > li > a'
 		self.C_PAGE_STRIP_STR = ''
 		
 		self.C_PAGE_IGNORE_STR = ['1']			# 페이지 중에 무시해야 하는 스트링
@@ -75,7 +75,7 @@ class shop(Cafe24) :
 		self.C_PRODUCT_CASE = __DEFINE__.__C_SELECT__
 		self.C_PRODUCT_TYPE = ''
 
-		self.C_PRODUCT_VALUE = '#contents > div.inner > div.xans-element-.xans-product.xans-product-normalpackage.wow.fadeInDown > div > ul > li'
+		self.C_PRODUCT_VALUE = '#contents > div.inner > div.xans-element-.xans-product.xans-product-listnormal.ec-base-product > ul > li'
 		
 		self.C_PRODUCT_STRIP_STR = ''
 		
@@ -83,11 +83,11 @@ class shop(Cafe24) :
 		self.C_LAST_PAGE_CASE = __DEFINE__.__C_SELECT__
 		self.C_LAST_PAGE_TYPE = ''
 
-		self.C_LAST_PAGE_VALUE = '#contents > div.inner > div.xans-element-.xans-product.xans-product-normalpaging.ec-base-paginate > a.last'
+		self.C_LAST_PAGE_VALUE = '#contents > div.xans-element-.xans-product.xans-product-normalpaging.ec-base-paginate > a.last'
 		
 		self.PAGE_SPLIT_STR = '&page='		# 페이지 링크에서 page를 구분할수 있는 구분자
 		
-		self.PAGE_LAST_LINK = True		# 페이지에서 맨끝 링크 존재 여부
+		self.PAGE_LAST_LINK = False		# 페이지에서 맨끝 링크 존재 여부
 
 		
 		
