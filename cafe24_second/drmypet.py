@@ -44,8 +44,8 @@ class shop(Cafe24) :
 		Cafe24.__init__(self)
 		
 		
-		self.SITE_HOME = 'http://drmypet.co.kr/product/list.html?cate_no=24'
-		
+		#self.SITE_HOME = 'http://drmypet.co.kr/product/list.html?cate_no=24'
+		self.SITE_HOME = 'http://drmypet.co.kr/'
 		self.ORG_SITE_HOME = 'http://drmypet.co.kr'
 		
 		self.SEARCH_MODE = __DEFINE__.__CATEGORY_ALL__
@@ -56,7 +56,7 @@ class shop(Cafe24) :
 		self.C_CATEGORY_TYPE = ''
 		
 
-		self.C_CATEGORY_VALUE = '#contents > div.xans-element-.xans-product.xans-product-menupackage > ul > li > a'
+		self.C_CATEGORY_VALUE = '#categorymenu > ul > li > a'
 		self.C_CATEGORY_IGNORE_STR = []
 		self.C_CATEGORY_STRIP_STR = ''
 
@@ -66,7 +66,7 @@ class shop(Cafe24) :
 		self.C_PAGE_TYPE = ''
 		
 		
-		self.C_PAGE_VALUE = ''
+		self.C_PAGE_VALUE = '#-common > div > div > div.xans-element-.xans-product.xans-product-normalpaging.ec-base-paginate > ol > li > a'
 		self.C_PAGE_STRIP_STR = ''
 		
 		self.C_PAGE_IGNORE_STR = ['1']			# 페이지 중에 무시해야 하는 스트링
@@ -76,7 +76,7 @@ class shop(Cafe24) :
 		self.C_PRODUCT_CASE = __DEFINE__.__C_SELECT__
 		self.C_PRODUCT_TYPE = ''
 
-		self.C_PRODUCT_VALUE = '#contents > div.xans-element-.xans-product.xans-product-normalpackage > div > ul > li > div'
+		self.C_PRODUCT_VALUE = '#-common > div > div > div.xans-element-.xans-product.xans-product-normalpackage > div.xans-element-.xans-product.xans-product-listnormal.ec-base-product > ul > li > div'
 		
 		self.C_PRODUCT_STRIP_STR = ''
 		
@@ -84,18 +84,18 @@ class shop(Cafe24) :
 		self.C_LAST_PAGE_CASE = __DEFINE__.__C_SELECT__
 		self.C_LAST_PAGE_TYPE = ''
 		
-		self.C_LAST_PAGE_VALUE = ''
+		self.C_LAST_PAGE_VALUE = '#-common > div > div > div.xans-element-.xans-product.xans-product-normalpaging.ec-base-paginate > a.last'
 		
 		self.PAGE_SPLIT_STR = '&page='		# 페이지 링크에서 page를 구분할수 있는 구분자
 		
-		self.PAGE_LAST_LINK = False		# 페이지에서 맨끝 링크 존재 여부
+		self.PAGE_LAST_LINK = True		# 페이지에서 맨끝 링크 존재 여부
 
 		
 		
-		self.BASIC_CATEGORY_URL = self.ORG_SITE_HOME
-		self.BASIC_PAGE_URL = self.ORG_SITE_HOME + '/product/list.html'
-		self.BASIC_PRODUCT_URL = self.ORG_SITE_HOME
-		self.BASIC_IMAGE_URL = self.ORG_SITE_HOME
+		self.BASIC_CATEGORY_URL = self.SITE_HOME
+		self.BASIC_PAGE_URL = self.SITE_HOME + '/product/list.html'
+		self.BASIC_PRODUCT_URL = self.SITE_HOME
+		self.BASIC_IMAGE_URL = self.SITE_HOME
 		
 		'''
 		# Cafe24 전용 
@@ -103,8 +103,8 @@ class shop(Cafe24) :
 		'''
 		
 		# 물품 이미지 CSS selector 정의
-		self.C_PRODUCT_IMG_SELECTOR = 'img'
-		self.C_PRODUCT_IMG_SELECTOR_CLASSNAME = 'thumb'
+		self.C_PRODUCT_IMG_SELECTOR = 'div'
+		self.C_PRODUCT_IMG_SELECTOR_CLASSNAME = 'thumbnail'
 		
 		
 		# 물품 SOLDOUT CSS selector 정의
@@ -124,32 +124,7 @@ class shop(Cafe24) :
 	'''
 
 	
-	def process_page_list(self):
-
-		__LOG__.Trace("********** process_page_list ***********")
-		
-		rtn = False
-		resptext = ''
-		
-		self.PAGE_URL_HASH = None
-		self.PAGE_URL_HASH = {}
-			
-		for category_url in self.CATEGORY_URL_HASH.keys() :
-			if(self.SHUTDOWN) : break
-			self.PAGE_URL_HASH[category_url] = self.CATEGORY_URL_HASH[category_url]
-		
-		if(config.__DEBUG__) : __LOG__.Trace( '페이지 수 : %d' % len(self.PAGE_URL_HASH))	
-		__LOG__.Trace("*************************************************")	
-		
-		return rtn
-		
-	'''
-	######################################################################
-	#
-	# 상품 리스트 페이지 : 사이트별 수정해야 함.
-	#
-	######################################################################
-	'''
+	
 	
 	def set_product_data(self , page_url, soup, product_ctx ) :
 		
@@ -169,7 +144,7 @@ class shop(Cafe24) :
 			#
 			# <img src="//ai-doggi.com/web/product/medium/20191220/a8ebb002293a954628763cf4a9ab6c38.jpg" alt="" class="thumb">
 			###########################
-			self.set_product_image_second( product_data, product_ctx )
+			self.set_product_image_third( product_data, product_ctx )
 
 			# 품절여부 확인
 			self.set_product_soldout_first(product_data, product_ctx ) 
@@ -181,6 +156,7 @@ class shop(Cafe24) :
 			
 			crw_post_url = self.set_product_name_url_fourth( product_data, product_ctx , 'p', 'name')
 			if(crw_post_url == '') : crw_post_url = self.set_product_name_url_fourth( product_data, product_ctx , 'strong', 'name')
+			if(crw_post_url == '') : crw_post_url = self.set_product_name_url_fourth( product_data, product_ctx , 'div', 'name')
 			
 			
 			##############################
@@ -188,9 +164,15 @@ class shop(Cafe24) :
 			# <strong class="price">4,000원</strong>
 			#
 			##############################
-			price_p_list = product_ctx.find_all('strong', class_='price')
-			for price_p_ctx in price_p_list :
-				if(product_data.crw_price_sale == 0) : product_data.crw_price_sale = int( __UTIL__.get_only_digit( price_p_ctx.get_text().strip() ) )
+			li_list = product_ctx.find_all('li')
+			for li_ctx in li_list :
+				value_str = li_ctx.get_text().strip()
+				split_list = value_str.split(':')
+				if( 0 <= value_str.find('브랜드')) and ( 0 < value_str.find(':')) :
+					product_data.crw_brand1 = split_list[1].strip()
+				elif( 0 <= value_str.find('판매가')) and ( 0 < value_str.find(':')) :
+					sub_split_list =  split_list[1].split('(')
+					product_data.crw_price_sale = int( __UTIL__.get_only_digit( sub_split_list[0].strip() ))
 
 
 			if( crw_post_url != '' ) :
