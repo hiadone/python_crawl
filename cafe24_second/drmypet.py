@@ -99,6 +99,12 @@ class shop(Cafe24) :
 		
 		'''
 		# Cafe24 전용 
+		# <div class="thumbnail">
+		# <a href="/product/detail.html?product_no=123&amp;cate_no=62&amp;display_group=1" name="anchorBoxName_123">
+		# <img alt="애견 수제 간식 영양식 호박죽 24개입" id="eListPrdImage123_1" src="//drmypet.co.kr/web/product/medium/202011/5a4fc67ece613964f059f2b053a320df.jpg"/>
+		#                                  <img alt="애견 수제 간식 영양식 호박죽 24개입" class="-hover -smo -fix" src="//drmypet.co.kr/web/product/small/202011/a5de54faa84b425b9fdb8dc34e5a9d7e.jpg"/>
+		#                                                         </a>
+		# <div class="soldoutbgfunc"><div class="soldoutbg -nodrag displaynone"><div class="soldoutbg_table"><div class="soldoutbg_cell"><img src="/_d1/img/soldoutbg.png"/></div></div></div></div>
 		#
 		'''
 		
@@ -142,7 +148,9 @@ class shop(Cafe24) :
 			###########################
 			# 상품 이미지 확인
 			#
-			# <img src="//ai-doggi.com/web/product/medium/20191220/a8ebb002293a954628763cf4a9ab6c38.jpg" alt="" class="thumb">
+			# <div class="thumbnail">
+			# <a href="/product/detail.html?product_no=123&amp;cate_no=62&amp;display_group=1" name="anchorBoxName_123">
+			# <img alt="애견 수제 간식 영양식 호박죽 24개입" id="eListPrdImage123_1" src="//drmypet.co.kr/web/product/medium/202011/5a4fc67ece613964f059f2b053a320df.jpg"/>
 			###########################
 			self.set_product_image_third( product_data, product_ctx )
 
@@ -151,7 +159,7 @@ class shop(Cafe24) :
 
 			###########################
 			#
-			# <p class="name"><a href="/product/detail.html?product_no=123&amp;cate_no=24&amp;display_group=1"><span style="font-size:12px;color:#555555;">애견 수제 간식 영양식 호박죽 화식</span></a></p>
+			# <div class="name"><a class="" href="/product/detail.html?product_no=123&amp;cate_no=62&amp;display_group=1"><span class="title displaynone"><span style="font-size:12px;color:#555555;">상품명</span> :</span> <span style="font-size:12px;color:#555555;">애견 수제 간식 영양식 호박죽 24개입</span></a></div>
 			###########################
 			
 			crw_post_url = self.set_product_name_url_fourth( product_data, product_ctx , 'p', 'name')
@@ -161,7 +169,8 @@ class shop(Cafe24) :
 			
 			##############################
 			#
-			# <strong class="price">4,000원</strong>
+			# <li class="xans-record-" rel="판매가">
+			# <strong class="title displaynone"><span style="font-size:12px;color:#555555;font-weight:bold;">판매가</span> :</strong> <span style="font-size:12px;color:#555555;font-weight:bold;">48,000원</span><span id="span_product_tax_type_text" style=""> </span></li>
 			#
 			##############################
 			li_list = product_ctx.find_all('li')
