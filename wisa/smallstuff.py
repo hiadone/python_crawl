@@ -56,9 +56,9 @@ class shop(Mall) :
 		self.BASIC_DETAIL_CATEGORY_URL = self.SITE_HOME
 		self.C_DETAIL_CATEGORY_STRIP_STR = ''
 		
-		#header > div > div > div > ul > li:nth-child(4) > a
-		# self.C_CATEGORY_VALUE = '#header > div > div > ul > li > div.sub_menu > ul > li > a'		
-		self.C_CATEGORY_VALUE = 'div.category > ul > li.sub > div.sub_menu > ul > li > a'		
+		
+		self.C_CATEGORY_VALUE = '#header > div > div > ul > li > div.sub_menu > ul > li > a'		
+		# self.C_CATEGORY_VALUE = 'div.category > ul > li.sub > div.sub_menu > ul > li > a'		
 		self.C_CATEGORY_IGNORE_STR = ['PRIVATE','NOTICE','FLIM','REVIEW','Q&A']
 		self.C_CATEGORY_STRIP_STR = ''
 
