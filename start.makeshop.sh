@@ -10,7 +10,13 @@ export PYTHONPATH=$PYTHONPATH:/root/HIADONE/bin:/root/HIADONE/lib:.
 
 
 $PYTHON_EXE ./makeshop/affetto.py
-$PYTHON_EXE ./makeshop/amylovespet.py
+
+VAL=$(date +"%H")
+
+if [ ${VAL} -ge 10 ] ; then
+    $PYTHON_EXE ./makeshop/amylovespet.py
+fi
+
 $PYTHON_EXE ./makeshop/cocochien.py
 $PYTHON_EXE ./makeshop/dermadog.py
 $PYTHON_EXE ./makeshop/ecofoam.py
