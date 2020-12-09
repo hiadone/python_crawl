@@ -52,6 +52,7 @@ class shop(Cafe24) :
 		
 		#self.C_CATEGORY_VALUE = '#category > div > ul > li > a'
 		self.C_CATEGORY_VALUE = '#category > div > ul > li > a'
+		
 		self.C_CATEGORY_IGNORE_STR = []
 		self.C_CATEGORY_STRIP_STR = ''
 
@@ -113,8 +114,7 @@ class shop(Cafe24) :
 	######################################################################
 	'''
 	
-	def process_category_list(self):
-		self.process_category_list_second()
+	
 		
 	'''
 	######################################################################
@@ -133,8 +133,8 @@ class shop(Cafe24) :
 			
 			# 상품 카테고리
 			#
-			#self.set_product_category_first(product_data, soup)
-			self.set_product_category_second(page_url, product_data, soup)
+			self.set_product_category_third(product_data, soup)
+			# self.set_product_category_second(page_url, product_data, soup)
 
 
 			# 상품 이미지 확인
