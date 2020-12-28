@@ -52,12 +52,12 @@ class shop(Mall) :
 		
 		
 		self.DETAIL_CATEGORY_ACTION = True
-		self.C_DETAIL_CATEGORY_VALUE = '#big_section > ul.midcate > li > a'
+		self.C_DETAIL_CATEGORY_VALUE = '#big_section > ul.sub_category > li > a'
 		self.BASIC_DETAIL_CATEGORY_URL = self.SITE_HOME
 		self.C_DETAIL_CATEGORY_STRIP_STR = ''
 		
 		
-		self.C_CATEGORY_VALUE = '#header > div > div > ul > li > div.sub_menu > ul > li > a'		
+		self.C_CATEGORY_VALUE = '#header > div.inner > div.gnb > div > ul > li:nth-child(3) > ul > li > a'		
 		# self.C_CATEGORY_VALUE = 'div.category > ul > li.sub > div.sub_menu > ul > li > a'		
 		self.C_CATEGORY_IGNORE_STR = ['PRIVATE','NOTICE','FLIM','REVIEW','Q&A']
 		self.C_CATEGORY_STRIP_STR = ''
@@ -78,7 +78,7 @@ class shop(Mall) :
 		self.C_PRODUCT_CASE = __DEFINE__.__C_SELECT__
 		self.C_PRODUCT_TYPE = ''
 
-		self.C_PRODUCT_VALUE = '#big_section > table > tbody > tr > td > div'
+		self.C_PRODUCT_VALUE = '#big_section > ul.prd_basic > li > div '
 		self.C_PRODUCT_STRIP_STR = ''
 		
 		# self.PAGE_LAST_LINK = True 일때 사용
@@ -211,7 +211,7 @@ class shop(Mall) :
 			# </div>
 			####################################
 
-			img_div_list = product_ctx.find_all('div', class_='img')
+			img_div_list = product_ctx.find_all('div', class_='prdimg')
 			for img_div_ctx in img_div_list :
 				img_ctx = img_div_ctx.find('img')
 
@@ -229,19 +229,15 @@ class shop(Mall) :
 			# 품절여부 추출
 			# 품절시 <div class="info out"> 으로 표현됨
 			#
-			# <div class="info out">
-			# <div class="img">
-			# <img src="https://img.mywisa.com/freeimg/smallstuff/_data/product/201803/31/5395b457e4a34714569bece276afda8e.jpg" width="260" height="260">
-			# 생략
-			# </ul>
-			# <div class="icon"></div>
-			# </div>
+			# <!-- 상품품절 영역 -->
+			#      <div class="soldout" onclick="location.href='https://www.smallstuff.kr/shop/detail.php?pno=A02FFD91ECE5E7EFEB46DB8F10A74059&amp;rURL=https%3A%2F%2Fwww.smallstuff.kr%2Fshop%2Fbig_section.php%3Fcno1%3D1001&amp;ctype=1&amp;cno1=1001'">Sold out</div>
+			#      <!-- //상품품절 영역 -->
 			####################################
 			
 			if('class' in product_ctx.attrs ) :
 				class_name_list = product_ctx.attrs['class']
-				if( len(class_name_list) == 2 ) :
-					if(class_name_list[1] == 'out') : product_data.crw_is_soldout = 1
+				# if( len(class_name_list) == 2 ) :
+				if(class_name_list[0] == 'soldout') : product_data.crw_is_soldout = 1
 	
 
 			####################################
