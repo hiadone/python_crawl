@@ -54,7 +54,7 @@ class shop(Cafe24) :
 		
 
 		
-		self.C_CATEGORY_VALUE = '#category > div > ul > li.xans-record- > a'
+		self.C_CATEGORY_VALUE = '#category-lnb > ul.d1-wrap.d_ratio > li > a'
 		self.C_CATEGORY_IGNORE_STR = []
 		self.C_CATEGORY_STRIP_STR = ''
 
