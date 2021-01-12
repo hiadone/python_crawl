@@ -52,7 +52,7 @@ class shop(SixShop) :
 		self.C_CATEGORY_CASE = __DEFINE__.__C_SELECT__
 		self.C_CATEGORY_TYPE = ''
 		
-		self.C_CATEGORY_VALUE = '#siteHeader > div.row.row-main.desktop > div.column.header-center > nav > ul > li'
+		self.C_CATEGORY_VALUE = '#siteHeader > div.row.row-main.desktop > div.column.header-center > div > ul > li'
 		#self.C_CATEGORY_VALUE = '#siteHeader > div.row.row-main.desktop > div.column.header-center > nav > ul > li > a'
 		#self.C_CATEGORY_VALUE = '#siteHeader > div.row.row-main.desktop > div.column.header-center > nav > ul > li.menu-navi.menu-main.pageMenu.subMenu-exist > div.subMenuNaviListDiv > ul > li > a'
 		#siteHeader > div.row.row-main.desktop > div.column.header-center > nav > ul > li > div.subMenuNaviListDiv > ul > li:nth-child(1) > a
