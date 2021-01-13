@@ -55,7 +55,7 @@ class shop(SixShop) :
 		
 
 		#self.C_CATEGORY_VALUE = '#siteHeader > div.row.row-main.desktop > div.column.header-left > nav > ul > li.menu-navi.menu-main.pageMenu > a'
-		self.C_CATEGORY_VALUE = '#siteHeader > div.row.row-main.desktop > div.column.header-right > nav > ul > li > div.subMenuNaviListDiv > ul > li > a'
+		self.C_CATEGORY_VALUE = '#siteHeader > div.row.row-main.desktop > div.column.header-right > div.headerMenuList.desktop.site-element > ul > li.menu-navi.menu-main.pageMenu.subMenu-exist > div.subMenuNaviListDiv > ul > li > a'
 		self.C_CATEGORY_IGNORE_STR = ['ONLY YOU','News','Review','Q&A','주문제작']
 		self.C_CATEGORY_STRIP_STR = ''
 

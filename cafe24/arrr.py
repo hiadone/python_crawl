@@ -51,7 +51,7 @@ class shop(Cafe24) :
 		self.C_CATEGORY_TYPE = ''
 		
 		#self.C_CATEGORY_VALUE = '#category > div > ul > li > a'
-		self.C_CATEGORY_VALUE = '#category > div > ul > li > a'
+		self.C_CATEGORY_VALUE = '#gnbWrapInner > ul > li.xans-element-.xans-layout.xans-layout-category > div > ul > li > a'
 		
 		self.C_CATEGORY_IGNORE_STR = []
 		self.C_CATEGORY_STRIP_STR = ''
@@ -61,7 +61,7 @@ class shop(Cafe24) :
 		self.C_PAGE_CASE = __DEFINE__.__C_SELECT__
 		self.C_PAGE_TYPE = ''
 		#self.C_PAGE_VALUE = '#contents > div.xans-element-.xans-product.xans-product-normalpaging.ec-base-paginate > ol > li > a'
-		self.C_PAGE_VALUE = '#contents > div > ol > li > a'
+		self.C_PAGE_VALUE = 'div.loadMore'
 		self.C_PAGE_STRIP_STR = ''
 		
 		self.C_PAGE_IGNORE_STR = ['1']			# 페이지 중에 무시해야 하는 스트링
@@ -72,7 +72,7 @@ class shop(Cafe24) :
 		self.C_PRODUCT_TYPE = ''
 
 		#self.C_PRODUCT_VALUE = '#contents > div.xans-element-.xans-product.xans-product-normalpackage > div.xans-element-.xans-product.xans-product-listnormal.ec-base-product.gtm-product-list > ul > li > div.description > strong > a'
-		self.C_PRODUCT_VALUE = '#contents > div.xans-element-.xans-product.xans-product-normalpackage > div.xans-element-.xans-product.xans-product-listnormal.ec-base-product.gtm-product-list > ul > li'
+		self.C_PRODUCT_VALUE = 'ul.prdList > li'
 		
 		self.C_PRODUCT_STRIP_STR = ''
 		
@@ -83,7 +83,7 @@ class shop(Cafe24) :
 		self.C_LAST_PAGE_VALUE = '#contents > div > a.last'
 		self.PAGE_SPLIT_STR = '&page='		# 페이지 링크에서 page를 구분할수 있는 구분자
 		
-		self.PAGE_LAST_LINK = True		# 페이지에서 맨끝 링크 존재 여부
+		self.PAGE_LAST_LINK = False		# 페이지에서 맨끝 링크 존재 여부
 
 		
 		
@@ -104,7 +104,7 @@ class shop(Cafe24) :
 		
 		# 물품 SOLDOUT CSS selector 정의
 		self.C_PRODUCT_SOLDOUT_SELECTOR = 'div'
-		self.C_PRODUCT_SOLDOUT_SELECTOR_CLASSNAME = 'promotion'
+		self.C_PRODUCT_SOLDOUT_SELECTOR_CLASSNAME = 'soldthumbprice'
 		
 	'''
 	######################################################################
@@ -138,7 +138,7 @@ class shop(Cafe24) :
 
 
 			# 상품 이미지 확인
-			self.set_product_image_fourth(product_data, product_ctx )
+			self.set_product_image_first(product_data, product_ctx )
 			
 		
 			# 품절여부 확인
@@ -172,7 +172,52 @@ class shop(Cafe24) :
 	#
 	######################################################################
 	'''
-	
+	def set_product_name_url_second(self, product_data, product_ctx , name_ctx_css, name_ctx_css_class) :
+		#
+		# crw_post_url 안에 /product/ 가 들어가 있는 경우
+		#
+		# http://amor-ange.com/product/safari-padding-navy/67/category/25/display/1/
+		# 
+		crw_post_url = ''
+
+		try :
+
+			name_div_list = product_ctx.find_all('a')
+			
+			for name_div_ctx in name_div_list :
+				
+				#
+				# 상품 링크 정보 및 상품명 / 상품코드
+				#
+				product_link_ctx = name_div_ctx
+
+				
+					
+				if('href' in product_link_ctx.attrs ) : 
+
+					
+					
+					
+					
+					product_data.crw_name = product_link_ctx.find('span',class_='title').parent.select('span')[2].get_text()
+					
+					tmp_product_link = product_link_ctx.attrs['href'].strip()
+					
+					if(0 != tmp_product_link.find('http')) : tmp_product_link = '%s%s' % ( self.BASIC_PRODUCT_URL, product_link_ctx.attrs['href'].strip() )
+					crw_post_url = tmp_product_link
+
+					if(self.C_PRODUCT_STRIP_STR != '') : crw_post_url = tmp_product_link.replace( self.C_PRODUCT_STRIP_STR,'')
+
+					split_list = crw_post_url.split('/')
+					if( product_data.crw_name == '') : product_data.crw_name = split_list[4].strip()
+					product_data.crw_goods_code = split_list[5].strip()
+
+						
+		except Exception as ex :
+			__LOG__.Error( ex )
+			pass
+		
+		return crw_post_url
 				
 						
 	def get_product_detail_data(self, product_data, html):
