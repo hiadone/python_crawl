@@ -73,7 +73,7 @@ class shop(Cafe24) :
 		
 		#contents > div.xans-element-.xans-product.xans-product-normalpackage.mainlist > div.xans-element-.xans-product.xans-product-listnormal.ec-base-product > ul
 		#self.C_PRODUCT_VALUE = '#contents > div.xans-element-.xans-product.xans-product-normalpackage > div.xans-element-.xans-product.xans-product-listnormal.df-list-product > ul > li > div > div.description > div > p > a'
-		self.C_PRODUCT_VALUE = '#contents > div.xans-element-.xans-product.xans-product-normalpackage > div.xans-element-.xans-product.xans-product-listnormal.df-list-product > ul > li'
+		self.C_PRODUCT_VALUE = 'div.df-product-list > ul > li'
 		
 		self.C_PRODUCT_STRIP_STR = ''
 		
@@ -101,12 +101,12 @@ class shop(Cafe24) :
 		
 		# 물품 이미지 CSS selector 정의
 		self.C_PRODUCT_IMG_SELECTOR = 'div'
-		self.C_PRODUCT_IMG_SELECTOR_CLASSNAME = 'thumbnail'
+		self.C_PRODUCT_IMG_SELECTOR_CLASSNAME = 'df-prl-thumb'
 		
 		
 		# 물품 SOLDOUT CSS selector 정의
 		self.C_PRODUCT_SOLDOUT_SELECTOR = 'div'
-		self.C_PRODUCT_SOLDOUT_SELECTOR_CLASSNAME = 'icon'
+		self.C_PRODUCT_SOLDOUT_SELECTOR_CLASSNAME = 'df-prl-icon'
 		
 	'''
 	######################################################################
@@ -148,7 +148,7 @@ class shop(Cafe24) :
 			self.set_product_category_second(page_url, product_data, soup)
 
 			# 상품 이미지 확인
-			self.set_product_image_fourth(product_data, product_ctx )
+			self.set_product_image_third(product_data, product_ctx )
 			
 		
 			# 품절여부 확인
@@ -157,7 +157,7 @@ class shop(Cafe24) :
 			#
 			# 상품 링크 정보 및 상품명
 			#
-			crw_post_url = self.set_product_name_url_first( product_data, product_ctx , 'div', 'description')
+			crw_post_url = self.set_product_name_url_first( product_data, product_ctx , 'div', 'df-prl-desc')
 			
 			self.set_product_price_brand_first(product_data, product_ctx )
 			

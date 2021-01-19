@@ -164,7 +164,8 @@ class shop(Cafe24) :
 							category_name = category_ctx.get_text().strip()
 							if( self.WEB_CATEGORY_NAME_HASH.get( category_link , -1) == -1) : 
 								# 변환 
-								cvt_category_name = '%s%s' % ( category_name[0] , category_name[1:].lower() )
+								# cvt_category_name = '%s%s' % ( category_name[0] , category_name[1:].lower() )
+								cvt_category_name = '%s%s' % ( category_name[0].upper()	, category_name[1:].upper() )
 								self.WEB_CATEGORY_NAME_HASH[cvt_category_name] = category_link
 								if( config.__DEBUG__ ) :
 									__LOG__.Trace('WEB 카테고리 %s : %s' % ( cvt_category_name, category_link ) )
