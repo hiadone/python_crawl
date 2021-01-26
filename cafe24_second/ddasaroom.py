@@ -53,7 +53,7 @@ class shop(Cafe24) :
 		self.C_CATEGORY_TYPE = ''
 		
 
-		self.C_CATEGORY_VALUE = '#category-lnb > div > ul > li > a'
+		self.C_CATEGORY_VALUE = '#contents > div > ul > li > a'
 		self.C_CATEGORY_IGNORE_STR = []
 		self.C_CATEGORY_STRIP_STR = ''
 
@@ -62,8 +62,7 @@ class shop(Cafe24) :
 		self.C_PAGE_CASE = __DEFINE__.__C_SELECT__
 		self.C_PAGE_TYPE = ''
 		
-		
-		self.C_PAGE_VALUE = '#contents > div.xans-element-.xans-product.xans-product-normalpaging._paging > ol > li > a'
+		self.C_PAGE_VALUE = '#contents > div.xans-element-.xans-product.xans-product-normalpaging.ec-base-paginate > ol > li > a'
 		self.C_PAGE_STRIP_STR = ''
 		
 		self.C_PAGE_IGNORE_STR = ['1']			# 페이지 중에 무시해야 하는 스트링
@@ -81,7 +80,7 @@ class shop(Cafe24) :
 		self.C_LAST_PAGE_CASE = __DEFINE__.__C_SELECT__
 		self.C_LAST_PAGE_TYPE = ''
 
-		self.C_LAST_PAGE_VALUE = '#contents > div.xans-element-.xans-product.xans-product-normalpaging._paging > p.last > a'
+		self.C_LAST_PAGE_VALUE = '#contents > div.xans-element-.xans-product.xans-product-normalpaging.ec-base-paginate > a.last'
 		
 		self.PAGE_SPLIT_STR = '&page='		# 페이지 링크에서 page를 구분할수 있는 구분자
 		
@@ -101,7 +100,7 @@ class shop(Cafe24) :
 		
 		# 물품 이미지 CSS selector 정의
 		self.C_PRODUCT_IMG_SELECTOR = 'div'
-		self.C_PRODUCT_IMG_SELECTOR_CLASSNAME = 'thumbnail'
+		self.C_PRODUCT_IMG_SELECTOR_CLASSNAME = 'prdImg'
 		
 		
 		# 물품 SOLDOUT CSS selector 정의
@@ -164,7 +163,7 @@ class shop(Cafe24) :
 			# 상품 이미지 확인
 			#
 			###########################
-			self.set_product_image_fourth( product_data, product_ctx )
+			self.set_product_image_third( product_data, product_ctx )
 
 			# 품절여부 확인
 			#
@@ -174,8 +173,8 @@ class shop(Cafe24) :
 			# 상품명/URL
 			###########################
 			
-			crw_post_url = self.set_product_name_url_first( product_data, product_ctx , 'p', 'name -mov')
-			if(crw_post_url == '') : crw_post_url = self.set_product_name_url_first( product_data, product_ctx , 'strong', 'name -mov')
+			crw_post_url = self.set_product_name_url_second( product_data, product_ctx , 'div', 'name')
+			if(crw_post_url == '') : crw_post_url = self.set_product_name_url_second( product_data, product_ctx , 'strong', 'name -mov')
 			
 			##############################
 			# 가격
