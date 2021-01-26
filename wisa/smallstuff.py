@@ -59,7 +59,7 @@ class shop(Mall) :
 		
 		self.C_CATEGORY_VALUE = '#header > div.inner > div.gnb > div > ul > li:nth-child(3) > ul > li > a'		
 		# self.C_CATEGORY_VALUE = 'div.category > ul > li.sub > div.sub_menu > ul > li > a'		
-		self.C_CATEGORY_IGNORE_STR = ['PRIVATE','NOTICE','FLIM','REVIEW','Q&A']
+		self.C_CATEGORY_IGNORE_STR = ['Private','Notice','Flim','Review','Q&A']
 		self.C_CATEGORY_STRIP_STR = ''
 
 		
@@ -267,17 +267,24 @@ class shop(Mall) :
 			####################################
 			# 가격
 			#
-			# <ul class="prc">
-			# <li><span class="p_value"><strong>KRW21,000 </strong></span></li>
-			# </ul>
+			# 	<div class="price">
+				
+			# 	<p class="consumer consumer">KRW 24,000</p>
+				
+			# 	<p class="sell sell"><strong>KRW 22,800 </strong></p>
+			# </div>
 			#
 			####################################
 			
-			div_list = product_ctx.find_all('ul', class_='prc')
+			div_list = product_ctx.find_all('div', class_='price')
 			for div_ctx in div_list :
-				sell_ctx = div_ctx.find('span', class_='p_value')
+				sell_ctx = div_ctx.find('p', class_='sell')
+				# print('sell_ctx',sell_ctx)
 				if( sell_ctx != None ) : product_data.crw_price_sale = int( __UTIL__.get_only_digit( sell_ctx.get_text().strip() ))
-					
+				crw_price = div_ctx.find('p', class_='consumer')
+				if( crw_price != None ) : product_data.crw_price = int( __UTIL__.get_only_digit( crw_price.get_text().strip() ))
+			
+			
 			
 			if( crw_post_url != '' ) :
 				#if( self.PRODUCT_URL_HASH.get( crw_post_url , -1) == -1) : 

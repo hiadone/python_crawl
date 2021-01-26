@@ -1188,8 +1188,8 @@ class Mall(Browser) :
 		
 		# 가격 보정, 원가격 또는 판매가격에 값이 없을때
 		# 판매가격 = 원가격을 입력
-		if( product_data.crw_price_sale == 0) : product_data.crw_price_sale = product_data.crw_price
-		elif( product_data.crw_price == 0) : product_data.crw_price = product_data.crw_price_sale
+		# if( product_data.crw_price_sale == 0) : product_data.crw_price_sale = product_data.crw_price
+		# elif( product_data.crw_price == 0) : product_data.crw_price = product_data.crw_price_sale
 		
 		# 가격이 역전되어 추출되었을때 보정
 		# 판매가격이 원가격 보다 높을때, 가격을 변경하여 저장함.
